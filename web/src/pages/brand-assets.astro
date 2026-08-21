@@ -1,0 +1,163 @@
+---
+/**
+ * /brand-assets: 7Span's Brand page, section for section. Orange band with
+ * the mark on guide lines and a white card that overlaps it (H1, line,
+ * Download assets) → Logo and mark (rules + primary lockup in a box) → ink
+ * band with four asset tiles → Tagline (graphic box + rules) → Founders and
+ * team images (the /about team cards) → closing statement.
+ */
+import Site from "@/layouts/Site.astro";
+import { TeamCard, Cross } from "@/components/about/AboutParts";
+import { getAbout, getBrand, getSite } from "@/lib/cms";
+
+const site = await getSite();
+const BRAND = await getBrand();
+const S = site.site;
+const about = await getAbout();
+const members = about.team.members.filter((m) => !m.placeholder);
+const url = `${S.url}/brand-assets`;
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${url}#page`,
+    url,
+    name: BRAND.seo.title,
+    description: BRAND.seo.description,
+    isPartOf: { "@id": `${S.url}/#website` },
+    about: { "@id": `${S.url}/#organization` },
+    mainEntity: {
+      "@type": "DigitalDocument",
+      name: "Infoloop brand assets",
+      description: "Logos, mark, tagline and guidelines as a ZIP archive.",
+      url: `${S.url}${BRAND.hero.button.href}`,
+      encodingFormat: "application/zip",
+      publisher: { "@id": `${S.url}/#organization` },
+    },
+    inLanguage: "en",
+  },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Brand assets", item: url }] },
+];
+const guides = "repeating-linear-gradient(0deg, rgba(10,10,10,0.18) 0 1px, transparent 1px 56px)";
+---
+<Site title={BRAND.seo.title} description={BRAND.seo.description} canonical="/brand-assets" jsonLd={jsonLd}>
+  {/* Hero: orange band with the mark on guide lines, white card overlapping the band (7Span) */}
+  <section aria-labelledby="brand-h1">
+    <div class="relative bg-orange" aria-hidden="true">
+      <div class="absolute inset-0" style={`background-image: ${guides}`}></div>
+      <div class="absolute inset-y-0 left-1/2 w-[46%] -translate-x-1/2" style="background-image: repeating-linear-gradient(90deg, rgba(10,10,10,0.18) 0 1px, transparent 1px 56px)"></div>
+      <div class="relative flex h-[300px] items-start justify-center pt-12 sm:h-[340px] sm:pt-14">
+        <div class="hero-fade">
+          {/* Orange-field colorway from the kit: white bars, ink accent (the only mark that reads on orange) */}
+          <svg viewBox="0 0 256 256" width="176" height="176" aria-hidden="true">
+            <rect x="51" y="38" width="154" height="26" rx="8" fill="#FFFFFF" />
+            <rect x="70.5" y="76" width="115" height="26" rx="8" fill="#0A0A0A" />
+            <rect x="25.5" y="114" width="205" height="26" rx="8" fill="#FFFFFF" />
+            <rect x="85.5" y="152" width="85" height="26" rx="8" fill="#FFFFFF" />
+            <rect x="51" y="190" width="154" height="26" rx="8" fill="#FFFFFF" />
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="container-x">
+      <div class="relative -mt-24 border border-ink bg-white px-8 py-10 sm:-mt-28 sm:px-14 sm:py-14 lg:mx-16">
+        <h1 id="brand-h1" class="display-h2 text-ink hero-in">{BRAND.hero.h1}</h1>
+        <p class="lede mt-3 max-w-3xl text-ink/80 hero-in" style="--d: 60ms">{BRAND.hero.lede}</p>
+        <a href={BRAND.hero.button.href} download class="btn btn-ink mt-8 hero-in" style="--d: 120ms">{BRAND.hero.button.label}</a>
+      </div>
+    </div>
+  </section>
+
+  {/* Logo and mark: rules left, primary lockup in a bordered box right (7Span) */}
+  <section class="mt-16 border-t border-ink sm:mt-20" aria-labelledby="logo-h2">
+    <div class="container-x grid gap-10 py-14 sm:py-20 lg:grid-cols-12 lg:gap-14">
+      <div class="lg:col-span-7">
+        <h2 id="logo-h2" class="display-h2 text-ink reveal">{BRAND.logo.h2}</h2>
+        {BRAND.logo.paragraphs.map((p) => <p class="lede mt-5 text-ink/85 reveal" style="--reveal-delay: 60ms">{p}</p>)}
+        <p class="mt-6 text-[16px] text-ink reveal" style="--reveal-delay: 100ms">{BRAND.logo.formatsIntro}</p>
+        <ul class="mt-2 list-disc space-y-1.5 pl-6 text-[16px] text-ink/85 reveal" style="--reveal-delay: 120ms">
+          {BRAND.logo.formats.map((f) => <li>{f}</li>)}
+        </ul>
+        <ul class="mt-6 space-y-1.5 reveal" style="--reveal-delay: 160ms" aria-label="Do not">
+          {BRAND.logo.donts.map((d) => (
+            <li class="flex items-center gap-2 font-display text-[16px] font-semibold text-ink">
+              <Cross />
+              {d}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div class="lg:col-span-5 reveal" style="--reveal-delay: 120ms">
+        <div class="flex aspect-square items-center justify-center border border-ink bg-white p-10">
+          <img src="/brand/lockup-horizontal-twotone.png" alt="Infoloop logo: the five-bar mark and the infoloop wordmark" width="1775" height="560" class="w-full max-w-[360px]" loading="lazy" decoding="async" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Ink band with four asset tiles: logo light / dark, mark light / dark (7Span: Digital / Print) */}
+  <section class="bg-ink" aria-label="Logo and mark files">
+    <div class="container-x py-12 sm:py-16">
+      <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {BRAND.tiles.map((t) => (
+          <li>
+            <a href={t.download} download class="group flex h-full flex-col items-center justify-between gap-6 border border-ink bg-white p-6 text-ink transition-colors hover:bg-paper">
+              <span class={`flex h-24 w-full items-center justify-center ${t.dark ? "bg-ink" : ""}`}>
+                <img src={t.src} alt={`Infoloop ${t.label.toLowerCase()} for ${t.sub.toLowerCase()}`} width={t.kind === "mark" ? 256 : 1775} height={t.kind === "mark" ? 256 : 560} class={t.kind === "mark" ? "h-20 w-20" : "w-full max-w-[200px]"} loading="lazy" decoding="async" />
+              </span>
+              <span class="text-center">
+                <span class="block font-display text-[18px] font-semibold">{t.label}</span>
+                <span class="block text-[13px] text-ink/60">{t.sub}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  {/* Tagline: graphic in a box left, rules right (7Span) */}
+  <section class="border-b border-ink" aria-labelledby="tagline-h2">
+    <div class="container-x grid gap-10 py-14 sm:py-20 lg:grid-cols-12 lg:gap-14">
+      <div class="lg:col-span-4 reveal">
+        <a href={BRAND.tagline.download} download class="flex aspect-square items-center justify-center border border-ink bg-white p-8 hover:bg-paper" aria-label="Download the tagline graphic">
+          <span class="font-display text-[44px] font-bold leading-[0.95] tracking-[-0.035em] text-ink sm:text-[52px]" aria-hidden="true">
+            {BRAND.tagline.text[0]}<br />
+            <span class="text-orange">{BRAND.tagline.text[1]}</span>
+          </span>
+        </a>
+      </div>
+      <div class="lg:col-span-8">
+        <h2 id="tagline-h2" class="display-h2 text-ink reveal">{BRAND.tagline.h2}</h2>
+        <p class="lede mt-4 text-ink/85 reveal" style="--reveal-delay: 60ms">{BRAND.tagline.paragraph}</p>
+        <h3 class="mt-6 font-display text-[16px] font-bold text-ink reveal" style="--reveal-delay: 100ms">{BRAND.tagline.whenH3}</h3>
+        <ul class="mt-2 list-disc space-y-1.5 pl-6 text-[16px] text-ink/85 reveal" style="--reveal-delay: 120ms">
+          {BRAND.tagline.when.map((w) => <li>{w}</li>)}
+        </ul>
+        <h3 class="mt-6 flex items-center gap-2 font-display text-[16px] font-bold text-ink reveal" style="--reveal-delay: 140ms"><Cross /> {BRAND.tagline.dontH3}</h3>
+        <ul class="mt-2 list-disc space-y-1.5 pl-6 text-[16px] text-ink/85 reveal" style="--reveal-delay: 160ms">
+          {BRAND.tagline.donts.map((d) => <li>{d}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  {/* Founders and team images: the same cards as /about (7Span) */}
+  <section class="container-x py-14 sm:py-20" aria-labelledby="brand-team-h2">
+    <h2 id="brand-team-h2" class="display-h2 text-ink reveal">{BRAND.team.h2}</h2>
+    <p class="lede mt-3 max-w-4xl text-ink/85 reveal" style="--reveal-delay: 60ms">{BRAND.team.lede}</p>
+    <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 reveal" style="--reveal-delay: 120ms">
+      {members.map((m) => <TeamCard m={m} />)}
+    </ul>
+  </section>
+
+  {/* Closing statement (7Span: tagline lockup + one paragraph) */}
+  <section class="container-x grid gap-8 border-t border-ink py-12 sm:py-16 lg:grid-cols-12 lg:items-center" aria-labelledby="brand-closing-h2">
+    <h2 id="brand-closing-h2" class="font-display text-[40px] font-bold leading-[0.95] tracking-[-0.035em] text-ink sm:text-[52px] lg:col-span-4">
+      {BRAND.tagline.text[0]}<br />
+      <span class="text-orange">{BRAND.tagline.text[1]}</span>
+    </h2>
+    <p class="text-[17px] leading-relaxed text-ink/80 lg:col-span-8">{BRAND.closing.statement}</p>
+  </section>
+</Site>
+

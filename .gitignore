@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Builds
+dist/
+.next/
+.astro/
+out/
+build/
+
+# CMS uploads
+cms/media/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.pem
+
+# Logs / caches
+*.log
+npm-debug.log*
+.turbo/
+.netlify/
+.vercel/
+coverage/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+*.tsbuildinfo

@@ -1,0 +1,47 @@
+---
+/**
+ * /products: 7Span-style product list (mark | name + line), then the CTA band.
+ */
+import Site from "@/layouts/Site.astro";
+import { ProductRow } from "@/components/products/ProductPage";
+import { WorkBand } from "@/components/work/WorkIndex";
+import { getProducts, getProductsIndex, getSite } from "@/lib/cms";
+
+const site = await getSite();
+const S = site.site;
+const index = await getProductsIndex();
+const products = await getProducts();
+const org = { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url };
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${S.url}/products#page`,
+    url: `${S.url}/products`,
+    name: index.seo.title,
+    description: index.seo.description,
+    isPartOf: { "@id": `${S.url}/#website` },
+    about: org,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: products.map((p, i) => ({ "@type": "ListItem", position: i + 1, url: `${S.url}/products/${p.slug}`, name: p.name, item: { "@type": "SoftwareApplication", name: p.name, url: `${S.url}/products/${p.slug}`, applicationCategory: "BusinessApplication", operatingSystem: "Web", description: p.lede } })),
+    },
+  },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Products", item: `${S.url}/products` }] },
+];
+---
+<Site title={index.seo.title} description={index.seo.description} canonical="/products" jsonLd={jsonLd}>
+  <section aria-labelledby="products-h1">
+    <div class="container-x pt-12 sm:pt-16">
+      <h1 id="products-h1" class="display-h2 text-ink hero-in">{index.h1}</h1>
+      <p class="lede mt-4 max-w-4xl text-ink/75 hero-in" style="--d: 80ms">{index.lede}</p>
+    </div>
+  </section>
+  <section class="container-x mt-10 sm:mt-14" aria-label="Our products">
+    <ul class="space-y-5">
+      {products.map((p) => <ProductRow p={p} />)}
+    </ul>
+  </section>
+  <div class="h-14 sm:h-20"></div>
+  <WorkBand data={index.cta} />
+</Site>

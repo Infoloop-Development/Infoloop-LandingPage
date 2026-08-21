@@ -1,0 +1,68 @@
+---
+/**
+ * /work/<slug>: one case study, 7Span's case layout (header, at a glance,
+ * challenge, approach steps, how we did it, results + day to day, technology,
+ * more of our work, CTA band). Article + BreadcrumbList schema.
+ */
+import Site from "@/layouts/Site.astro";
+import { CaseHeader, CaseBody, RelatedWork } from "@/components/work/CasePage";
+import { WorkBand } from "@/components/work/WorkIndex";
+import { getSite, getWork, getWorkIndex, relatedCases } from "@/lib/cms";
+import type { CaseStudy } from "@/content/work";
+
+export async function getStaticPaths() {
+  const cases = await getWork();
+  return cases.map((c) => ({ params: { slug: c.slug }, props: { c, all: cases } }));
+}
+
+interface Props { c: CaseStudy; all: CaseStudy[] }
+const { c, all } = Astro.props;
+const site = await getSite();
+const S = site.site;
+const work = await getWorkIndex();
+const related = relatedCases(c, all);
+const url = `${S.url}/work/${c.slug}`;
+const org = { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url, logo: { "@type": "ImageObject", url: `${S.url}/favicon-512.png`, width: 512, height: 512 } };
+// Closing band: the case's own question, line and service-specific button (7Span: "Launch my website").
+const band = { h2: c.cta?.h2 ?? work.cta.h2, lede: c.cta?.lede ?? work.cta.lede, button: c.cta?.button ?? work.cta.button };
+const seoTitle = c.seo?.title || c.title;
+const seoDesc = c.seo?.description || c.lede;
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${url}#article`,
+    headline: c.title,
+    description: seoDesc,
+    articleSection: "Case study",
+    image: [c.cover?.url ?? `${S.url}/og.png`],
+    datePublished: c.datePublished,
+    dateModified: c.dateModified ?? c.datePublished,
+    inLanguage: "en",
+    about: [{ "@type": "Thing", name: c.industry }, ...c.services.map((s) => ({ "@type": "Thing", name: s }))],
+    keywords: [c.industry, ...c.services, ...c.tech].join(", "),
+    author: org,
+    publisher: org,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    isPartOf: { "@id": `${S.url}/work#page` },
+    speakable: { "@type": "SpeakableSpecification", cssSelector: ["#case-h1", "#results p"] },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` },
+      { "@type": "ListItem", position: 2, name: "Work", item: `${S.url}/work` },
+      { "@type": "ListItem", position: 3, name: c.named ? c.client : c.card.title, item: url },
+    ],
+  },
+];
+---
+<Site title={seoTitle} description={seoDesc} canonical={`/work/${c.slug}`} jsonLd={jsonLd} ogType="article" noindex={!!c.seo?.noindex}>
+  <CaseHeader c={c} ctaHref={work.heroButton.href} />
+  <CaseBody c={c} ctaHref={work.heroButton.href} />
+  <RelatedWork items={related} />
+  <div class="h-14 sm:h-20"></div>
+  <WorkBand data={band} />
+</Site>

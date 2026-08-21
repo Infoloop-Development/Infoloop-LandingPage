@@ -1,0 +1,24 @@
+---
+/**
+ * /privacy: the plain-language privacy policy, in 7Span's simple document
+ * layout. Copy lives in content/legal.ts and describes what this site
+ * actually does (one contact form, one brochure form, no tracking).
+ */
+import Site from "@/layouts/Site.astro";
+import LegalDoc from "@/components/legal/LegalDoc.astro";
+import { CtaPanel } from "@/components/sections/CtaPanel";
+import { PRIVACY } from "@/content/legal";
+import { getSite } from "@/lib/cms";
+
+const site = await getSite();
+const S = site.site;
+const url = `${S.url}/privacy`;
+const jsonLd = [
+  { "@context": "https://schema.org", "@type": "WebPage", "@id": `${url}#page`, url, name: PRIVACY.seo.title, description: PRIVACY.seo.description, isPartOf: { "@id": `${S.url}/#website` }, publisher: { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url }, inLanguage: "en" },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Privacy policy", item: url }] },
+];
+---
+<Site title={PRIVACY.seo.title} description={PRIVACY.seo.description} canonical="/privacy" jsonLd={jsonLd}>
+  <LegalDoc doc={PRIVACY} />
+  <CtaPanel id="privacy-cta-h2" h2="Want your details removed?" lede="Email us and a named person replies within one business day. No form to fill in, no ticket number." button={{ label: "Email us", href: `mailto:${S.email}` }} />
+</Site>

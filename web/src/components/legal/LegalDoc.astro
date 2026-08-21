@@ -1,0 +1,55 @@
+---
+/**
+ * Legal document page (7Span's privacy page: a plain stacked document).
+ * Hero with the eyebrow, H1, one line and the date, a contents rail, then
+ * H2 sections with paragraphs and bullet lists in one readable column.
+ */
+import type { LegalDoc } from "@/content/legal";
+const { doc } = Astro.props as { doc: LegalDoc };
+const id = (h2: string) => h2.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+const hatch = "repeating-linear-gradient(135deg, rgba(10,10,10,0.35) 0 1px, transparent 1px 7px)";
+---
+<section class="relative border-b border-ink" aria-labelledby="legal-h1">
+  <div class="absolute inset-y-0 right-0 hidden w-[22%] lg:block" style={`background-image: ${hatch}`} aria-hidden="true"></div>
+  <div class="container-x relative py-12 sm:py-16">
+    <p class="eyebrow text-ink/70 hero-in">{doc.eyebrow}</p>
+    <h1 id="legal-h1" class="display-h2 mt-3 max-w-3xl text-ink hero-in" style="--d: 60ms">{doc.h1}</h1>
+    <p class="lede mt-4 max-w-2xl text-ink/80 hero-in" style="--d: 120ms">{doc.lede}</p>
+    <p class="mt-6 font-display text-[12px] font-bold uppercase tracking-[0.14em] text-ink/60 hero-in" style="--d: 160ms">Last updated {doc.updated}</p>
+  </div>
+</section>
+
+<div class="container-x grid gap-12 py-12 sm:py-16 lg:grid-cols-12 lg:gap-16">
+  <nav class="lg:col-span-4" aria-labelledby="contents-h2">
+    <div class="lg:sticky lg:top-28">
+      <h2 id="contents-h2" class="font-display text-[12px] font-bold uppercase tracking-[0.14em] text-ink/60">{doc.contentsLabel}</h2>
+      <ol class="mt-4 space-y-1.5">
+        {doc.sections.map((s, i) => (
+          <li class="flex gap-3 text-[15px]">
+            <span class="font-display text-[12px] font-bold tabular-nums text-orange" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+            <a href={`#${id(s.h2)}`} class="text-ink/80 underline decoration-transparent underline-offset-4 transition-colors hover:text-orange hover:decoration-orange">{s.h2}</a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </nav>
+
+  <div class="lg:col-span-8">
+    {doc.sections.map((s, i) => (
+      <section class={`${i > 0 ? "mt-10 border-t border-line pt-8" : ""}`} aria-labelledby={id(s.h2)}>
+        <h2 id={id(s.h2)} class="scroll-mt-28 font-display text-[24px] font-bold leading-tight tracking-[-0.02em] text-ink sm:text-[28px]">{s.h2}</h2>
+        {s.paragraphs?.map((p) => <p class="mt-4 text-[16.5px] leading-relaxed text-ink/80">{p}</p>)}
+        {s.bullets && (
+          <ul class="mt-4 space-y-2.5">
+            {s.bullets.map((b) => (
+              <li class="flex gap-3 text-[16.5px] leading-relaxed text-ink/80">
+                <span class="mt-2.5 h-1.5 w-1.5 shrink-0 bg-orange" aria-hidden="true"></span>
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ))}
+  </div>
+</div>

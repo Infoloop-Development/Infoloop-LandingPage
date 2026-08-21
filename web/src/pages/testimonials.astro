@@ -1,0 +1,88 @@
+---
+/**
+ * /testimonials: the four published client quotes, each attached to the case
+ * study behind it, plus the review-platform scores. No quote appears here
+ * without work we can show.
+ */
+import Site from "@/layouts/Site.astro";
+import { TaglineBand } from "@/components/sections/TaglineBand";
+import { RatingsRow } from "@/components/sections/RatingsRow";
+import { CtaPanel } from "@/components/sections/CtaPanel";
+import { CaseCard } from "@/components/work/CaseCard";
+import { Hi } from "@/components/ui";
+import { TESTIMONIALS as T } from "@/content/company";
+import { getSite, getWork } from "@/lib/cms";
+
+const site = await getSite();
+const S = site.site;
+const url = `${S.url}/testimonials`;
+const cases = await getWork();
+const quoted = cases.filter((c) => c.quote?.text);
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${url}#page`,
+    url,
+    name: T.seo.title,
+    description: T.seo.description,
+    isPartOf: { "@id": `${S.url}/#website` },
+    about: { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url },
+    inLanguage: "en",
+  },
+  ...quoted.map((c) => ({
+    "@context": "https://schema.org",
+    "@type": "Review",
+    itemReviewed: { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop" },
+    reviewBody: c.quote.text,
+    author: { "@type": "Person", name: c.quote.name || c.quote.role },
+    url: `${S.url}/work/${c.slug}`,
+  })),
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Testimonials", item: url }] },
+];
+---
+<Site title={T.seo.title} description={T.seo.description} canonical="/testimonials" jsonLd={jsonLd}>
+  <section class="border-b border-ink" aria-labelledby="test-h1">
+    <div class="container-x py-12 sm:py-16">
+      <p class="eyebrow text-ink/70 hero-in">{T.eyebrow}</p>
+      <h1 id="test-h1" class="display-h2 mt-3 max-w-4xl text-ink hero-in" style="--d: 60ms"><Hi text={T.h1} /></h1>
+      <p class="lede mt-4 max-w-3xl text-ink/80 hero-in" style="--d: 120ms">{T.lede}</p>
+      <a href="/work" class="btn btn-ink mt-8 hero-in" style="--d: 180ms">{T.button}</a>
+    </div>
+  </section>
+
+  <TaglineBand data={T.band} />
+
+  {/* Quote wall: one card per published client quote */}
+  <section class="container-x py-14 sm:py-20" aria-labelledby="quotes-h2">
+    <h2 id="quotes-h2" class="display-h2 text-ink reveal">{T.quotesH2}</h2>
+    <p class="lede mt-3 max-w-3xl text-ink/80 reveal" style="--reveal-delay: 60ms">{T.quotesLede}</p>
+    <ul class="mt-8 grid auto-rows-fr gap-4 md:grid-cols-2">
+      {quoted.map((c, i) => (
+        <li class="flex reveal" style={`--reveal-delay: ${i * 60}ms`}>
+          <figure class="flex w-full flex-col border border-ink bg-white">
+            <blockquote class="flex-1 p-7 font-display text-[20px] font-medium leading-snug tracking-[-0.01em] text-ink sm:p-8 sm:text-[22px]">{c.quote.text}</blockquote>
+            <figcaption class="flex flex-wrap items-center justify-between gap-3 border-t border-ink bg-paper px-7 py-4 sm:px-8">
+              <span>
+                {c.quote.name && <span class="block font-display text-[15px] font-bold text-ink">{c.quote.name}</span>}
+                <span class="block font-display text-[12px] font-semibold uppercase tracking-[0.12em] text-ink/70">{c.quote.role}</span>
+              </span>
+              <a href={`/work/${c.slug}`} class="link-arrow text-ink hover:text-orange">Read the case study<span class="sr-only">: {c.card.title}</span></a>
+            </figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="container-x border-t border-ink py-14 sm:py-20" aria-labelledby="cases-h2">
+    <h2 id="cases-h2" class="display-h2 text-ink reveal">{T.casesH2}</h2>
+    <p class="lede mt-3 max-w-3xl text-ink/80 reveal" style="--reveal-delay: 60ms">{T.casesLede}</p>
+    <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {quoted.slice(0, 3).map((c) => <CaseCard c={c} />)}
+    </ul>
+  </section>
+
+  <CtaPanel id="test-cta-h2" h2={T.cta.h2} lede={T.cta.lede} button={{ label: T.cta.button, href: "/contact" }} />
+  <RatingsRow ratings={site.ratings} />
+</Site>

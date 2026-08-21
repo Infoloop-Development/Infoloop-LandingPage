@@ -1,0 +1,23 @@
+---
+/**
+ * /terms: the plain-language terms of use, in the same document layout as
+ * the privacy policy. A signed proposal always takes precedence over it.
+ */
+import Site from "@/layouts/Site.astro";
+import LegalDoc from "@/components/legal/LegalDoc.astro";
+import { CtaPanel } from "@/components/sections/CtaPanel";
+import { TERMS } from "@/content/legal";
+import { getSite } from "@/lib/cms";
+
+const site = await getSite();
+const S = site.site;
+const url = `${S.url}/terms`;
+const jsonLd = [
+  { "@context": "https://schema.org", "@type": "WebPage", "@id": `${url}#page`, url, name: TERMS.seo.title, description: TERMS.seo.description, isPartOf: { "@id": `${S.url}/#website` }, publisher: { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url }, inLanguage: "en" },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Terms of use", item: url }] },
+];
+---
+<Site title={TERMS.seo.title} description={TERMS.seo.description} canonical="/terms" jsonLd={jsonLd}>
+  <LegalDoc doc={TERMS} />
+  <CtaPanel id="terms-cta-h2" h2="Ready to see it in writing?" lede="Tell us the job. You get a written scope, a date and a price before anyone starts, and we price any change before we do it." button={{ label: "Start a conversation", href: "/contact" }} />
+</Site>

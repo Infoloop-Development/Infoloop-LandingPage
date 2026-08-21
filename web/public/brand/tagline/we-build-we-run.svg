@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" width="900" height="360" role="img" aria-label="We build. We run.">
+  <!-- Infoloop tagline. Set in DM Sans Bold, -3.5% tracking. Install DM Sans (fonts.google.com/specimen/DM+Sans) or use the PNGs. -->
+  <style>text{font-family:"DM Sans","DM Sans Variable",ui-sans-serif,system-ui,sans-serif;font-weight:700;font-size:160px;letter-spacing:-0.035em}</style>
+  <text x="40" y="160" fill="#0A0A0A">We build.</text>
+  <text x="40" y="312" fill="#F47B00">We run.</text>
+</svg>

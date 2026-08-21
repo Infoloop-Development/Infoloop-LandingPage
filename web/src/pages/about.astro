@@ -1,0 +1,166 @@
+---
+import { PROFILE_LINKS } from "@/content/site";
+/**
+ * /about: 7Span's About page, section for section. Our story (H1, sub,
+ * paragraphs, photo over a hatched panel) → About (hatched rail) → tagline
+ * marquee → Our vision (rail) → 7 values (horizontal card rail) → Life @
+ * Infoloop band with the road → Core priorities (thumbnail list) → Our
+ * team (photo cards, no QR codes) → tagline marquee → closing statement.
+ */
+import Site from "@/layouts/Site.astro";
+import { TaglineBand } from "@/components/sections/TaglineBand";
+import { ValuesRail, PriorityThumb, TeamCard } from "@/components/about/AboutParts";
+import { CtaPanel } from "@/components/sections/CtaPanel";
+import { Mark } from "@/components/Logo";
+import { Hi } from "@/components/ui";
+import { getAbout, getSite } from "@/lib/cms";
+
+const site = await getSite();
+const ABOUT = await getAbout();
+const S = site.site;
+const hatch = "repeating-linear-gradient(135deg, rgba(10,10,10,0.35) 0 1px, transparent 1px 7px)";
+const rail = `repeating-linear-gradient(135deg, rgba(10,10,10,0.35) 0 1px, transparent 1px 7px), #f47b00`;
+const founder = ABOUT.team.members.find((m) => m.founder && !m.placeholder);
+// Placeholder cards show in the dev preview only; production lists real people.
+const members = ABOUT.team.members.filter((m) => !m.placeholder || import.meta.env.DEV);
+const org = {
+  "@type": "Organization",
+  "@id": `${S.url}/#organization`,
+  name: "Infoloop",
+  url: S.url,
+  logo: `${S.url}/brand/icon-primary.svg`,
+  email: S.email,
+  sameAs: [...site.social.map((s) => s.href), ...PROFILE_LINKS],
+  address: site.offices.map((o) => ({ "@type": "PostalAddress", ...o.address })),
+  ...(founder
+    ? {
+        founder: {
+          "@type": "Person",
+          ...(founder.profile?.slug ? { "@id": `${S.url}/${founder.profile.slug}#person`, url: `${S.url}/${founder.profile.slug}` } : {}),
+          name: founder.name,
+          jobTitle: founder.role,
+          worksFor: { "@id": `${S.url}/#organization` },
+        },
+      }
+    : {}),
+  employee: ABOUT.team.members
+    .filter((m) => !m.placeholder && !m.founder)
+    .map((m) => ({ "@type": "Person", ...(m.profile?.slug ? { "@id": `${S.url}/${m.profile.slug}#person`, url: `${S.url}/${m.profile.slug}` } : {}), name: m.name, jobTitle: m.role, worksFor: { "@id": `${S.url}/#organization` } })),
+  knowsAbout: ["Custom software development", "AI automation", "Webflow", "Shopify", "Manufacturing", "Healthcare", "SaaS", "Biorenewables"],
+};
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "@id": `${S.url}/about#page`,
+    url: `${S.url}/about`,
+    name: ABOUT.seo.title,
+    description: ABOUT.seo.description,
+    isPartOf: { "@id": `${S.url}/#website` },
+    about: { "@id": `${S.url}/#organization` },
+    mainEntity: org,
+    inLanguage: "en",
+  },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "About", item: `${S.url}/about` }] },
+];
+---
+<Site title={ABOUT.seo.title} description={ABOUT.seo.description} canonical="/about" jsonLd={jsonLd}>
+  {/* Our story: text left, photo right over a hatched panel (7Span) */}
+  <section class="relative" aria-labelledby="story-h1">
+    <div class="absolute inset-y-0 right-0 hidden w-[30%] lg:block" style={`background-image: ${hatch}`} aria-hidden="true"></div>
+    <div class="container-x relative grid gap-10 py-12 sm:py-16 lg:grid-cols-12 lg:gap-12">
+      <div class="lg:col-span-7">
+        <h1 id="story-h1" class="display-h2 text-ink hero-in">{ABOUT.story.h1}</h1>
+        <p class="mt-4 font-display text-[20px] font-medium leading-snug tracking-[-0.01em] text-ink sm:text-[22px] hero-in" style="--d: 60ms">{ABOUT.story.sub}</p>
+        <div class="mt-6 max-w-2xl space-y-5 text-[16.5px] leading-relaxed text-ink/80 hero-in" style="--d: 120ms">
+          {ABOUT.story.paragraphs.map((p) => <p>{p}</p>)}
+        </div>
+      </div>
+      <div class="w-full max-w-[420px] lg:col-span-5 lg:justify-self-end hero-fade" style="--d: 180ms">
+        <div class="relative aspect-[3/4] w-full overflow-hidden border border-ink bg-mist" aria-hidden="true" data-photo-alt={ABOUT.story.photoAlt}>
+          <div class="absolute inset-0" aria-hidden="true">
+            {[["12%","12%","56%"],["8%","30%","40%"],["4%","48%","70%"],["10%","66%","38%"],["6%","82%","52%"]].map(([l,t,w],i) => (
+              <span class={`absolute h-[6%] rounded-full ${i === 1 ? "bg-orange/80" : "bg-white/70"}`} style={`left:${l};top:${t};width:${w}`} />
+            ))}
+          </div>
+          <div class="absolute bottom-4 left-4 flex items-center gap-2 rounded-md bg-white/85 px-2.5 py-1.5 text-[11px] text-ink/70" aria-hidden="true">
+            <Mark size={14} /> Photo slot
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* About: hatched orange rail on the left, text indented (7Span) */}
+  <section class="relative border-t border-ink" aria-labelledby="about-h2">
+    <div class="absolute inset-y-0 left-0 hidden w-[7%] border-r border-ink lg:block" style={`background: ${rail}`} aria-hidden="true"></div>
+    <div class="container-x py-14 sm:py-20 lg:pl-[max(clamp(1.25rem,4vw,2.5rem),9%)]">
+      <h2 id="about-h2" class="display-h2 text-ink reveal">{ABOUT.about.h2}</h2>
+      <div class="mt-6 max-w-3xl space-y-5 text-[16.5px] leading-relaxed text-ink/80 reveal" style="--reveal-delay: 80ms">
+        {ABOUT.about.paragraphs.map((p) => <p>{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  {/* Tagline marquee (7Span: black band, repeated line) */}
+  <TaglineBand data={ABOUT.band} />
+
+  {/* Our vision: same rail, statement + line (7Span) */}
+  <section class="relative border-b border-ink" aria-labelledby="vision-h2">
+    <div class="absolute inset-y-0 left-0 hidden w-[7%] border-r border-ink lg:block" style={`background: ${rail}`} aria-hidden="true"></div>
+    <div class="container-x py-14 sm:py-20 lg:pl-[max(clamp(1.25rem,4vw,2.5rem),9%)]">
+      <h2 id="vision-h2" class="display-h2 text-ink reveal">{ABOUT.vision.h2}</h2>
+      <p class="mt-6 max-w-2xl font-display text-[19px] font-medium leading-snug tracking-[-0.01em] text-ink reveal sm:text-[21px]" style="--reveal-delay: 60ms"><Hi text={ABOUT.vision.statement} /></p>
+      <p class="mt-5 max-w-2xl text-[16.5px] leading-relaxed text-ink/80 reveal" style="--reveal-delay: 120ms">{ABOUT.vision.body}</p>
+    </div>
+  </section>
+
+  {/* Values: heading in the container, cards scroll sideways (7Span) */}
+  <section class="py-14 sm:py-20" aria-labelledby="values-h2">
+    <div class="container-x">
+      <h2 id="values-h2" class="display-h2 text-ink reveal">{ABOUT.values.h2}</h2>
+      <p class="mt-2 text-[18px] text-ink/75 reveal sm:text-[20px]" style="--reveal-delay: 60ms">{ABOUT.values.sub}</p>
+    </div>
+    <ValuesRail items={ABOUT.values.items} />
+  </section>
+
+  {/* Life @ Infoloop: the site's minimal CTA panel (7Span has a black band with the road here) */}
+  <CtaPanel id="life-h2" h2={ABOUT.life.h2} lede={ABOUT.life.sub} button={ABOUT.life.button} external />
+
+  {/* Core priorities: heading + line left, thumbnail list right (7Span) */}
+  <section class="border-b border-ink" aria-labelledby="priorities-h2">
+    <div class="container-x grid gap-10 py-14 sm:py-20 lg:grid-cols-12 lg:gap-14">
+      <div class="lg:col-span-5">
+        <h2 id="priorities-h2" class="display-h2 text-ink reveal">{ABOUT.priorities.h2}</h2>
+        <p class="mt-3 max-w-md text-[18px] leading-snug text-ink/80 reveal sm:text-[20px]" style="--reveal-delay: 60ms"><Hi text={ABOUT.priorities.sub} /></p>
+      </div>
+      <ul class="divide-y divide-ink border border-ink bg-white lg:col-span-7 reveal" style="--reveal-delay: 120ms">
+        {ABOUT.priorities.items.map((p) => (
+          <li class="flex items-center gap-4 p-3 sm:gap-5">
+            <span class="shrink-0 border border-ink" aria-hidden="true"><PriorityThumb k={p.key} /></span>
+            <p class="text-[16.5px] text-ink">{p.text}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  {/* Our team: photo cards, three across, no QR codes (per Nimit) */}
+  <section class="container-x py-14 sm:py-20" aria-labelledby="team-h2">
+    <h2 id="team-h2" class="display-h2 text-ink reveal">{ABOUT.team.h2}</h2>
+    <p class="mt-2 max-w-3xl text-[18px] text-ink/75 reveal sm:text-[20px]" style="--reveal-delay: 60ms">{ABOUT.team.sub}</p>
+    <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 reveal" style="--reveal-delay: 120ms">
+      {members.map((m) => <TeamCard m={m} />)}
+    </ul>
+  </section>
+
+  {/* Closing marquee + statement (7Span: MAKING IT POSSIBLE band, then the lockup and one paragraph) */}
+  <TaglineBand data={ABOUT.closing.band} />
+  <section class="container-x grid gap-8 py-12 sm:py-16 lg:grid-cols-12 lg:items-center" aria-labelledby="closing-h2">
+    <h2 id="closing-h2" class="font-display text-[40px] font-bold leading-[0.95] tracking-[-0.035em] text-ink sm:text-[52px] lg:col-span-4">
+      {ABOUT.closing.band[0]}<br />
+      <span class="text-orange">{ABOUT.closing.band[1]}</span>
+    </h2>
+    <p class="text-[17px] leading-relaxed text-ink/80 lg:col-span-8">{ABOUT.closing.statement}</p>
+  </section>
+</Site>

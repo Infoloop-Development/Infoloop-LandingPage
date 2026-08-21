@@ -1,0 +1,67 @@
+---
+/**
+ * /products/<slug>: one product, Vepaar-style page. SoftwareApplication +
+ * FAQPage + BreadcrumbList schema.
+ */
+import Site from "@/layouts/Site.astro";
+import { ProductHero, ProductIdea, FeatureBlock, DarkStatement, WorksWith, ProductImpact } from "@/components/products/ProductPage";
+import { CaseCard } from "@/components/work/CaseCard";
+import { Faq } from "@/components/sections/Faq";
+import { WorkBand } from "@/components/work/WorkIndex";
+import { getProducts, getSite, getWork } from "@/lib/cms";
+import type { Product } from "@/content/products";
+
+export async function getStaticPaths() {
+  const products = await getProducts();
+  return products.map((p) => ({ params: { slug: p.slug }, props: { p } }));
+}
+interface Props { p: Product }
+const { p } = Astro.props;
+const site = await getSite();
+const S = site.site;
+const cases = await getWork();
+const related = p.caseSlug ? cases.find((c) => c.slug === p.caseSlug) : undefined;
+const url = `${S.url}/products/${p.slug}`;
+const org = { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url };
+const faqData = { eyebrow: "Questions", h2: "Questions teams ask first", lede: `Straight answers about ${p.name}.`, items: p.faq };
+const band = { h2: p.cta.h2, lede: p.cta.lede, button: { label: p.cta.button, href: "/contact" } };
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "@id": `${url}#software`,
+    name: p.name,
+    url,
+    description: p.lede,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    author: org,
+    publisher: org,
+    featureList: [...p.block1.features, ...p.block2.features].map((f) => f.h3),
+  },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: p.faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Products", item: `${S.url}/products` }, { "@type": "ListItem", position: 3, name: p.name, item: url }] },
+];
+---
+<Site title={p.seo.title} description={p.seo.description} canonical={`/products/${p.slug}`} jsonLd={jsonLd} noindex={!!p.seo.noindex}>
+  <ProductHero p={p} />
+  <ProductIdea p={p} />
+  <FeatureBlock id="features" h2={p.block1.h2} sub={p.block1.sub} features={p.block1.features} p={p} screenIndex={1} />
+  <DarkStatement p={p} />
+  <FeatureBlock id="automation" h2={p.block2.h2} sub={p.block2.sub} features={p.block2.features} p={p} screenIndex={3} flip />
+  <WorksWith p={p} />
+  <ProductImpact p={p} />
+  {related && (
+    <section class="container-x pt-14 sm:pt-20" aria-labelledby="proof-h2">
+      <p class="eyebrow text-ink/50">In the field</p>
+      <h2 id="proof-h2" class="display-h3 mt-3 text-ink">See {p.name} in a real business</h2>
+      <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <CaseCard href={`/work/${related.slug}`} industry={related.industry} tile={related.tile} cover={related.cover} text={related.card.blurb} client={related.client} />
+      </ul>
+    </section>
+  )}
+  <div class="h-14 sm:h-20"></div>
+  <Faq data={faqData} />
+  <div class="h-14 sm:h-20"></div>
+  <WorkBand data={band} />
+</Site>

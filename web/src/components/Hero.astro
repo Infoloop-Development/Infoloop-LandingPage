@@ -1,0 +1,18 @@
+---
+/**
+ * Hero: static top block (React rendered to HTML, no client JS) plus the
+ * hydrated HeroPanels island (scroll parallax) and the trusted line.
+ */
+import { HeroTop, HeroTrusted } from "@/components/sections/Hero";
+import { HeroPanels } from "@/components/sections/HeroPanels";
+import type { HERO } from "@/content/home";
+interface Props { data: typeof HERO }
+const { data } = Astro.props;
+---
+<section class="relative overflow-hidden pt-[76px]" aria-labelledby="hero-h1">
+  <HeroTop data={data} />
+  <div class="container-x hero-fade mt-14 sm:mt-20" style="--d: 600ms">
+    <HeroPanels client:load data={data} />
+    <HeroTrusted data={data} />
+  </div>
+</section>

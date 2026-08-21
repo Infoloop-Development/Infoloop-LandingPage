@@ -1,0 +1,96 @@
+# Infoloop
+
+> Infoloop is a US software development company that designs, builds and runs custom applications, AI automation and Webflow and Shopify websites for manufacturing, healthcare, SaaS and biorenewables businesses. Tagline: We build. We run.
+
+## What Infoloop does
+- Custom applications, enterprise applications, eCommerce and digital storefronts, no-code and low-code solutions, custom web development, SaaS product development (Build)
+- UX optimization and accessibility, IT strategy and process optimization, application maintenance and support, IT staff augmentation (Grow)
+- Legacy app modernization, AI and advanced tech solutions (Transform)
+- Product, tech and design consulting (Consulting)
+- In-house products: OpsDeck (attendance management for manufacturing), GarageZone (garage management), LoopIQ (learning and testing platform), Verko (AI governance and compliance)
+
+## How Infoloop works
+- 30-minute discovery call, then scope in a week with a fixed price in writing
+- Most projects live in 4 to 8 weeks, with weekly demos on real data
+- After launch Infoloop monitors, fixes and improves the software every month and sends a short report ("We run")
+- Clients own the code, accounts, domains and data from day one
+
+## Proof
+- 4.8 average client rating (Trustpilot 4.9, Google 4.8, Clutch 4.7, GoodFirms 4.7)
+- 50+ projects delivered, software running in 6 countries, 99.9% uptime on software Infoloop runs
+- Certified Webflow and Shopify Partners
+
+## Case studies (https://infoloop.co/work)
+- $1.2M saved a year with predictive maintenance and a multi-plant ERP for a machinery manufacturer; unplanned downtime down 72%, order fulfilment accuracy 84% to 98%: https://infoloop.co/work/manufacturing-erp-predictive-maintenance
+- Brightlane Auto Group: nine garage branches on one platform (GarageZone) in 11 weeks; bay utilisation up 28%, run by Infoloop: https://infoloop.co/work/brightlane-auto-group-garagezone
+- AI support assistant for a fintech scale-up: manual ticket work down 72%, first response from hours to under two minutes, live in five weeks: https://infoloop.co/work/fintech-support-assistant
+- Shopify rebuild for a DTC brand: conversion up 38%, six figures of revenue added in the first quarter: https://infoloop.co/work/dtc-shopify-rebuild
+- Attendance software (OpsDeck) across three manufacturing plants: live in three weeks, timesheet admin down 90%: https://infoloop.co/work/manufacturing-attendance-opsdeck
+
+## Products (https://infoloop.co/products)
+- OpsDeck, attendance software for manufacturing: biometric, card or phone clock-in, breaks and overtime per shift, AI flags on missed punches and overtime creep, payroll export in one click; live in 2 to 4 weeks: https://infoloop.co/products/opsdeck
+- GarageZone, garage management software for workshops: job cards, online bookings, parts with reorder alerts, invoicing and payments, automatic service reminders; most workshops live in about three weeks: https://infoloop.co/products/garagezone
+- Verko, AI governance and compliance platform (verko.ai): automated risk assessments, evidence collection and audit preparation across 15+ frameworks (EU AI Act, NIST AI RMF, SOC 2, GDPR, ISO 42001, DPDPA), connects to AWS, GitHub, Okta and 20+ tools: https://infoloop.co/products/verko
+- LoopIQ, learning and testing platform for training providers, staffing firms and assessors: courses, online tests, AI proctoring, AI-assisted grading, certificates with renewals; live in 3 to 5 weeks: https://infoloop.co/products/loopiq
+
+## Blog (https://infoloop.co/blog)
+- How to ship an AI agent that survives production: https://infoloop.co/blog/ship-ai-agent-production
+- The metrics that prove an AI copilot is working: https://infoloop.co/blog/metrics-ai-copilot-working
+- Cutting payroll errors with smarter attendance: https://infoloop.co/blog/reduce-payroll-errors-attendance
+- Building a Webflow site that ranks from day one: https://infoloop.co/blog/webflow-seo-day-one
+- What a managed software retainer should include: https://infoloop.co/blog/managed-software-retainer-guide
+
+## Pages
+- Home: https://infoloop.co/
+- Services: https://infoloop.co/services
+- Industries: https://infoloop.co/industries
+- Hire talent: https://infoloop.co/hire
+- Products: https://infoloop.co/products
+- Work: https://infoloop.co/work
+- Blog: https://infoloop.co/blog
+- About: https://infoloop.co/about (our story, values, team; founder Nimit Kaneria; offices in Surat, India and Dover, Delaware)
+- Founder: https://infoloop.co/nimit (Nimit Kaneria, personal page with contact links)
+- Solutions: https://infoloop.co/solutions/build (custom, enterprise, eCommerce, no-code, web, SaaS), https://infoloop.co/solutions/grow (UX and accessibility, IT strategy, maintenance, staff augmentation), https://infoloop.co/solutions/transform (legacy modernization, AI), https://infoloop.co/solutions/consulting (product, tech, design)
+- Service pages: Build: https://infoloop.co/custom-software-development, /enterprise-application-solutions, /ecommerce-development, /low-code-no-code-development, /custom-web-development, /saas-product-development. Grow: /ui-ux-design, /it-optimization, /application-maintenance, /it-staff-augmentation-services. Transform: /legacy-app-modernization, /ai-and-emerging-technologies. Consulting: /product-strategy-and-management, /technology-consulting, /ux-consulting (all under https://infoloop.co)
+- Industries (software built for a sector, with that sector's problems, numbers and case studies):
+  - https://infoloop.co/industry/manufacturing
+  - https://infoloop.co/industry/agriculture-agritech
+  - https://infoloop.co/industry/ai-startups
+  - https://infoloop.co/industry/automotive
+  - https://infoloop.co/industry/b2b-saas
+  - https://infoloop.co/industry/consumer-platforms
+  - https://infoloop.co/industry/corporate-training
+  - https://infoloop.co/industry/d2c-brands
+  - https://infoloop.co/industry/ecommerce-retail
+  - https://infoloop.co/industry/edtech
+  - https://infoloop.co/industry/energy-utilities
+  - https://infoloop.co/industry/enterprise-software
+  - https://infoloop.co/industry/isvs-technology-companies
+  - https://infoloop.co/industry/learning-platforms
+- Hire talent (add an experienced person to your team in 1 to 2 weeks, or a set piece of work):
+  - https://infoloop.co/hire-javascript-developers
+  - https://infoloop.co/hire-figma-designers
+  - https://infoloop.co/hire-flutter-developers
+  - https://infoloop.co/hire-laravel-developers
+  - https://infoloop.co/hire-nestjs-developers
+  - https://infoloop.co/hire-nextjs-developers
+  - https://infoloop.co/hire-nodejs-developers
+  - https://infoloop.co/hire-nuxt-developers
+  - https://infoloop.co/hire-php-developers
+  - https://infoloop.co/hire-react-developers
+  - https://infoloop.co/hire-react-native-developers
+  - https://infoloop.co/hire-shopify-developers
+  - https://infoloop.co/hire-swift-developers
+  - https://infoloop.co/hire-typescript-developers
+  - https://infoloop.co/hire-vue-developers
+  - https://infoloop.co/hire-webflow-developers
+  - https://infoloop.co/hire-wordpress-developers
+- Index pages listing everything in one place: https://infoloop.co/services (all 15 services), https://infoloop.co/industries (all 14 industries), https://infoloop.co/hire (all 17 roles)
+- Technologies: https://infoloop.co/technologies (the tools Infoloop builds with and why, each linked to the people you can hire for it)
+- Testimonials: https://infoloop.co/testimonials (client quotes, each linked to the case study behind it)
+- Careers: https://infoloop.co/careers (how Infoloop hires and any open roles; there may be none listed)
+- Trust center: https://infoloop.co/trust-center (ownership of code and accounts, day-to-day security practice, and an explicit list of what Infoloop does NOT claim: no SOC 2 or ISO 27001 certification is held today)
+- Brand assets: https://infoloop.co/brand-assets (official logo, mark, tagline and usage rules; ZIP download)
+- Sitemap: https://infoloop.co/sitemap (every live page in one list)
+- Privacy policy: https://infoloop.co/privacy and terms of use: https://infoloop.co/terms
+- Contact: https://infoloop.co/contact (hi@infoloop.co)

@@ -1,0 +1,81 @@
+---
+/**
+ * Cookie consent, shown only when a cookie-setting tracker is configured and
+ * PUBLIC_CONSENT_REQUIRED has not been turned off.
+ *
+ * Deliberately plain: two equally weighted buttons, no "legitimate interest"
+ * toggle that pre-consents you, no dark pattern where Reject is a grey link
+ * three clicks deep. Rejecting is one click and is remembered.
+ *
+ * It grants or denies through Google Consent Mode v2, so GA4 keeps receiving
+ * cookieless pings either way and page totals survive a rejection. Clarity is
+ * only started on a grant, since it records sessions.
+ */
+const env = import.meta.env;
+const cookieTrackers = Boolean(env.PUBLIC_GA4_ID || env.PUBLIC_GTM_ID || env.PUBLIC_POSTHOG_KEY || env.PUBLIC_CLARITY_ID || env.PUBLIC_LINKEDIN_PARTNER_ID);
+const show = cookieTrackers && env.PUBLIC_CONSENT_REQUIRED !== "false";
+const clarityId = env.PUBLIC_CLARITY_ID;
+---
+{show && (
+  <div
+    id="consent"
+    hidden
+    role="dialog"
+    aria-modal="false"
+    aria-labelledby="consent-h"
+    class="fixed inset-x-0 bottom-0 z-[80] border-t border-ink bg-white p-4 shadow-[0_-8px_30px_-20px_rgba(10,10,10,0.4)] sm:p-5"
+  >
+    <div class="container-x flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div class="max-w-3xl">
+        <p id="consent-h" class="font-display text-[16px] font-bold text-ink">Cookies for measurement</p>
+        <p class="mt-1 text-[14.5px] leading-relaxed text-ink/75">
+          We would like to measure how this site is used so we can improve it. That sets cookies.
+          Nothing is used for advertising, and the site works exactly the same if you say no.
+          <a href="/privacy" class="underline decoration-orange underline-offset-4 hover:text-orange">Read the privacy policy</a>.
+        </p>
+      </div>
+      <div class="flex shrink-0 gap-3">
+        <button type="button" id="consent-no" class="btn btn-outline px-6 py-3">Decline</button>
+        <button type="button" id="consent-yes" class="btn btn-ink px-6 py-3">Allow</button>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline define:vars={{ clarityId }}>
+    (function () {
+      var el = document.getElementById("consent");
+      if (!el) return;
+      var KEY = "il-consent";
+      var stored = null;
+      try { stored = localStorage.getItem(KEY); } catch (e) {}
+      if (!stored) el.hidden = false;
+
+      function apply(value) {
+        try { localStorage.setItem(KEY, value); } catch (e) {}
+        var granted = value === "granted";
+        if (typeof window.gtag === "function") {
+          window.gtag("consent", "update", {
+            analytics_storage: granted ? "granted" : "denied",
+            ad_storage: "denied",
+            ad_user_data: "denied",
+            ad_personalization: "denied",
+          });
+        }
+        /* Clarity was not started at page load; start it now on a grant. */
+        if (granted && clarityId && !window.clarity) {
+          (function (c, l, a, r, i, t, y) {
+            c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
+            t = l.createElement(r); t.async = 1;
+            t.src = "https://www.clarity.ms/tag/" + i;
+            y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+          })(window, document, "clarity", "script", clarityId);
+        }
+        if (!granted && typeof window.clarity === "function") window.clarity("consent", false);
+        el.hidden = true;
+      }
+
+      document.getElementById("consent-yes").addEventListener("click", function () { apply("granted"); });
+      document.getElementById("consent-no").addEventListener("click", function () { apply("denied"); });
+    })();
+  </script>
+)}

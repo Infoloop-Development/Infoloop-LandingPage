@@ -1,0 +1,88 @@
+# Netlify config for the Astro site (web/). Set the site's base directory to
+# "web" in the Netlify UI, or deploy from this folder with the CLI.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Environment variables to set in the Netlify UI (Site settings > Environment):
+#   PAYLOAD_URL          https://cms.infoloop.co (Railway/Render URL of the Payload app)
+#   PAYLOAD_TOKEN        optional users API key, only needed for drafts/private reads
+#   CONTACT_WEBHOOK_URL  where /api/contact posts leads (CRM, Zapier, Slack)
+
+
+# Old case study URLs (previous site) -> new /work/<slug> pages
+[[redirects]]
+  from = "/case-machinery-erp"
+  to = "/work/manufacturing-erp-predictive-maintenance"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/case-machinery-erp.html"
+  to = "/work/manufacturing-erp-predictive-maintenance"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/work-brightlane-garages"
+  to = "/work/brightlane-auto-group-garagezone"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/work-brightlane-garages.html"
+  to = "/work/brightlane-auto-group-garagezone"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/case-fintech-support-copilot"
+  to = "/work/fintech-support-assistant"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/case-fintech-support-copilot.html"
+  to = "/work/fintech-support-assistant"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/case-dtc-shopify-rebuild"
+  to = "/work/dtc-shopify-rebuild"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/case-dtc-shopify-rebuild.html"
+  to = "/work/dtc-shopify-rebuild"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/case-manufacturing-attendance"
+  to = "/work/manufacturing-attendance-opsdeck"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/case-manufacturing-attendance.html"
+  to = "/work/manufacturing-attendance-opsdeck"
+  status = 301
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

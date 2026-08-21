@@ -1,0 +1,454 @@
+@import "tailwindcss";
+@import "@fontsource-variable/dm-sans";
+@import "@fontsource/open-sans/400.css";
+@import "@fontsource/open-sans/600.css";
+
+/* ------------------------------------------------------------------
+   infoloop design tokens
+   Source: brand-assets/infoloop-brand-kit (v1.1). Ink, white and one
+   orange. DM Sans speaks, Open Sans explains. Motion belongs to the mark.
+   ------------------------------------------------------------------ */
+@theme {
+  --color-ink: #0a0a0a;
+  --color-orange: #f47b00;
+  --color-white: #ffffff;
+  --color-charcoal: #1f1f1d;
+  --color-gray-60: #8a8a85;
+  --color-gray-40: #9a9a95;
+  --color-mist: #e8e8e5;
+  /* Mist is the brand page-background gray. Full-strength Mist is heavy as a
+     section fill, so paper is Mist mixed with white; line is Mist itself. */
+  --color-paper: color-mix(in srgb, #e8e8e5 55%, #ffffff);
+  --color-line: #e8e8e5;
+  --color-line-dark: #2a2a27;
+
+  --font-display: "DM Sans Variable", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 12px;
+  --radius-btn: 6px;
+
+  /* Motion tokens, measured off the reference site. --ease-standard is what
+     7Span uses for every UI state change; --ease-drawer is plain CSS "ease",
+     which is what their menu overlay slides on. The old expo curve
+     cubic-bezier(0.16, 1, 0.3, 1) was retired: over 200ms+ it shoots forward
+     then crawls, which reads as floaty next to an even glide. */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-drawer: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-out-brand: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px; /* fixed header + breathing room for #anchors */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-white);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-orange);
+  color: var(--color-ink);
+}
+
+@layer components {
+/* Display type. Tight tracking above 24px, sentence case, never all caps
+   except small labels. */
+.display-hero {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.5rem, 1.2rem + 4.6vw, 4.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+.display-h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 1.2rem + 2.4vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.display-h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.625rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.display-stat {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.5rem, 1.6rem + 3vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.lede {
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  line-height: 1.55;
+}
+
+/* Layout */
+.container-x {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+/* Section rhythm. The mobile floor is 3rem, not 4rem: on a phone every
+   section already stacks to full width, so a 12 section page was spending
+   nearly two screens on padding alone. Desktop is unchanged. */
+.section-y {
+  padding-block: clamp(3rem, 6vw + 1.5rem, 7.5rem);
+}
+
+/* Buttons. Orange lands on the phrase that converts; ink text on orange
+   is the approved AA pair. White text on orange is display-only, so we
+   never use it for a button label. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  /* Labels are set like 7Span: uppercase, wide tracking, small. Headings stay
+     sentence case per the brand kit; this is the "small labels" exception. */
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  /* Touch minimum, so a button that overrides the padding cannot fall under it. */
+  min-height: 44px;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-btn);
+  border: 1px solid transparent;
+  transition:
+    background-color 200ms var(--ease-standard),
+    color 200ms var(--ease-standard),
+    border-color 200ms var(--ease-standard),
+    box-shadow 200ms var(--ease-standard),
+    filter 200ms var(--ease-standard);
+  white-space: nowrap;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 3px;
+}
+.btn-primary {
+  background: var(--color-orange);
+  color: var(--color-ink);
+}
+.btn-primary:hover {
+  /* Stays orange on every surface (it sits on ink in the CTA band);
+     a soft ring and a touch of brightness signal hover instead. */
+  background: var(--color-orange);
+  color: var(--color-ink);
+  filter: brightness(1.06);
+  box-shadow: 0 0 0 4px rgba(244, 123, 0, 0.28);
+}
+.btn-ink {
+  background: var(--color-ink);
+  color: var(--color-white);
+}
+.btn-ink:hover {
+  background: var(--color-charcoal);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-ink);
+}
+.btn-outline:hover {
+  background: var(--color-ink);
+  color: var(--color-white);
+}
+.btn-outline-light {
+  background: transparent;
+  color: var(--color-white);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+.btn-outline-light:hover {
+  border-color: var(--color-white);
+}
+.btn .btn-arrow {
+  transition: transform 150ms var(--ease-standard);
+}
+.btn:hover .btn-arrow {
+  transform: translateX(3px);
+}
+
+/* Text link with underline that arrives on hover */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+/* On a touch screen this 12px label is a real tap target, so give it the 44px
+   minimum. Pointer-based devices keep the tight desktop layout. */
+@media (pointer: coarse) {
+  .link-arrow {
+    min-height: 44px;
+  }
+}
+.link-arrow svg {
+  transition: transform 150ms var(--ease-standard);
+}
+.link-arrow:hover svg {
+  transform: translateX(3px);
+}
+
+/* Screenshot / media frame per brand: 8px radius, 1px Gray 60 at 30% */
+.frame {
+  border-radius: 8px;
+  border: 1px solid rgba(138, 138, 133, 0.3);
+  overflow: hidden;
+}
+.frame-dark {
+  border-radius: 8px;
+  border: 1px solid var(--color-charcoal);
+  overflow: hidden;
+}
+
+}
+
+/* Reveal on scroll. Text and UI move at most 8px, 200ms on --ease-standard.
+   Collapses to a plain fade under reduced motion. Gated on the .js class
+   that layout.tsx sets before paint, so without JavaScript (or before
+   hydration on a slow device) every element is simply visible. */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 200ms var(--ease-standard),
+    transform 200ms var(--ease-standard);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .js .reveal {
+    transform: none;
+    transition: opacity 200ms ease-out;
+  }
+  .btn,
+  .link-arrow svg,
+  .btn .btn-arrow {
+    transition: none;
+  }
+}
+
+/* Hero load sequence (Roundsite Home V1): elements fade up in a stagger,
+   ~900ms ease-out, then the media panels fade in. JS-gated like .reveal. */
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+.js .hero-in {
+  opacity: 0;
+  animation: hero-in 400ms var(--ease-standard) forwards;
+  animation-delay: var(--d, 0ms);
+}
+.js .hero-fade {
+  opacity: 0;
+  animation: hero-in 400ms var(--ease-standard) forwards;
+  animation-delay: var(--d, 0ms);
+  transform: none;
+}
+/* Side panels are pushed outward at the top of the page and slide in on
+   scroll (set by HeroPanels). Transition smooths the per-frame updates. */
+.hero-side {
+  will-change: transform;
+  transition: transform 80ms linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .hero-in,
+  .js .hero-fade {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .hero-side {
+    transform: none !important;
+    transition: none;
+  }
+}
+
+/* The mark's reveal: bars draw in from the center outward, top to bottom,
+   60ms stagger, 240ms ease-out, accent bar lands last. */
+@keyframes bar-in {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+.mark-animate rect {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bar-in 240ms var(--ease-out-brand) both;
+}
+.mark-animate rect:nth-child(1) { animation-delay: 0ms; }
+.mark-animate rect:nth-child(3) { animation-delay: 60ms; }
+.mark-animate rect:nth-child(4) { animation-delay: 120ms; }
+.mark-animate rect:nth-child(5) { animation-delay: 180ms; }
+.mark-animate rect:nth-child(2) { animation-delay: 260ms; }
+@media (prefers-reduced-motion: reduce) {
+  .mark-animate rect {
+    animation: none;
+  }
+}
+
+/* Logo marquee (7Span "Trusted by" row). Slow, pauses on hover, off under
+   reduced motion. Explicitly requested; the brand book prefers static UI. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  /* One reading speed for every strip, whatever its text. The duration is set
+     per strip from its own width (see the marquee script in Site.astro), so a
+     short band and a long one travel at the same pixels per second, matching
+     7Span at about 100px/s. The fallback keeps a sane speed without JS. */
+  animation: marquee var(--marquee-duration, 48s) linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* Native details/summary FAQ without marker */
+details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+details[open] .faq-plus {
+  transform: rotate(45deg);
+}
+.faq-plus {
+  transition: transform 150ms var(--ease-standard);
+}
+
+/* ------------------------------------------------------------------
+   Work page featured tabs: pure CSS (a radio group). The checked tab shows
+   its panel; up to six tabs. Chips for the filter live in the WorkBrowser
+   island instead.
+   ------------------------------------------------------------------ */
+.ftabs input:checked + .ftab {
+  background: var(--color-white);
+  color: var(--color-ink);
+  box-shadow: inset 0 -2px 0 var(--color-orange);
+}
+.ftabs input:focus-visible + .ftab {
+  outline: 2px solid var(--color-orange);
+  outline-offset: -2px;
+}
+.ftabs .fpanel {
+  display: none;
+}
+.ftabs:has(#ft-0:checked) .fpanel[data-i="0"],
+.ftabs:has(#ft-1:checked) .fpanel[data-i="1"],
+.ftabs:has(#ft-2:checked) .fpanel[data-i="2"],
+.ftabs:has(#ft-3:checked) .fpanel[data-i="3"],
+.ftabs:has(#ft-4:checked) .fpanel[data-i="4"],
+.ftabs:has(#ft-5:checked) .fpanel[data-i="5"] {
+  display: grid;
+}
+
+/* Technologies panel: category rail on the left, one pane at a time on the
+   right (7Span's Technologies page). Radios plus :has(), so no JavaScript. */
+.ttabs input:checked + .ttab {
+  background: var(--color-white);
+  color: var(--color-ink);
+  box-shadow: inset 3px 0 0 var(--color-orange);
+}
+.ttabs input:focus-visible + .ttab {
+  outline: 2px solid var(--color-orange);
+  outline-offset: -2px;
+}
+.ttabs .tpane {
+  display: none;
+}
+.ttabs:has(#tt-0:checked) .tpane[data-i="0"],
+.ttabs:has(#tt-1:checked) .tpane[data-i="1"],
+.ttabs:has(#tt-2:checked) .tpane[data-i="2"],
+.ttabs:has(#tt-3:checked) .tpane[data-i="3"],
+.ttabs:has(#tt-4:checked) .tpane[data-i="4"],
+.ttabs:has(#tt-5:checked) .tpane[data-i="5"] {
+  display: block;
+}
+
+/* Product banner: floating icon circles (7Span Vepaar). Off under reduced motion. */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [style*="float 6s"] { animation: none !important; }
+}
+
+/* ------------------------------------------------------------------
+   Blog article body (markdown). Plain, readable, brand type.
+   ------------------------------------------------------------------ */
+.prose-il { color: color-mix(in srgb, var(--color-ink) 82%, transparent); font-size: 1.0625rem; line-height: 1.7; }
+.prose-il > * + * { margin-top: 1.1em; }
+.prose-il h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; line-height: 1.2; letter-spacing: -0.02em; color: var(--color-ink); margin-top: 2.2em; }
+.prose-il h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; line-height: 1.3; color: var(--color-ink); margin-top: 1.8em; }
+.prose-il p strong { color: var(--color-ink); }
+.prose-il a { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-orange); text-underline-offset: 4px; }
+.prose-il ul, .prose-il ol { padding-left: 1.4em; }
+.prose-il ul { list-style: disc; }
+.prose-il ol { list-style: decimal; }
+.prose-il li + li { margin-top: 0.4em; }
+.prose-il blockquote { border-left: 3px solid var(--color-orange); padding-left: 1.1em; font-family: var(--font-display); font-weight: 600; font-size: 1.15rem; line-height: 1.4; color: var(--color-ink); }
+.prose-il code { font-size: 0.92em; background: var(--color-paper); padding: 0.1em 0.35em; border-radius: 4px; }
+.prose-il hr { border: 0; border-top: 1px solid var(--color-line); margin: 2.5em 0; }
+.prose-il img { max-width: 100%; height: auto; }

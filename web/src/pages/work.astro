@@ -1,0 +1,62 @@
+---
+/**
+ * /work: 7Span's Work page format. "Work" H1 + one paragraph, a tabbed
+ * featured panel, search + filter-by-industry toolbar with the card grid
+ * (WorkBrowser island, hydrated when visible), then the hatched CTA band.
+ */
+import Site from "@/layouts/Site.astro";
+import { WorkHero, FeaturedTabs, WorkBand } from "@/components/work/WorkIndex";
+import { WorkBrowser, toBrowserItems } from "@/components/work/WorkBrowser";
+import { getSite, getWork, getWorkIndex } from "@/lib/cms";
+
+const site = await getSite();
+const S = site.site;
+const work = await getWorkIndex();
+const cases = await getWork();
+const tabs = work.featured.map((f) => ({ label: f.label, c: cases.find((c) => c.slug === f.slug) })).filter((t) => t.c) as { label: string; c: (typeof cases)[number] }[];
+const items = toBrowserItems(cases, work.snapshots);
+const org = { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url, logo: { "@type": "ImageObject", url: `${S.url}/favicon-512.png`, width: 512, height: 512 } };
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${S.url}/work#page`,
+    url: `${S.url}/work`,
+    name: work.seo.title,
+    description: work.seo.description,
+    isPartOf: { "@id": `${S.url}/#website` },
+    about: org,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListOrder: "https://schema.org/ItemListOrderAscending",
+      numberOfItems: cases.length,
+      itemListElement: cases.map((c, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${S.url}/work/${c.slug}`,
+        name: c.title,
+        item: { "@type": "Article", "@id": `${S.url}/work/${c.slug}#article`, headline: c.title, url: `${S.url}/work/${c.slug}` },
+      })),
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` },
+      { "@type": "ListItem", position: 2, name: "Work", item: `${S.url}/work` },
+    ],
+  },
+];
+---
+<Site title={work.seo.title} description={work.seo.description} canonical="/work" jsonLd={jsonLd}>
+  <WorkHero data={work} />
+  <FeaturedTabs tabs={tabs} button={work.browser.featuredButton} />
+  <section class="container-x mt-12 sm:mt-16" aria-labelledby="all-work-h2" id="all-work">
+    <h2 id="all-work-h2" class="sr-only">All case studies</h2>
+    <WorkBrowser client:visible items={items} industries={work.filters.industries} labels={work.browser} />
+  </section>
+  <div class="h-14 sm:h-20"></div>
+  <WorkBand data={work.band} />
+</Site>

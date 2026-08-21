@@ -1,0 +1,58 @@
+---
+/**
+ * /<slug>: a team member's personal page (7Span: 7span.com/kaushal, the
+ * page their business-card QR opens). Standalone card without the site
+ * header and footer; a small lockup under the card leads back to the site.
+ * Generated for every team member in content/about.ts with a `profile`.
+ */
+import Base from "@/layouts/Base.astro";
+import { ProfileCard } from "@/components/about/ProfileCard";
+import { Lockup } from "@/components/Logo";
+import { getAbout, getSite } from "@/lib/cms";
+
+export async function getStaticPaths() {
+  const about = await getAbout();
+  return about.team.members.filter((m) => m.profile?.slug).map((m) => ({ params: { person: m.profile!.slug }, props: { m } }));
+}
+const { m } = Astro.props;
+// CMS-added members may leave parts of the profile empty: default every list and the SEO pair.
+const p = { tags: [], socials: [], links: [], photoAlts: [], ...m.profile!, seo: { title: `${m.name} | ${m.role}, Infoloop`, description: m.profile?.bio ?? "", ...m.profile?.seo } };
+const site = await getSite();
+const S = site.site;
+const url = `${S.url}/${p.slug}`;
+const org = { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url };
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "@id": `${url}#page`,
+    url,
+    name: p.seo.title,
+    description: p.seo.description,
+    isPartOf: { "@id": `${S.url}/#website` },
+    mainEntity: {
+      "@type": "Person",
+      "@id": `${url}#person`,
+      name: m.name,
+      jobTitle: m.role,
+      description: p.bio,
+      url,
+      worksFor: org,
+      // Only the person's own profiles; company pages belong to the Organization node.
+      sameAs: p.socials.filter((s) => s.personal && s.href.startsWith("http")).map((s) => s.href),
+      ...(m.photo ? { image: new URL(m.photo, S.url).toString() } : {}),
+    },
+    inLanguage: "en",
+  },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "About", item: `${S.url}/about` }, { "@type": "ListItem", position: 3, name: m.name, item: url }] },
+];
+---
+<Base title={p.seo.title} description={p.seo.description} canonical={`/${p.slug}`} jsonLd={jsonLd}>
+  <main id="main" class="flex-1 bg-paper">
+    <ProfileCard m={m} p={p} />
+    <p class="mx-auto flex w-full max-w-[672px] items-center justify-between px-6 py-5 text-[12px] text-ink/60">
+      <Lockup wordmarkSize={16} />
+      <a href="/about" class="font-display font-semibold text-ink hover:text-orange">Meet the team</a>
+    </p>
+  </main>
+</Base>

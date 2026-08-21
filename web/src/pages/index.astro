@@ -1,0 +1,103 @@
+---
+import { PROFILE_LINKS } from "@/content/site";
+/**
+ * Landing page. Section order (lead-volume first): hero → trusted by →
+ * industries → services → tagline band → process → proof → why us →
+ * products → about → FAQ → CTA band → ratings row → footer.
+ *
+ * Only three islands hydrate: the header (drawer), the hero panels (scroll
+ * parallax) and the reveal observer. Everything else is static HTML.
+ * Content is Payload-merged over the local defaults (src/lib/cms.ts).
+ */
+import Site from "@/layouts/Site.astro";
+import Hero from "@/components/Hero.astro";
+import { TrustStrip } from "@/components/sections/TrustStrip";
+import { Industries } from "@/components/sections/Industries";
+import { Services } from "@/components/sections/Services";
+import { TaglineBand } from "@/components/sections/TaglineBand";
+import { Process } from "@/components/sections/Process";
+import { Proof } from "@/components/sections/Proof";
+import { Why } from "@/components/sections/Why";
+import { Products } from "@/components/sections/Products";
+import { About } from "@/components/sections/About";
+import { Faq } from "@/components/sections/Faq";
+import { CtaBand } from "@/components/sections/CtaBand";
+import { RatingsRow } from "@/components/sections/RatingsRow";
+import { getHome, getSite } from "@/lib/cms";
+
+const home = await getHome();
+const site = await getSite();
+const S = site.site;
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${S.url}/#organization`,
+    name: "Infoloop",
+    legalName: S.legalName,
+    url: S.url,
+    logo: `${S.url}/brand/icon-primary.svg`,
+    slogan: S.tagline,
+    description: S.description,
+    email: S.email,
+    telephone: S.salesPhone.tel,
+    address: site.offices.map((o) => ({ "@type": "PostalAddress", ...o.address })),
+    location: site.offices.map((o) => ({ "@type": "Place", name: `Infoloop ${o.name}`, address: { "@type": "PostalAddress", ...o.address } })),
+    sameAs: [...site.social.map((s) => s.href), ...PROFILE_LINKS],
+    areaServed: { "@type": "Country", name: "United States" },
+    knowsAbout: ["Custom software development", "AI automation", "Webflow", "Shopify", "Manufacturing", "Healthcare", "SaaS", "Biorenewables"],
+    contactPoint: [
+      { "@type": "ContactPoint", contactType: "sales", email: S.email, telephone: S.salesPhone.tel, areaServed: "IN", availableLanguage: "en" },
+      { "@type": "ContactPoint", contactType: "sales", email: S.email, telephone: S.usSalesPhone.tel, areaServed: "US", availableLanguage: "en" },
+      { "@type": "ContactPoint", contactType: "recruiting", email: S.careersEmail, telephone: S.hrPhone.tel, availableLanguage: "en" },
+    ],
+    founder: { "@type": "Person", name: home.about.founder.name, jobTitle: "Founder", worksFor: { "@id": `${S.url}/#organization` } },
+    award: "Certified Webflow and Shopify Partners",
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Software development services",
+      itemListElement: site.services.map((g) => ({
+        "@type": "OfferCatalog",
+        name: g.title,
+        url: `${S.url}${g.href}`,
+        itemListElement: g.items.map((s) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: s.label, url: `${S.url}${s.href}`, provider: { "@type": "Organization", name: "Infoloop" } } })),
+      })),
+    },
+  },
+  { "@context": "https://schema.org", "@type": "WebSite", "@id": `${S.url}/#website`, name: "Infoloop", url: S.url, publisher: { "@id": `${S.url}/#organization` } },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${S.url}/#webpage`,
+    url: S.url,
+    name: S.title,
+    description: home.about.paragraphs[0],
+    isPartOf: { "@id": `${S.url}/#website` },
+    about: { "@id": `${S.url}/#organization` },
+    speakable: { "@type": "SpeakableSpecification", cssSelector: ["#hero-h1", "#about p", ".faq-a"] },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Infoloop products",
+    itemListElement: home.products.items.map((p, i) => ({ "@type": "ListItem", position: i + 1, item: { "@type": "SoftwareApplication", name: p.name, applicationCategory: "BusinessApplication", operatingSystem: "Web", url: `${S.url}${p.href}`, description: p.body } })),
+  },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: home.faq.items.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
+];
+---
+<Site title={S.title} description={S.description} canonical="/" jsonLd={jsonLd} padTop={false}>
+    <Hero data={home.hero} />
+    <TrustStrip data={home.trust} stats={home.stats} />
+    <Industries data={home.industries} />
+    <Services data={home.services} />
+    <TaglineBand data={home.band} />
+    <Process data={home.process} />
+    <Proof data={home.proof} />
+    <Why data={home.why} />
+    <Products data={home.products} />
+    <About data={home.about} />
+    <Faq data={home.faq} />
+    <CtaBand data={home.cta} />
+    <RatingsRow ratings={site.ratings} />
+</Site>

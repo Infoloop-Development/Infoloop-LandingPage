@@ -1,0 +1,147 @@
+---
+/**
+ * /contact: 7Span's contact page. Hero (H1, line, photo in a hatched frame),
+ * ink band with the white "Schedule a meeting" card and the form, "Up for a
+ * quick connect?" band with email and phone boxes, "A glimpse into our
+ * expertise" with the brochure download (gated), footer.
+ */
+import Site from "@/layouts/Site.astro";
+import { ContactForm } from "@/components/contact/ContactForm";
+import { BrochureGate } from "@/components/contact/BrochureGate";
+import { Mark } from "@/components/Logo";
+import { Hi } from "@/components/ui";
+import { CONTACT } from "@/content/contact";
+import { getSite } from "@/lib/cms";
+
+const site = await getSite();
+const S = site.site;
+const hatch = "repeating-linear-gradient(135deg, rgba(10,10,10,0.35) 0 1px, transparent 1px 7px)";
+const org = { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url };
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "@id": `${S.url}/contact#page`,
+    url: `${S.url}/contact`,
+    name: CONTACT.seo.title,
+    description: CONTACT.seo.description,
+    isPartOf: { "@id": `${S.url}/#website` },
+    about: org,
+    mainEntity: {
+      ...org,
+      email: S.email,
+      telephone: S.usSalesPhone.tel,
+      contactPoint: [
+        { "@type": "ContactPoint", contactType: "sales", telephone: S.usSalesPhone.tel, email: S.email, areaServed: "US", availableLanguage: "en" },
+        { "@type": "ContactPoint", contactType: "sales", telephone: S.salesPhone.tel, email: S.email, areaServed: "IN", availableLanguage: "en" },
+      ],
+      address: site.offices.map((o) => ({ "@type": "PostalAddress", ...o.address })),
+    },
+  },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Contact", item: `${S.url}/contact` }] },
+];
+const quick = [
+  { label: "Email", value: S.email, href: `mailto:${S.email}`, kind: "mail" },
+  { label: "Sales, US", value: S.usSalesPhone.display, href: `tel:${S.usSalesPhone.tel}`, kind: "phone" },
+  { label: "Sales, India", value: S.salesPhone.display, href: `tel:${S.salesPhone.tel}`, kind: "phone" },
+];
+---
+<Site title={CONTACT.seo.title} description={CONTACT.seo.description} canonical="/contact" jsonLd={jsonLd}>
+  {/* Hero: H1 + line left, photo in a hatched frame right (7Span) */}
+  <section aria-labelledby="contact-h1">
+    <div class="container-x grid gap-10 pt-12 lg:grid-cols-12 lg:items-center lg:gap-14 sm:pt-16">
+      <div class="lg:col-span-6">
+        <h1 id="contact-h1" class="display-h2 text-ink hero-in"><Hi text={CONTACT.h1} /></h1>
+        <p class="lede mt-5 max-w-xl text-ink/75 hero-in" style="--d: 80ms">{CONTACT.lede}</p>
+      </div>
+      <div class="lg:col-span-6 hero-fade" style="--d: 160ms">
+        <div class="relative p-6 sm:p-8" style={`background-image: ${hatch}`}>
+          <div class="relative aspect-[4/3] overflow-hidden border border-ink bg-mist" aria-label={CONTACT.photoAlt} role="img">
+            <div class="absolute inset-0" aria-hidden="true">
+              {[["12%","10%","60%"],["8%","28%","44%"],["4%","46%","72%"],["10%","64%","40%"],["6%","80%","56%"]].map(([l,t,w],i) => (
+                <span class={`absolute h-[7%] rounded-full ${i === 1 ? "bg-orange/80" : "bg-white/70"}`} style={`left:${l};top:${t};width:${w}`} />
+              ))}
+            </div>
+            <div class="absolute bottom-4 left-4 flex items-center gap-2 rounded-md bg-white/85 px-2.5 py-1.5 text-[11px] text-ink/70" aria-hidden="true">
+              <Mark size={14} /> Photo slot
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Ink band with the white card: "Schedule a meeting" left, form right (7Span) */}
+  <section class="mt-14 bg-ink sm:mt-20" aria-labelledby="form-h2">
+    <div class="container-x py-12 sm:py-16">
+      <div class="grid border border-ink bg-white lg:grid-cols-12">
+        <div class="border-b border-ink p-8 lg:col-span-5 lg:border-b-0 lg:border-r lg:p-10">
+          <h2 id="form-h2" class="display-h3 text-ink">{CONTACT.form.h2}</h2>
+          <p class="mt-2 text-[16px] leading-relaxed text-ink/75">{CONTACT.form.sub}</p>
+          {/* Abstract figure (7Span puts a line-art shape here): outlined circle and blades, two orange fills */}
+          <div class="mt-10 hidden lg:block" aria-hidden="true">
+            <svg width="176" height="176" viewBox="0 0 200 200" fill="none" stroke="#0A0A0A" stroke-width="2" stroke-linejoin="round">
+              <circle cx="100" cy="100" r="46" fill="#FFFFFF" />
+              <path d="M100 100 L100 54 A46 46 0 0 1 146 100 Z" fill="#F47B00" />
+              <path d="M100 100 L100 146 A46 46 0 0 1 54 100 Z" fill="#F47B00" />
+              <path d="M112 44 L154 14 L160 66 Z" fill="#FFFFFF" />
+              <path d="M156 112 L186 154 L134 160 Z" fill="#FFFFFF" />
+              <path d="M88 156 L46 186 L40 134 Z" fill="#FFFFFF" />
+              <path d="M44 88 L14 46 L66 40 Z" fill="#FFFFFF" />
+              <circle cx="100" cy="100" r="9" fill="#FFFFFF" />
+              <circle cx="100" cy="100" r="82" stroke-dasharray="3 7" opacity="0.5" />
+            </svg>
+          </div>
+        </div>
+        <div class="lg:col-span-7">
+          <ContactForm client:visible />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Quick connect band (7Span red hatched card): email + phone boxes */}
+  <section class="container-x mt-14 sm:mt-20" aria-labelledby="quick-h2">
+    <div class="p-3 sm:p-4" style={`background-image: repeating-linear-gradient(135deg, #f47b00 0 6px, transparent 6px 12px)`}>
+      <div class="border border-ink bg-white p-6 sm:p-10">
+        <h2 id="quick-h2" class="display-h3 text-ink">{CONTACT.quick.h2}</h2>
+        <p class="mt-2 text-[16px] text-ink/75">{CONTACT.quick.sub}</p>
+        <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {quick.map((q) => (
+            <li>
+              <a href={q.href} class="group flex items-stretch border border-ink bg-white transition-colors hover:bg-paper">
+                <span class="flex w-14 shrink-0 items-center justify-center bg-orange text-ink" aria-hidden="true">
+                  {q.kind === "mail" ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" /></svg>
+                  )}
+                </span>
+                <span class="flex flex-col justify-center px-4 py-3">
+                  <span class="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/55">{q.label}</span>
+                  <span class="font-display text-[16px] font-bold text-ink group-hover:text-orange">{q.value}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  {/* Brochure (7Span "A glimpse into our expertise" + Download brochure) */}
+  <section class="mt-14 bg-ink text-white sm:mt-20" aria-labelledby="brochure-h2">
+    <div class="relative overflow-hidden">
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0 opacity-[0.14]">
+        {[520, 760, 1000].map((d) => (<span class="absolute left-1/2 top-full -translate-x-1/2 -translate-y-1/2 rounded-full border border-white" style={`width:${d}px;height:${d}px`} />))}
+      </div>
+      <div class="container-x relative py-16 text-center sm:py-24">
+        <h2 id="brochure-h2" class="display-h2 text-white">{CONTACT.brochure.h2}</h2>
+        <p class="mx-auto mt-3 max-w-2xl text-[17px] text-gray-40">{CONTACT.brochure.sub}</p>
+        <div class="mt-8">
+          <BrochureGate client:visible />
+        </div>
+      </div>
+    </div>
+  </section>
+</Site>

@@ -1,0 +1,59 @@
+---
+/**
+ * /solutions/<build|grow|transform|consulting>: one page per Services group
+ * in 7Span's service-page format. Hero (H1, line, button, media, marquee)
+ * → what we offer → our process → why Infoloop → client quotes → CTA band
+ * with the road → ratings row (as on the home page) → footer. Industries,
+ * technologies, other services and blogs belong to the service pages under
+ * each group (7Span keeps them off the category page).
+ */
+import Site from "@/layouts/Site.astro";
+import { TaglineBand } from "@/components/sections/TaglineBand";
+import { Process } from "@/components/sections/Process";
+import { RatingsRow } from "@/components/sections/RatingsRow";
+import { SolutionHero, OfferGrid, WhyList, QuoteCards, CtaPanel } from "@/components/solutions/SolutionParts";
+import { getSite, getSolutionGroups } from "@/lib/cms";
+import { SERVICES_DETAIL } from "@/content/services";
+
+export async function getStaticPaths() {
+  return (await getSolutionGroups()).map((g) => ({ params: { group: g.slug }, props: { g } }));
+}
+const { g } = Astro.props;
+const site = await getSite();
+const S = site.site;
+const url = `${S.url}/solutions/${g.slug}`;
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name: `${g.name}: ${g.offer.items.map((o) => o.title).join(", ")}`,
+    serviceType: g.offer.items.map((o) => o.title),
+    description: g.lede,
+    url,
+    provider: { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url },
+    areaServed: { "@type": "Country", name: "United States" },
+    hasOfferCatalog: { "@type": "OfferCatalog", name: g.offer.h2, itemListElement: g.offer.items.map((o) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: o.title, description: o.body } })) },
+  },
+  { "@context": "https://schema.org", "@type": "WebPage", "@id": `${url}#page`, url, name: g.seo.title, description: g.seo.description, isPartOf: { "@id": `${S.url}/#website` }, about: { "@id": `${url}#service` }, inLanguage: "en" },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: g.name, item: url }] },
+];
+---
+<Site title={g.seo.title} description={g.seo.description} canonical={`/solutions/${g.slug}`} jsonLd={jsonLd}>
+  <SolutionHero g={g} />
+  <TaglineBand data={g.band} />
+  {/* Cards link only to service pages that exist; the rest stay plain until built */}
+  <OfferGrid g={g} linked={SERVICES_DETAIL.map((s) => `/${s.slug}`)} />
+  <div class="border-t border-ink">
+    <Process data={g.process} />
+  </div>
+  <WhyList g={g} />
+  {/* Group pages go straight from why + client quotes to the CTA (7Span); industries and stack live on the service pages */}
+  <QuoteCards quotes={g.quotes} />
+
+  {/* CTA panel: ink, copy + button left, "what happens next" right (replaces the road at Nimit's request) */}
+  <CtaPanel g={g} />
+
+  {/* Ratings row between the CTA and the footer, as on the home page */}
+  <RatingsRow ratings={site.ratings} />
+</Site>

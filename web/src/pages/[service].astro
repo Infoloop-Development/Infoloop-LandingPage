@@ -1,0 +1,75 @@
+---
+/**
+ * /<service-slug>: one page per Solutions menu item, 7Span's service page
+ * format thoroughly (their custom-software-development page): hero (H1,
+ * line, button, proof panel) → marquee → "<service> for your industry"
+ * (rounded cards) → our process → why Infoloop for <service> (dark) →
+ * industries we serve → technologies we use → client quotes → CTA panel →
+ * other services in the group → marquee → latest blogs → footer.
+ * First page: /custom-software-development (Build → Custom applications).
+ */
+import Site from "@/layouts/Site.astro";
+import { TaglineBand } from "@/components/sections/TaglineBand";
+import { Process } from "@/components/sections/Process";
+import { PostCard } from "@/components/blog/PostCards";
+import { SolutionHero, PillGrid, WhyList, IndustryChips, TechTable, QuoteCards, CtaPanel, OtherServices } from "@/components/solutions/SolutionParts";
+import { SERVICES_DETAIL } from "@/content/services";
+import { INDUSTRY_CHIPS } from "@/content/solutions";
+import { ABOUT } from "@/content/about";
+import { getPosts, toMeta } from "@/lib/posts";
+import { getServiceDetails, getSite } from "@/lib/cms";
+
+export async function getStaticPaths() {
+  return (await getServiceDetails()).map((s) => ({ params: { service: s.slug }, props: { s } }));
+}
+const { s } = Astro.props;
+const site = await getSite();
+const S = site.site;
+const url = `${S.url}/${s.slug}`;
+const posts = (await getPosts()).map(toMeta).slice(0, 3);
+const GROUP_TITLE: Record<typeof s.group, string> = { build: "Build", grow: "Grow", transform: "Transform", consulting: "Consulting" };
+const groupNav = site.services.find((g) => g.title === GROUP_TITLE[s.group]);
+// Siblings in the same group; only the ones with a built page are linked (the rest render as plain rows until built).
+const built = SERVICES_DETAIL.map((d) => `/${d.slug}`);
+const siblings = (groupNav?.items ?? []).filter((it) => it.href !== `/${s.slug}`);
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name: s.name,
+    serviceType: s.name,
+    description: s.lede,
+    url,
+    provider: { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url },
+    areaServed: { "@type": "Country", name: "United States" },
+    audience: s.industryFit.items.map((i) => ({ "@type": "BusinessAudience", name: i.title })),
+  },
+  { "@context": "https://schema.org", "@type": "WebPage", "@id": `${url}#page`, url, name: s.seo.title, description: s.seo.description, isPartOf: { "@id": `${S.url}/#website` }, about: { "@id": `${url}#service` }, inLanguage: "en" },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: groupNav?.title ?? s.group, item: `${S.url}${groupNav?.href ?? `/solutions/${s.group}`}` }, { "@type": "ListItem", position: 3, name: s.name, item: url }] },
+  // FAQPage schema is added only when the FAQ block is rendered on the page (Google: marked-up content must be visible).
+];
+---
+<Site title={s.seo.title} description={s.seo.description} canonical={`/${s.slug}`} jsonLd={jsonLd}>
+  <SolutionHero g={s} />
+  <TaglineBand data={s.band} />
+  <PillGrid id="fit-h2" h2={s.industryFit.h2} lede={s.industryFit.lede} items={s.industryFit.items} />
+  <div class="border-t border-ink">
+    <Process data={s.process} />
+  </div>
+  <WhyList g={s} />
+  <IndustryChips g={s} chips={INDUSTRY_CHIPS} />
+  <TechTable h2={s.tech.h2} rows={s.tech.rows} />
+  <QuoteCards quotes={s.quotes} />
+  <CtaPanel g={s} />
+  {siblings.length > 0 && <OtherServices h2={s.other.h2} links={siblings} linked={built} />}
+  <TaglineBand data={ABOUT.closing.band} />
+  {posts.length > 0 && (
+    <section class="container-x py-14 sm:py-20" aria-labelledby="blogs-h2">
+      <h2 id="blogs-h2" class="display-h2 text-ink reveal">Latest blogs</h2>
+      <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {posts.map((p, i) => <PostCard post={p} index={i + 1} />)}
+      </ul>
+    </section>
+  )}
+</Site>

@@ -1,0 +1,68 @@
+---
+/**
+ * /services: the "All services" hub the menu links to. Hero, marquee, then
+ * the four Solutions groups, each listing its services as cards built from
+ * the service pages themselves. Ends with the site CTA panel and ratings.
+ */
+import Site from "@/layouts/Site.astro";
+import { TaglineBand } from "@/components/sections/TaglineBand";
+import { HubGroups } from "@/components/hub/HubGroups";
+import { CtaPanel } from "@/components/sections/CtaPanel";
+import { RatingsRow } from "@/components/sections/RatingsRow";
+import { Hi } from "@/components/ui";
+import { HUBS } from "@/content/hubs";
+import { SOLUTIONS } from "@/content/solutions";
+import { SERVICES_DETAIL } from "@/content/services";
+import { getSite } from "@/lib/cms";
+
+const hub = HUBS.find((h) => h.slug === "services")!;
+const site = await getSite();
+const S = site.site;
+const url = `${S.url}/services`;
+const built = new Set(SERVICES_DETAIL.map((s) => `/${s.slug}`));
+// One group per Solutions group; a card per service that has a page.
+const groups = SOLUTIONS.map((g) => ({
+  title: g.name,
+  blurb: g.offer.lede,
+  cards: g.offer.items.filter((o) => built.has(o.href)).map((o) => ({ title: o.title, line: o.body, href: o.href })),
+})).filter((g) => g.cards.length > 0);
+const count = groups.reduce((n, g) => n + g.cards.length, 0);
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${url}#page`,
+    url,
+    name: hub.seo.title,
+    description: hub.seo.description,
+    isPartOf: { "@id": `${S.url}/#website` },
+    about: { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url },
+    mainEntity: { "@type": "ItemList", numberOfItems: count, itemListElement: groups.flatMap((g) => g.cards).map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.title, url: `${S.url}${c.href}` })) },
+    inLanguage: "en",
+  },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Services", item: url }] },
+];
+---
+<Site title={hub.seo.title} description={hub.seo.description} canonical="/services" jsonLd={jsonLd}>
+  <section class="border-b border-ink" aria-labelledby="hub-h1">
+    <div class="container-x py-12 sm:py-16">
+      <p class="eyebrow text-ink/70 hero-in">{hub.eyebrow}</p>
+      <h1 id="hub-h1" class="display-h2 mt-3 max-w-4xl text-ink hero-in" style="--d: 60ms"><Hi text={hub.h1} /></h1>
+      <p class="lede mt-4 max-w-3xl text-ink/80 hero-in" style="--d: 120ms">{hub.lede}</p>
+      <a href="/contact" class="btn btn-ink mt-8 hero-in" style="--d: 180ms">{hub.button}</a>
+    </div>
+  </section>
+
+  <TaglineBand data={hub.band} />
+
+  <section class="container-x pt-14 sm:pt-20" aria-labelledby="groups-h2">
+    <h2 id="groups-h2" class="display-h2 text-ink reveal">{hub.groupsH2}</h2>
+    <p class="lede mt-3 max-w-3xl text-ink/80 reveal" style="--reveal-delay: 60ms">{hub.groupsLede}</p>
+  </section>
+  <div class="py-10 sm:py-12">
+    <HubGroups groups={groups} />
+  </div>
+
+  <CtaPanel id="hub-cta-h2" h2={hub.cta.h2} lede={hub.cta.lede} button={{ label: hub.cta.button, href: "/contact" }} />
+  <RatingsRow ratings={site.ratings} />
+</Site>

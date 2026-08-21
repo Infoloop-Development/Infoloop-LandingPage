@@ -1,0 +1,47 @@
+# infoloop.co
+#
+# AI crawler policy, decided deliberately (see web/docs/AEO-GEO.md).
+# Infoloop sells expertise, and being quotable by an answer engine is
+# distribution, not theft. Every assistant crawler below is ALLOWED on the
+# whole site. If that ever changes, change it here and say why.
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Answer and generative engines, named explicitly so the intent is on the
+# record rather than inherited from the wildcard above.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://infoloop.co/sitemap-index.xml

@@ -1,0 +1,92 @@
+---
+/**
+ * /hire-<role>: 7Span's hire page format (their /hire-javascript-developers):
+ * hero (badge, H1, sub, paragraph, check bullets, two buttons, side panel)
+ * → thin band → why companies hire from Infoloop → how you can hire from us
+ * (4 dark tiles) → <tech> expertise (table) → engagement models → one client
+ * quote → three case cards → schedule a meeting (form) → FAQs → CTA →
+ * related blogs → more roles → ratings → footer. First: JavaScript developers.
+ */
+import Site from "@/layouts/Site.astro";
+import { TaglineBand } from "@/components/sections/TaglineBand";
+import { Process } from "@/components/sections/Process";
+import { Faq } from "@/components/sections/Faq";
+import { CtaPanel } from "@/components/sections/CtaPanel";
+import { RatingsRow } from "@/components/sections/RatingsRow";
+import { PostCard } from "@/components/blog/PostCards";
+import { ContactForm } from "@/components/contact/ContactForm";
+import { TechTable, OtherServices } from "@/components/solutions/SolutionParts";
+import { BigQuote } from "@/components/industry/IndustryParts";
+import { HireHero, WhyGrid, Models, CaseCardsDark } from "@/components/hire/HireParts";
+
+import { getPosts, toMeta } from "@/lib/posts";
+import { getHirePages, getSite, getWork } from "@/lib/cms";
+
+export async function getStaticPaths() {
+  return (await getHirePages()).map((d) => ({ params: { role: d.slug.replace(/^hire-/, "") }, props: { d } }));
+}
+const { d } = Astro.props;
+const site = await getSite();
+const S = site.site;
+const url = `${S.url}/${d.slug}`;
+const allRoles = site.hire.flatMap((g) => g.items);
+const otherRoles = allRoles.filter((r) => r.href !== `/${d.slug}`);
+// Six related roles for the "more roles" block, in the order given (7Span lists six related services)
+const relatedRoles = d.more.roles.map((href) => allRoles.find((r) => r.href === href)).filter(Boolean) as typeof allRoles;
+const allPages = await getHirePages();
+const built = allPages.map((h) => `/${h.slug}`);
+const cases = await getWork();
+const picked = d.cases.slugs.map((s) => cases.find((c) => c.slug === s)).filter(Boolean) as typeof cases;
+const posts = (await getPosts()).map(toMeta).slice(0, 3);
+const jsonLd = [
+  { "@context": "https://schema.org", "@type": "Service", "@id": `${url}#service`, name: `Hire ${d.role}`, serviceType: "IT staff augmentation", description: d.lede, url, provider: { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url }, areaServed: { "@type": "Country", name: "United States" }, hasOfferCatalog: { "@type": "OfferCatalog", name: d.models.h2, itemListElement: d.models.items.map((m) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: m.title, description: m.body } })) } },
+  { "@context": "https://schema.org", "@type": "WebPage", "@id": `${url}#page`, url, name: d.seo.title, description: d.seo.description, isPartOf: { "@id": `${S.url}/#website` }, about: { "@id": `${url}#service` }, inLanguage: "en" },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: d.faq.items.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: `Hire ${d.role}`, item: url }] },
+];
+---
+<Site title={d.seo.title} description={d.seo.description} canonical={`/${d.slug}`} jsonLd={jsonLd}>
+  <HireHero d={d} roles={relatedRoles} built={built} />
+  <TaglineBand data={d.band} />
+  <WhyGrid d={d} />
+  <div id="how" class="border-t border-ink">
+    <Process data={d.how} />
+  </div>
+  <div class="border-t border-ink">
+    <TechTable h2={d.expertise.h2} rows={d.expertise.rows} />
+  </div>
+  <Models d={d} />
+  <BigQuote q={d.quote} photoAlt="Photo slot: an Infoloop engineer working with a client team" />
+  <CaseCardsDark cases={picked} button={d.cases.button} />
+
+  {/* Schedule a meeting: ink band with a white split card, form on the right (7Span) */}
+  <section class="bg-ink" aria-labelledby="meet-h2">
+    <div class="container-x py-12 sm:py-16">
+      <div class="grid border border-ink bg-white lg:grid-cols-12">
+        <div class="border-b border-ink p-8 lg:col-span-5 lg:border-b-0 lg:border-r lg:p-10">
+          <h2 id="meet-h2" class="display-h3 text-ink">{d.meeting.h2}</h2>
+          <p class="mt-2 text-[16px] leading-relaxed text-ink/75">{d.meeting.lede}</p>
+        </div>
+        <div class="lg:col-span-7">
+          <ContactForm client:visible />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Faq data={d.faq} />
+  <CtaPanel id="hire-cta-h2" h2={d.cta.h2} lede={d.cta.lede} button={{ label: d.cta.button, href: "/contact" }} />
+
+  {posts.length > 0 && (
+    <section class="container-x pb-14 sm:pb-20" aria-labelledby="blogs-h2">
+      <h2 id="blogs-h2" class="display-h2 text-ink reveal">Related blogs</h2>
+      <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {posts.map((p, i) => <PostCard post={p} index={i + 1} />)}
+      </ul>
+    </section>
+  )}
+  <div class="border-t border-ink">
+    <OtherServices h2={d.more.h2} links={relatedRoles} linked={built} />
+  </div>
+  <RatingsRow ratings={site.ratings} />
+</Site>

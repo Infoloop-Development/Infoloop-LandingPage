@@ -1,0 +1,124 @@
+---
+/**
+ * /blog/<slug>: 7Span's post layout. Header band (title, date, categories),
+ * single-column article with H2 sections, a "talk to our experts" card
+ * inserted mid-article, the author card, then "More" with three cards.
+ */
+import Site from "@/layouts/Site.astro";
+import { PostCard } from "@/components/blog/PostCards";
+import { fmtDate } from "@/components/blog/PostCards";
+import { AuthorCard } from "@/components/blog/AuthorCard";
+import { PostFaq } from "@/components/blog/PostFaq";
+import { BLOG } from "@/content/blog";
+import { getPosts, toMeta } from "@/lib/posts";
+import { getSite } from "@/lib/cms";
+import { render } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((e) => ({ params: { slug: e.data.slug }, props: { entry: e } }));
+}
+const { entry } = Astro.props;
+const d = entry.data;
+const site = await getSite();
+const S = site.site;
+const all = (await getPosts()).map(toMeta);
+const me = toMeta(entry);
+const cats = me.categories;
+// Related: same category first, then the rest, never itself.
+const related = [...all.filter((p) => p.slug !== me.slug && p.categories.some((c) => cats.includes(c))), ...all.filter((p) => p.slug !== me.slug && !p.categories.some((c) => cats.includes(c)))].slice(0, 3);
+const url = `${S.url}/blog/${me.slug}`;
+
+// Rendered HTML, with the CTA card inserted before the third H2 (7Span puts it mid-article).
+const { Content } = await render(entry);
+const html = entry.rendered?.html ?? "";
+const parts = html.split(/(?=<h2)/);
+const cut = parts.length > 3 ? 3 : Math.max(1, Math.floor(parts.length / 2));
+const before = parts.slice(0, cut).join("");
+const after = parts.slice(cut).join("");
+const readMins = d.readingMinutes ?? Math.max(1, Math.round(entry.body!.split(/\s+/).length / 220));
+const isTeam = /team/i.test(d.author);
+const author = {
+  name: d.author,
+  role: d.authorRole,
+  bio: isTeam
+    ? "The people at Infoloop who build and run the software described here: engineers, designers and the team that stays after launch."
+    : `${d.author.split(/\s+/)[0]} writes about how Infoloop builds and runs software for the businesses it serves${d.authorRole ? `, from the ${d.authorRole.replace(/, Infoloop$/, "")} desk` : ""}.`,
+  linkedin: S.linkedin,
+  moreHref: `/blog?q=${encodeURIComponent(d.author)}`,
+};
+const org = { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url, logo: { "@type": "ImageObject", url: `${S.url}/favicon-512.png` } };
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${url}#post`,
+    headline: d.title,
+    description: d.description,
+    url,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    datePublished: d.publishedAt.toISOString(),
+    dateModified: (d.updatedAt ?? d.publishedAt).toISOString(),
+    author: isTeam ? org : { "@type": "Person", name: d.author, jobTitle: d.authorRole, worksFor: org },
+    publisher: org,
+    articleSection: cats,
+    keywords: cats.join(", "),
+    wordCount: entry.body!.split(/\s+/).length,
+    image: [`${S.url}/og.png`],
+    inLanguage: "en",
+  },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Blog", item: `${S.url}/blog` }, { "@type": "ListItem", position: 3, name: d.title, item: url }] },
+  ...(d.faq.length ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: d.faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) }] : []),
+];
+---
+<Site title={`${d.title} | Infoloop`} description={d.description} canonical={`/blog/${me.slug}`} jsonLd={jsonLd} ogType="article">
+  {/* Header band (7Span: gray band with title, date, categories) */}
+  <header class="bg-paper" aria-labelledby="post-h1">
+    <div class="container-x py-12 sm:py-16">
+      <div class="mx-auto max-w-3xl">
+        <h1 id="post-h1" class="display-h2 text-ink hero-in">{d.title}</h1>
+        <p class="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/60 hero-in" style="--d: 80ms">
+          <span>{fmtDate(d.publishedAt.toISOString())}</span>
+          <span aria-hidden="true" class="text-ink/30">/</span>
+          {cats.map((c, i) => <span>{i > 0 && <span aria-hidden="true" class="mr-3 text-ink/30">·</span>}{c}</span>)}
+          <span aria-hidden="true" class="text-ink/30">/</span>
+          <span class="normal-case tracking-normal">{readMins} min read</span>
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <article class="container-x py-12 sm:py-16">
+    <div class="mx-auto max-w-3xl">
+      {d.dek && <p class="lede text-ink/80">{d.dek}</p>}
+      <div class="prose-il mt-8" set:html={before} />
+      {/* Mid-article card (7Span "Not sure if you're solving the right problem?") */}
+      <aside class="my-10 grid gap-6 border border-ink bg-paper p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8" aria-label="Talk to Infoloop">
+        <div>
+          <p class="font-display text-[19px] font-bold text-ink">{BLOG.articleCta.h3}</p>
+          <p class="mt-1.5 text-[14.5px] leading-relaxed text-ink/75">{BLOG.articleCta.body}</p>
+        </div>
+        <a href={BLOG.articleCta.button.href} class="btn btn-primary px-6 py-3.5">{BLOG.articleCta.button.label}</a>
+      </aside>
+      <div class="prose-il" set:html={after} />
+      {/* FAQ (7Span: end of the article, before the author card) */}
+      <PostFaq items={d.faq} />
+
+      {/* Author card (7Span) */}
+      <div class="mt-14">
+        <AuthorCard a={author} />
+      </div>
+    </div>
+  </article>
+
+  {/* More (7Span: "An interesting read? Here is more related to it.") */}
+  {related.length > 0 && (
+    <section class="container-x pb-16 sm:pb-24" aria-labelledby="more-h2">
+      <h2 id="more-h2" class="display-h2 text-ink">{BLOG.moreH2}</h2>
+      <p class="mt-2 text-[16px] text-ink/75">{BLOG.moreSub}</p>
+      <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {related.map((p, i) => <PostCard post={p} index={i + 1} />)}
+      </ul>
+    </section>
+  )}
+</Site>

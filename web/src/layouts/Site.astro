@@ -1,0 +1,56 @@
+---
+import ConsentBanner from "@/components/ConsentBanner.astro";
+/**
+ * Site chrome, locked for every page: skip link, fixed header (Nav island),
+ * <main>, footer, reveal observer. Pages only supply their content and
+ * metadata. Header/footer content comes from the `site` global (Payload)
+ * merged over src/content/site.ts.
+ */
+import Base from "@/layouts/Base.astro";
+import { Nav } from "@/components/Nav";
+import { Footer } from "@/components/Footer";
+import { RevealObserver } from "@/components/RevealObserver";
+import { getSite } from "@/lib/cms";
+
+interface Props {
+  title: string;
+  description: string;
+  canonical: string;
+  jsonLd?: unknown[];
+  noindex?: boolean;
+  ogType?: "website" | "article";
+  /** Extra top padding under the fixed 76px header (pages without a hero of their own). */
+  padTop?: boolean;
+}
+const { title, description, canonical, jsonLd = [], noindex = false, ogType = "website", padTop = true } = Astro.props;
+const site = await getSite();
+---
+<Base title={title} description={description} canonical={canonical} jsonLd={jsonLd} noindex={noindex} ogType={ogType}>
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-ink focus:px-4 focus:py-2 focus:text-white">Skip to content</a>
+  <Nav client:load site={site} />
+  <main id="main" tabindex="-1" class={`flex-1 outline-none ${padTop ? "pt-[76px]" : ""}`}>
+    <slot />
+  </main>
+  <Footer site={site} />
+  <RevealObserver client:idle />
+  {/* Even marquee speed: duration = half the track width / 100px per second,
+      so every strip reads at the same pace. Re-runs once fonts load and on
+      resize. Without JS the CSS fallback duration applies. */}
+  <script is:inline>
+    (() => {
+      const SPEED = 100; // pixels per second
+      const set = () => {
+        for (const t of document.querySelectorAll(".marquee-track")) {
+          const half = t.scrollWidth / 2;
+          if (!half) continue;
+          const secs = Math.min(240, Math.max(12, half / SPEED));
+          t.style.setProperty("--marquee-duration", secs.toFixed(1) + "s");
+        }
+      };
+      set();
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(set);
+      let t;
+      addEventListener("resize", () => { clearTimeout(t); t = setTimeout(set, 200); });
+    })();
+  </script>
+</Base>

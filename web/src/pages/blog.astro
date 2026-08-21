@@ -1,0 +1,60 @@
+---
+/**
+ * /blog: 7Span's blog page. "Our knowledge hub" + one line, three featured
+ * cards, "Keep exploring" + search, top categories + post rows (BlogBrowser
+ * island), "Load more".
+ */
+import Site from "@/layouts/Site.astro";
+import { PostCard } from "@/components/blog/PostCards";
+import { BlogBrowser } from "@/components/blog/BlogBrowser";
+import { BLOG } from "@/content/blog";
+import { getPosts, toMeta } from "@/lib/posts";
+import { getSite } from "@/lib/cms";
+
+const site = await getSite();
+const S = site.site;
+const all = (await getPosts()).map(toMeta);
+const featured = [...all.filter((p) => p.featured), ...all.filter((p) => !p.featured)].slice(0, 3);
+const categories = [...new Set(all.flatMap((p) => p.categories))];
+const org = { "@type": "Organization", "@id": `${S.url}/#organization`, name: "Infoloop", url: S.url };
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "@id": `${S.url}/blog#blog`,
+    url: `${S.url}/blog`,
+    name: BLOG.seo.title,
+    description: BLOG.seo.description,
+    publisher: org,
+    blogPost: all.map((p) => ({ "@type": "BlogPosting", headline: p.title, url: `${S.url}/blog/${p.slug}`, datePublished: p.publishedAt, author: { "@type": p.author.includes("team") ? "Organization" : "Person", name: p.author } })),
+  },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Blog", item: `${S.url}/blog` }] },
+];
+---
+<Site title={BLOG.seo.title} description={BLOG.seo.description} canonical="/blog" jsonLd={jsonLd}>
+  <section aria-labelledby="blog-h1">
+    <div class="container-x pt-12 sm:pt-16">
+      <h1 id="blog-h1" class="display-h2 text-ink hero-in">{BLOG.h1}</h1>
+      <p class="lede mt-3 text-ink/75 hero-in" style="--d: 80ms">{BLOG.lede}</p>
+    </div>
+  </section>
+
+  {/* Featured three (7Span) */}
+  <section class="container-x mt-8" aria-label="Featured articles">
+    <ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 hero-fade" style="--d: 160ms">
+      {featured.map((p, i) => <PostCard post={p} index={i} />)}
+    </ul>
+  </section>
+
+  <div class="container-x mt-14 border-t border-line sm:mt-20"></div>
+
+  {/* Keep exploring */}
+  <section class="container-x mt-12 sm:mt-14" aria-labelledby="explore-h2">
+    <h2 id="explore-h2" class="display-h3 text-ink">{BLOG.exploreH2}</h2>
+    <p class="mt-2 text-[16px] text-ink/75">{BLOG.exploreSub}</p>
+    <div class="mt-6">
+      <BlogBrowser client:visible posts={all} categories={categories} labels={BLOG} />
+    </div>
+  </section>
+  <div class="h-16 sm:h-24"></div>
+</Site>

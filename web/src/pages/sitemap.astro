@@ -1,0 +1,79 @@
+---
+/**
+ * /sitemap: 7Span's HTML sitemap. Groups with an H2, each a hatched field of
+ * bordered link rows with an arrow. Every group is generated from the same
+ * content the pages are built from, so this list can never point at a page
+ * that does not exist.
+ */
+import Site from "@/layouts/Site.astro";
+import { OtherServices } from "@/components/solutions/SolutionParts";
+import { CtaPanel } from "@/components/sections/CtaPanel";
+import { SITEMAP } from "@/content/legal";
+import { SOLUTIONS } from "@/content/solutions";
+import { SERVICES_DETAIL } from "@/content/services";
+import { PRODUCTS } from "@/content/products";
+import { getHirePages, getIndustries, getSite, getWork } from "@/lib/cms";
+import { getPosts, toMeta } from "@/lib/posts";
+
+const site = await getSite();
+const S = site.site;
+const [industries, hire, cases, posts] = [await getIndustries(), await getHirePages(), await getWork(), (await getPosts()).map(toMeta)];
+// Personal pages (/nimit and the rest) are deliberately not listed here, the
+// same call 7Span makes: they are business-card landing pages, not part of
+// the navigation people browse. They stay linked from the team cards on
+// /about and stay in the XML sitemap, so search engines still index them.
+
+const groups = [
+  {
+    h2: "Company",
+    links: [
+      { label: "Home", href: "/" },
+      { label: "About", href: "/about" },
+      { label: "Testimonials", href: "/testimonials" },
+      { label: "Career", href: "/careers" },
+      { label: "Contact", href: "/contact" },
+      { label: "Technologies", href: "/technologies" },
+      { label: "Trust center", href: "/trust-center" },
+      { label: "Brand assets", href: "/brand-assets" },
+    ],
+  },
+  { h2: "Solutions", links: SOLUTIONS.map((g) => ({ label: g.name, href: `/solutions/${g.slug}` })) },
+  { h2: "Services", links: [{ label: "All services", href: "/services" }, ...SERVICES_DETAIL.map((s) => ({ label: s.name, href: `/${s.slug}` }))] },
+  { h2: "Industries", links: [{ label: "All industries", href: "/industries" }, ...industries.map((d) => ({ label: d.name, href: `/industry/${d.slug}` }))] },
+  { h2: "Hire talent", links: [{ label: "All roles", href: "/hire" }, ...hire.map((d) => ({ label: `Hire ${d.role}`, href: `/${d.slug}` }))] },
+  { h2: "Products", links: [{ label: "All products", href: "/products" }, ...PRODUCTS.map((p) => ({ label: p.name, href: `/products/${p.slug}` }))] },
+  { h2: "Work", links: [{ label: "All case studies", href: "/work" }, ...cases.map((c) => ({ label: c.card.title, href: `/work/${c.slug}` }))] },
+  { h2: "Blog", links: [{ label: "All articles", href: "/blog" }, ...posts.map((p) => ({ label: p.title, href: `/blog/${p.slug}` }))] },
+  { h2: "Legal", links: [{ label: "Privacy policy", href: "/privacy" }, { label: "Terms of use", href: "/terms" }, { label: "Sitemap", href: "/sitemap" }] },
+];
+const count = groups.reduce((n, g) => n + g.links.length, 0);
+const url = `${S.url}/sitemap`;
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${url}#page`,
+    url,
+    name: SITEMAP.seo.title,
+    description: SITEMAP.seo.description,
+    isPartOf: { "@id": `${S.url}/#website` },
+    mainEntity: { "@type": "ItemList", numberOfItems: count, itemListElement: groups.flatMap((g) => g.links).map((l, i) => ({ "@type": "ListItem", position: i + 1, name: l.label, url: `${S.url}${l.href === "/" ? "" : l.href}` })) },
+    inLanguage: "en",
+  },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Sitemap", item: url }] },
+];
+---
+<Site title={SITEMAP.seo.title} description={SITEMAP.seo.description} canonical="/sitemap" jsonLd={jsonLd}>
+  <section class="border-b border-ink" aria-labelledby="sitemap-h1">
+    <div class="container-x py-12 sm:py-16">
+      <p class="eyebrow text-ink/70 hero-in">{SITEMAP.eyebrow}</p>
+      <h1 id="sitemap-h1" class="display-h2 mt-3 text-ink hero-in" style="--d: 60ms">{SITEMAP.h1}</h1>
+      <p class="lede mt-4 max-w-2xl text-ink/80 hero-in" style="--d: 120ms">{SITEMAP.lede}</p>
+      <p class="mt-6 font-display text-[12px] font-bold uppercase tracking-[0.14em] text-ink/60 hero-in" style="--d: 160ms">{count} pages</p>
+    </div>
+  </section>
+
+  {groups.map((g) => <OtherServices h2={g.h2} links={g.links} />)}
+
+  <CtaPanel id="sitemap-cta-h2" h2="Cannot find what you need?" lede="Tell us what you were looking for and we will point you at it, or build the page that was missing." button={{ label: "Ask us", href: "/contact" }} />
+</Site>
