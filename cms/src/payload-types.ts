@@ -113,6 +113,7 @@ export interface Config {
     'solutions-pages': SolutionsPage;
     'industry-pages': IndustryPage;
     'hire-pages': HirePage;
+    analytics: Analytics;
   };
   globalsSelect: {
     home: HomeSelect<false> | HomeSelect<true>;
@@ -124,6 +125,7 @@ export interface Config {
     'solutions-pages': SolutionsPagesSelect<false> | SolutionsPagesSelect<true>;
     'industry-pages': IndustryPagesSelect<false> | IndustryPagesSelect<true>;
     'hire-pages': HirePagesSelect<false> | HirePagesSelect<true>;
+    analytics: AnalyticsSelect<false> | AnalyticsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -3358,6 +3360,66 @@ export interface HirePage {
   createdAt?: string | null;
 }
 /**
+ * Connect Google Analytics and other tools without a code change. Paste the IDs from each vendor, tick the privacy checkbox, save, and wait for the site rebuild.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics".
+ */
+export interface Analytics {
+  id: number;
+  /**
+   * GA4: Admin → Data streams → copy Measurement ID (G-…). Optional GTM: paste GTM-… and put GA4 inside the container (do not double-tag). Search Console meta token only if DNS verification is unavailable.
+   */
+  google?: {
+    /**
+     * Measurement ID from GA4, e.g. G-XXXXXXXXXX. Leave empty to disable.
+     */
+    ga4Id?: string | null;
+    /**
+     * Container ID, e.g. GTM-XXXXXXX. If set, the direct GA4 tag above is skipped so you do not double-count. Put GA4 inside the GTM container instead.
+     */
+    gtmId?: string | null;
+    /**
+     * HTML-tag verification content only (not the whole meta tag). Prefer DNS verification when you can.
+     */
+    gscVerification?: string | null;
+  };
+  other?: {
+    /**
+     * Cookieless analytics. Usually your site hostname, e.g. infoloop.co
+     */
+    plausibleDomain?: string | null;
+    /**
+     * Session recordings / heatmaps. Needs consent banner. Use only if you need this.
+     */
+    clarityId?: string | null;
+    /**
+     * Only if you run LinkedIn Ads. Sets advertising cookies.
+     */
+    linkedinPartnerId?: string | null;
+    /**
+     * Product analytics. Usually not needed on a marketing site.
+     */
+    posthogKey?: string | null;
+    /**
+     * Default EU host. Change only if your PostHog project uses another region.
+     */
+    posthogHost?: string | null;
+  };
+  compliance?: {
+    /**
+     * Tick this only when you accept that /privacy will disclose website analytics. The site will not ship trackers without this.
+     */
+    privacyDisclosed?: boolean | null;
+    /**
+     * Shows the cookie banner for GA4, GTM, Clarity, PostHog and LinkedIn. Leave on for EU/UK visitors unless a lawyer advises otherwise.
+     */
+    consentRequired?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "home_select".
  */
@@ -4652,6 +4714,37 @@ export interface HirePagesSelect<T extends boolean = true> {
               description?: T;
             };
         id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics_select".
+ */
+export interface AnalyticsSelect<T extends boolean = true> {
+  google?:
+    | T
+    | {
+        ga4Id?: T;
+        gtmId?: T;
+        gscVerification?: T;
+      };
+  other?:
+    | T
+    | {
+        plausibleDomain?: T;
+        clarityId?: T;
+        linkedinPartnerId?: T;
+        posthogKey?: T;
+        posthogHost?: T;
+      };
+  compliance?:
+    | T
+    | {
+        privacyDisclosed?: T;
+        consentRequired?: T;
       };
   updatedAt?: T;
   createdAt?: T;
