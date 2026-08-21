@@ -1,20 +1,13 @@
 ---
 /**
- * Cookie consent, shown only when a cookie-setting tracker is configured and
- * PUBLIC_CONSENT_REQUIRED has not been turned off.
- *
- * Deliberately plain: two equally weighted buttons, no "legitimate interest"
- * toggle that pre-consents you, no dark pattern where Reject is a grey link
- * three clicks deep. Rejecting is one click and is remembered.
- *
- * It grants or denies through Google Consent Mode v2, so GA4 keeps receiving
- * cookieless pings either way and page totals survive a rejection. Clarity is
- * only started on a grant, since it records sessions.
+ * Cookie consent banner. Shown when CMS/env configures a cookie tracker and
+ * consent is required. Uses Google Consent Mode v2.
  */
-const env = import.meta.env;
-const cookieTrackers = Boolean(env.PUBLIC_GA4_ID || env.PUBLIC_GTM_ID || env.PUBLIC_POSTHOG_KEY || env.PUBLIC_CLARITY_ID || env.PUBLIC_LINKEDIN_PARTNER_ID);
-const show = cookieTrackers && env.PUBLIC_CONSENT_REQUIRED !== "false";
-const clarityId = env.PUBLIC_CLARITY_ID;
+import { getAnalytics, cookieTrackers } from "@/lib/analytics";
+
+const cfg = await getAnalytics();
+const show = cookieTrackers(cfg) && cfg.consentRequired;
+const clarityId = cfg.clarityId;
 ---
 {show && (
   <div
@@ -61,7 +54,6 @@ const clarityId = env.PUBLIC_CLARITY_ID;
             ad_personalization: "denied",
           });
         }
-        /* Clarity was not started at page load; start it now on a grant. */
         if (granted && clarityId && !window.clarity) {
           (function (c, l, a, r, i, t, y) {
             c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };

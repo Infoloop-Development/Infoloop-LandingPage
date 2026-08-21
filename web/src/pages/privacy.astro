@@ -1,16 +1,18 @@
 ---
 /**
- * /privacy: the plain-language privacy policy, in 7Span's simple document
- * layout. Copy lives in content/legal.ts and describes what this site
- * actually does (one contact form, one brochure form, no tracking).
+ * /privacy: the plain-language privacy policy. Copy flips when analytics
+ * is disclosed via CMS or TRACKING_DISCLOSED.
  */
 import Site from "@/layouts/Site.astro";
 import LegalDoc from "@/components/legal/LegalDoc.astro";
 import { CtaPanel } from "@/components/sections/CtaPanel";
-import { PRIVACY } from "@/content/legal";
+import { getPrivacy } from "@/content/legal";
 import { getSite } from "@/lib/cms";
+import { getAnalytics } from "@/lib/analytics";
 
 const site = await getSite();
+const analytics = await getAnalytics();
+const PRIVACY = getPrivacy(analytics.privacyDisclosed);
 const S = site.site;
 const url = `${S.url}/privacy`;
 const jsonLd = [

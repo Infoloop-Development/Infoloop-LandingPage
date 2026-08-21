@@ -1,64 +1,38 @@
 ---
 /**
- * Tracking, wired but OFF until someone sets an environment variable.
+ * Tracking scripts. IDs come from the Payload `analytics` global at build
+ * time (CMS UI), with PUBLIC_* env vars as fallback. See docs/TRACKING.md.
  *
- * Nothing here loads on a build with no PUBLIC_* vars set, which is the
- * default. That matters: /privacy states plainly that the site runs no
- * analytics, no tracking cookies and no advertising pixels, and that stays
- * literally true until the first variable is set in the Netlify UI.
- *
- * THE MOMENT YOU SET ONE, UPDATE /privacy. Set TRACKING_DISCLOSED=true in the
- * same deploy: it flips the privacy copy to the version that discloses
- * analytics. The build fails if a tracker is on and that flag is not set, so
- * the policy cannot silently drift out of date. See docs/TRACKING.md.
- *
- * Loading order is deliberate: analytics must never block the page, so every
- * script is async or deferred and none of them run before first paint.
+ * Privacy: any tracker requires privacyDisclosed. Saving analytics in the
+ * CMS triggers a site rebuild so tags appear without a code deploy.
  */
-const env = import.meta.env;
+import { getAnalytics, anyTracker, cookieTrackers } from "@/lib/analytics";
 
-// Cookieless, no consent banner required in most jurisdictions.
-const plausible = env.PUBLIC_PLAUSIBLE_DOMAIN;
-// Cookie-based. Needs consent in the EU/UK and a privacy-policy disclosure.
-const ga4 = env.PUBLIC_GA4_ID;
-const gtm = env.PUBLIC_GTM_ID;
-const posthog = env.PUBLIC_POSTHOG_KEY;
-const posthogHost = env.PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com";
-const clarity = env.PUBLIC_CLARITY_ID;
-const linkedIn = env.PUBLIC_LINKEDIN_PARTNER_ID;
+const cfg = await getAnalytics();
+const plausible = cfg.plausibleDomain;
+const ga4 = cfg.ga4Id;
+const gtm = cfg.gtmId;
+const posthog = cfg.posthogKey;
+const posthogHost = cfg.posthogHost || "https://eu.i.posthog.com";
+const clarity = cfg.clarityId;
+const linkedIn = cfg.linkedinPartnerId;
+const gscVerify = cfg.gscVerification;
 
-// Google Search Console ownership. Prefer DNS verification; this meta tag is
-// the fallback when DNS is not available to whoever is doing the setup.
-const gscVerify = env.PUBLIC_GSC_VERIFICATION;
+const consentRequired = cfg.consentRequired;
+const hasCookieTrackers = cookieTrackers(cfg);
+const showConsent = consentRequired && hasCookieTrackers;
+const trackersOn = anyTracker(cfg);
+const disclosed = cfg.privacyDisclosed;
 
-/*
- * Consent. GA4 and Clarity both set cookies, so the EU/UK need a lawful basis
- * before they run. We use Google Consent Mode v2 rather than simply blocking
- * the tag: consent starts denied, GA4 still receives cookieless pings so
- * totals are not lost, and a grant upgrades it in place. Clarity has its own
- * consent call. Set PUBLIC_CONSENT_REQUIRED=false only if you have taken
- * advice that your audience does not need it.
- */
-const consentRequired = env.PUBLIC_CONSENT_REQUIRED !== "false";
-const cookieTrackers = Boolean(ga4 || gtm || posthog || clarity || linkedIn);
-const showConsent = consentRequired && cookieTrackers;
-
-const anyTracker = Boolean(plausible || ga4 || gtm || posthog || clarity || linkedIn);
-const disclosed = env.TRACKING_DISCLOSED === "true";
-
-// A hard stop rather than a warning. A site whose privacy policy denies the
-// tracking it actually runs is a legal problem, not a cosmetic one.
-if (anyTracker && !disclosed) {
+if (trackersOn && !disclosed) {
   throw new Error(
-    "Tracking is configured but TRACKING_DISCLOSED is not 'true'.\n" +
-      "Set TRACKING_DISCLOSED=true only after updating the privacy policy to\n" +
-      "disclose what you now collect. See web/docs/TRACKING.md.",
+    "Tracking is configured but privacy disclosure is off.\n" +
+      "In CMS → Analytics & tracking, tick \"Privacy policy updated\", or set\n" +
+      "TRACKING_DISCLOSED=true. See web/docs/TRACKING.md.",
   );
 }
-// A cookie-setting tracker with consent switched off is a deliberate choice,
-// so say so at build time rather than letting it pass silently.
-if (cookieTrackers && !consentRequired) {
-  console.warn("[analytics] Cookie-setting trackers are on with PUBLIC_CONSENT_REQUIRED=false. No consent is collected. See web/docs/TRACKING.md.");
+if (hasCookieTrackers && !consentRequired) {
+  console.warn("[analytics] Cookie-setting trackers are on with consent off. No consent is collected. See web/docs/TRACKING.md.");
 }
 ---
 {gscVerify && <meta name="google-site-verification" content={gscVerify} />}
@@ -110,8 +84,6 @@ if (cookieTrackers && !consentRequired) {
       function gtag() { window.dataLayer.push(arguments); }
       window.gtag = gtag;
       gtag("js", new Date());
-      /* IP anonymisation is on by default in GA4; ads signals are not, and we
-         do not turn them on. Nothing here is shared with advertising. */
       gtag("config", ga4, { anonymize_ip: true, allow_google_signals: false, allow_ad_personalization_signals: false });
     </script>
   </>
@@ -126,7 +98,6 @@ if (cookieTrackers && !consentRequired) {
 
 {clarity && (
   <script is:inline define:vars={{ clarity, showConsent }}>
-    /* Clarity records sessions, so it waits for a grant when consent applies. */
     if (!showConsent || window.__ilConsent === "granted") {
     (function (c, l, a, r, i, t, y) {
       c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
@@ -153,3 +124,36 @@ if (cookieTrackers && !consentRequired) {
   </script>
 )}
 
+{trackersOn && (
+  <script is:inline>
+    /* Shared conversion helper for GA4 / GTM / Plausible / PostHog. */
+    window.ilTrack = function (name, props) {
+      props = props || {};
+      props.page = props.page || (typeof location !== "undefined" ? location.pathname : "");
+      try {
+        if (typeof window.gtag === "function") {
+          window.gtag("event", name, props);
+        }
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push(Object.assign({ event: name }, props));
+      } catch (e) {}
+      try {
+        if (typeof window.plausible === "function") window.plausible(name, { props: props });
+      } catch (e) {}
+      try {
+        if (window.posthog && typeof window.posthog.capture === "function") window.posthog.capture(name, props);
+      } catch (e) {}
+    };
+    document.addEventListener("click", function (e) {
+      var el = e.target instanceof Element ? e.target : null;
+      var a = el && el.closest("a[href]");
+      if (!a) return;
+      var href = a.getAttribute("href") || "";
+      var page = location.pathname;
+      if (href.indexOf("tel:") === 0) window.ilTrack("phone_click", { target: href.slice(4), page: page });
+      else if (href.indexOf("mailto:") === 0) window.ilTrack("email_click", { target: href.slice(7), page: page });
+      else if (href.indexOf("wa.me/") > -1) window.ilTrack("whatsapp_click", { page: page });
+      else if (href.indexOf("/downloads/") === 0) window.ilTrack("file_download", { file: href, page: page });
+    });
+  </script>
+)}

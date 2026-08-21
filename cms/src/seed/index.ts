@@ -127,6 +127,22 @@ async function run() {
   }
   payload.logger.info(`Seeded ${SERVICES_DETAIL.length} service pages`)
 
+  await payload.updateGlobal({
+    slug: 'analytics',
+    data: {
+      google: { ga4Id: '', gtmId: '', gscVerification: '' },
+      other: {
+        plausibleDomain: '',
+        clarityId: '',
+        linkedinPartnerId: '',
+        posthogKey: '',
+        posthogHost: 'https://eu.i.posthog.com',
+      },
+      compliance: { privacyDisclosed: false, consentRequired: true },
+    } as never,
+  })
+  payload.logger.info('Seeded global: analytics (empty / off)')
+
   const email = process.env.SEED_ADMIN_EMAIL
   const password = process.env.SEED_ADMIN_PASSWORD
   if (email && password) {

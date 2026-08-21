@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowRight } from "@/components/ui";
 import { CONTACT } from "@/content/contact";
+import { trackEvent } from "@/lib/track";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -34,6 +35,7 @@ export function ContactForm() {
         throw new Error(j.error || "Something went wrong.");
       }
       setStatus("sent");
+      trackEvent("generate_lead", { form_type: "project", page: window.location.pathname });
       form.reset();
     } catch (err) {
       setStatus("error");

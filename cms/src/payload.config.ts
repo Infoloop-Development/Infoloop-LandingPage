@@ -24,6 +24,7 @@ import { BrandPage } from './globals/BrandPage'
 import { SolutionsPages } from './globals/SolutionsPages'
 import { IndustryPages } from './globals/IndustryPages'
 import { HirePages } from './globals/HirePages'
+import { Analytics } from './globals/Analytics'
 import { rebuildAfterGlobalChange } from './hooks/revalidate'
 
 const filename = fileURLToPath(import.meta.url)
@@ -52,6 +53,7 @@ export default buildConfig({
     { ...SolutionsPages, hooks: { afterChange: [rebuildAfterGlobalChange] } },
     { ...IndustryPages, hooks: { afterChange: [rebuildAfterGlobalChange] } },
     { ...HirePages, hooks: { afterChange: [rebuildAfterGlobalChange] } },
+    { ...Analytics, hooks: { afterChange: [rebuildAfterGlobalChange] } },
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

@@ -12,14 +12,6 @@
  * collect" and "What we do not do" sections the same day.
  */
 
-/**
- * Set at build time by TRACKING_DISCLOSED. See the "What we do not do"
- * section below and web/docs/TRACKING.md: the privacy copy has to change in
- * the same deploy that turns a tracker on, and the build enforces it.
- */
-const TRACKING_DISCLOSED = import.meta.env.TRACKING_DISCLOSED === "true";
-
-
 export type LegalSection = { h2: string; paragraphs?: string[]; bullets?: string[] };
 export type LegalDoc = {
   eyebrow: string;
@@ -33,7 +25,12 @@ export type LegalDoc = {
 
 const UPDATED = "18 August 2026";
 
-export const PRIVACY: LegalDoc = {
+/**
+ * Privacy copy depends on whether analytics is disclosed (CMS Analytics
+ * global or TRACKING_DISCLOSED=true). Use getPrivacy() at page build time.
+ */
+export function getPrivacy(trackingDisclosed = false): LegalDoc {
+  return {
   eyebrow: "Legal",
   h1: "Privacy policy",
   lede: "What we collect when you use this website, why we collect it, and how to have it removed. In plain words, because you should not need a lawyer to read it.",
@@ -58,15 +55,7 @@ export const PRIVACY: LegalDoc = {
     },
     {
       h2: "What we do not do",
-      /*
-       * These two bullets are a factual claim about the build, and they are
-       * TRUE ONLY WHILE NO TRACKER IS CONFIGURED. web/src/components/
-       * Analytics.astro refuses to build if a PUBLIC_* tracking variable is
-       * set without TRACKING_DISCLOSED=true, which is what swaps these
-       * bullets for the disclosing version below. Do not edit one without
-       * the other. See web/docs/TRACKING.md.
-       */
-      bullets: TRACKING_DISCLOSED
+      bullets: trackingDisclosed
         ? [
             "No advertising pixels. We do not run retargeting, and nothing here follows you to other websites.",
             "We do not sell, rent or trade your details, and we do not add you to a newsletter you did not ask for.",
@@ -77,7 +66,7 @@ export const PRIVACY: LegalDoc = {
             "We do not sell, rent or trade your details, and we do not add you to a newsletter you did not ask for.",
           ],
     },
-    ...(TRACKING_DISCLOSED
+    ...(trackingDisclosed
       ? [
           {
             h2: "Website analytics",
@@ -150,9 +139,15 @@ export const PRIVACY: LegalDoc = {
   ],
   seo: {
     title: "Privacy policy | Infoloop",
-    description: "What Infoloop collects when you use infoloop.co, why, who sees it and how to have it deleted. No tracking cookies, no advertising pixels, no selling data.",
+    description: trackingDisclosed
+      ? "What Infoloop collects when you use infoloop.co, why, who sees it and how to have it deleted. Website analytics disclosed; no selling data."
+      : "What Infoloop collects when you use infoloop.co, why, who sees it and how to have it deleted. No tracking cookies, no advertising pixels, no selling data.",
   },
-};
+  };
+}
+
+/** Default export for pages that do not yet pass CMS disclosure (env-only). Prefer getPrivacy(await getAnalytics().privacyDisclosed). */
+export const PRIVACY: LegalDoc = getPrivacy(import.meta.env.TRACKING_DISCLOSED === "true");
 
 export const TERMS: LegalDoc = {
   eyebrow: "Legal",

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight } from "@/components/ui";
 import { CONTACT } from "@/content/contact";
+import { trackEvent } from "@/lib/track";
 
 /**
  * "Download brochure" (7Span): the button opens a two-field gate (name,
@@ -26,6 +27,7 @@ export function BrochureGate() {
         throw new Error(j.error || "Something went wrong.");
       }
       setStatus("done");
+      trackEvent("brochure_requested", { form_type: "brochure", page: window.location.pathname });
       window.open(B.file, "_blank", "noopener");
     } catch (err) {
       setStatus("error");
