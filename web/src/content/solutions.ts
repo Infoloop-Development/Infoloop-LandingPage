@@ -36,7 +36,7 @@ export type SolutionGroup = {
   quotes: Quote[];
   cta: { h2: string; lede: string; button: string };
   other: { h2: string };
-  seo: { title: string; description: string };
+  seo: { title: string; description: string; image?: { url: string; alt?: string }; llmSummary?: string; noindex?: boolean };
 };
 
 /** Every industry link, flat, for the "Industries we serve" chips. */

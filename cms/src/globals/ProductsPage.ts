@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { anyone, authenticated } from '../access'
-import { link } from '../fields'
+import { link, seo } from '../fields'
 
 /** /products index copy. Mirrors web/src/content/products.ts (ProductsIndex). */
 export const ProductsPage: GlobalConfig = {
@@ -12,6 +12,6 @@ export const ProductsPage: GlobalConfig = {
     { name: 'h1', type: 'text' },
     { name: 'lede', type: 'textarea' },
     { name: 'cta', type: 'group', fields: [{ name: 'h2', type: 'text' }, { name: 'lede', type: 'textarea' }, link('button')] },
-    { name: 'seo', type: 'group', fields: [{ name: 'title', type: 'text', maxLength: 60 }, { name: 'description', type: 'textarea', maxLength: 158 }] },
+    seo,
   ],
 }

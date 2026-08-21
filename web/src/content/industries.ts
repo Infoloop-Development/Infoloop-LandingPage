@@ -31,7 +31,7 @@ export type IndustryDetail = {
   faq: { eyebrow: string; h2: string; lede: string; items: { q: string; a: string }[] };
   cta: { h2: string; lede: string; button: string };
   blogCategory: string;
-  seo: { title: string; description: string };
+  seo: { title: string; description: string; image?: { url: string; alt?: string }; llmSummary?: string; noindex?: boolean };
 };
 
 export const INDUSTRIES_DETAIL: IndustryDetail[] = [

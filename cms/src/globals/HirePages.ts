@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { anyone, authenticated } from '../access'
-import { strings } from '../fields'
+import { strings, seo } from '../fields'
 
 /** Hire talent pages (/hire-<role>). Mirrors web/src/content/hire.ts. */
 export const HirePages: GlobalConfig = {
@@ -41,7 +41,7 @@ export const HirePages: GlobalConfig = {
         { name: 'faq', type: 'group', fields: [{ name: 'eyebrow', type: 'text' }, { name: 'h2', type: 'text' }, { name: 'lede', type: 'text' }, { name: 'items', type: 'array', fields: [{ name: 'q', type: 'text', required: true }, { name: 'a', type: 'textarea', required: true }] }] },
         { name: 'cta', type: 'group', fields: [{ name: 'h2', type: 'text' }, { name: 'lede', type: 'textarea' }, { name: 'button', type: 'text' }] },
         { name: 'more', type: 'group', fields: [{ name: 'h2', type: 'text' }, strings('roles', { maxRows: 6, admin: { description: 'Six related role paths, e.g. /hire-react-developers' } })] },
-        { name: 'seo', type: 'group', fields: [{ name: 'title', type: 'text', maxLength: 60 }, { name: 'description', type: 'textarea', maxLength: 158 }] },
+        seo,
       ],
     },
   ],

@@ -16,7 +16,7 @@ export type BrandContent = {
   tagline: { h2: string; text: [string, string]; paragraph: string; whenH3: string; when: string[]; dontH3: string; donts: string[]; download: string };
   team: { h2: string; lede: string };
   closing: { statement: string };
-  seo: { title: string; description: string };
+  seo: { title: string; description: string; image?: { url: string; alt?: string }; llmSummary?: string; noindex?: boolean };
 };
 
 export const BRAND: BrandContent = {

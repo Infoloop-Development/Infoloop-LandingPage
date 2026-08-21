@@ -41,7 +41,7 @@ export type Product = {
   impact: { paragraph: string; metrics: { value: string; label: string }[] };
   faq: { q: string; a: string }[];
   cta: { h2: string; lede: string; button: string };
-  seo: { title: string; description: string; noindex?: boolean };
+  seo: { title: string; description: string; image?: { url: string; alt?: string }; llmSummary?: string; noindex?: boolean };
   /** Optional real screenshots from the CMS; the drawn tile is the fallback. */
   screens?: { url: string; alt?: string }[];
   order?: number;
@@ -50,7 +50,7 @@ export type Product = {
 export type ProductsIndex = {
   h1: string;
   lede: string;
-  seo: { title: string; description: string };
+  seo: { title: string; description: string; image?: { url: string; alt?: string }; llmSummary?: string; noindex?: boolean };
   cta: { h2: string; lede: string; button: { label: string; href: string } };
 };
 

@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { anyone, authenticated } from '../access'
-import { strings } from '../fields'
+import { strings, seo } from '../fields'
 
 /**
  * The four Solutions group pages (/solutions/build|grow|transform|consulting).
@@ -91,7 +91,7 @@ export const SolutionsPages: GlobalConfig = {
         },
         { name: 'cta', type: 'group', fields: [{ name: 'h2', type: 'text' }, { name: 'lede', type: 'textarea' }, { name: 'button', type: 'text' }] },
         { name: 'other', type: 'group', fields: [{ name: 'h2', type: 'text' }] },
-        { name: 'seo', type: 'group', fields: [{ name: 'title', type: 'text', maxLength: 60 }, { name: 'description', type: 'textarea', maxLength: 158 }] },
+        seo,
       ],
     },
   ],

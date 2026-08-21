@@ -41,7 +41,7 @@ export type Profile = {
   socials: ProfileSocial[];
   links: ProfileLink[];
   photoAlts: string[];
-  seo: { title: string; description: string };
+  seo: { title: string; description: string; image?: { url: string; alt?: string }; llmSummary?: string; noindex?: boolean };
 };
 export type TeamMember = {
   name: string;
@@ -70,7 +70,7 @@ export type AboutContent = {
   priorities: { h2: string; sub: string; items: Priority[] };
   team: { h2: string; sub: string; members: TeamMember[] };
   closing: { band: [string, string]; statement: string };
-  seo: { title: string; description: string };
+  seo: { title: string; description: string; image?: { url: string; alt?: string }; llmSummary?: string; noindex?: boolean };
 };
 
 export const ABOUT: AboutContent = {

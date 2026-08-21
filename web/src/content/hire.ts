@@ -32,7 +32,7 @@ export type HireDetail = {
   cta: { h2: string; lede: string; button: string };
   /** Six related roles that work side by side with this one (hrefs from the Hire menu). */
   more: { h2: string; roles: string[] };
-  seo: { title: string; description: string };
+  seo: { title: string; description: string; image?: { url: string; alt?: string }; llmSummary?: string; noindex?: boolean };
 };
 
 export const HIRE_DETAIL: HireDetail[] = [

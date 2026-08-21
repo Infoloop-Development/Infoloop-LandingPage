@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { anyone, authenticated } from '../access'
-import { strings } from '../fields'
+import { strings, seo } from '../fields'
 import { TILES } from '../fields/workKeys'
 
 /** Industry pages (/industry/<slug>). Mirrors web/src/content/industries.ts. */
@@ -49,7 +49,7 @@ export const IndustryPages: GlobalConfig = {
         { name: 'faq', type: 'group', fields: [{ name: 'eyebrow', type: 'text' }, { name: 'h2', type: 'text' }, { name: 'lede', type: 'text' }, { name: 'items', type: 'array', fields: [{ name: 'q', type: 'text', required: true }, { name: 'a', type: 'textarea', required: true }] }] },
         { name: 'cta', type: 'group', fields: [{ name: 'h2', type: 'text' }, { name: 'lede', type: 'textarea' }, { name: 'button', type: 'text' }] },
         { name: 'blogCategory', type: 'text', admin: { description: 'Posts in this category are listed first.' } },
-        { name: 'seo', type: 'group', fields: [{ name: 'title', type: 'text', maxLength: 60 }, { name: 'description', type: 'textarea', maxLength: 158 }] },
+        seo,
       ],
     },
   ],

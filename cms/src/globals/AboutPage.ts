@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { anyone, authenticated } from '../access'
-import { link, strings } from '../fields'
+import { link, strings, seo } from '../fields'
 
 const VALUE_KEYS = ['clarity', 'ownership', 'transparency', 'simplicity', 'speed', 'craft', 'partnership']
 const PRIORITY_KEYS = ['people', 'clarity', 'door', 'words']
@@ -142,7 +142,7 @@ export const AboutPage: GlobalConfig = {
                           ],
                         },
                         strings('photoAlts', { maxRows: 3, label: 'Photo strip alt texts (3)' }),
-                        { name: 'seo', type: 'group', fields: [{ name: 'title', type: 'text', maxLength: 60 }, { name: 'description', type: 'textarea', maxLength: 158 }] },
+                        seo,
                       ],
                     },
                   ],
@@ -154,7 +154,7 @@ export const AboutPage: GlobalConfig = {
               type: 'group',
               fields: [strings('band', { label: 'Closing band (two parts)', maxRows: 2 }), { name: 'statement', type: 'textarea' }],
             },
-            { name: 'seo', type: 'group', fields: [{ name: 'title', type: 'text', maxLength: 60 }, { name: 'description', type: 'textarea', maxLength: 158 }] },
+            seo,
           ],
         },
       ],

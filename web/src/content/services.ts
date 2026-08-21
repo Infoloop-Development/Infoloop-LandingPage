@@ -32,7 +32,7 @@ export type ServiceDetail = {
   cta: { h2: string; lede: string; button: string };
   other: { h2: string };
   faq: { q: string; a: string }[];
-  seo: { title: string; description: string };
+  seo: { title: string; description: string; image?: { url: string; alt?: string }; llmSummary?: string; noindex?: boolean };
 };
 
 const BUILD_TECH: TechRow[] = [

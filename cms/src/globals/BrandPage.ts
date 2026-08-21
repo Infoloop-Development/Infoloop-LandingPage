@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { anyone, authenticated } from '../access'
-import { link, strings } from '../fields'
+import { link, strings, seo } from '../fields'
 
 /** /brand-assets copy. Mirrors web/src/content/brand.ts (BrandContent). */
 export const BrandPage: GlobalConfig = {
@@ -56,6 +56,6 @@ export const BrandPage: GlobalConfig = {
     },
     { name: 'team', type: 'group', fields: [{ name: 'h2', type: 'text' }, { name: 'lede', type: 'textarea' }] },
     { name: 'closing', type: 'group', fields: [{ name: 'statement', type: 'textarea' }] },
-    { name: 'seo', type: 'group', fields: [{ name: 'title', type: 'text', maxLength: 60 }, { name: 'description', type: 'textarea', maxLength: 158 }] },
+    seo,
   ],
 }

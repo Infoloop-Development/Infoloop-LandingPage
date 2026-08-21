@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { anyone, authenticated } from '../access'
-import { link, strings } from '../fields'
+import { link, strings, seo } from '../fields'
 import { INDUSTRY_KEYS, SERVICE_KEYS, TILES } from '../fields/workKeys'
 
 /** /work index copy. Mirrors web/src/content/work.ts (WorkIndex). */
@@ -77,6 +77,6 @@ export const WorkPage: GlobalConfig = {
       type: 'group',
       fields: [{ name: 'eyebrow', type: 'text' }, { name: 'h2', type: 'text' }, { name: 'lede', type: 'textarea' }, link('button'), link('secondary')],
     },
-    { name: 'seo', type: 'group', fields: [{ name: 'title', type: 'text', maxLength: 60 }, { name: 'description', type: 'textarea', maxLength: 158 }] },
+    seo,
   ],
 }

@@ -50,7 +50,7 @@ const jsonLd = [
   // FAQPage schema is added only when the FAQ block is rendered on the page (Google: marked-up content must be visible).
 ];
 ---
-<Site title={s.seo.title} description={s.seo.description} canonical={`/${s.slug}`} jsonLd={jsonLd}>
+<Site title={s.seo.title} description={s.seo.description} canonical={`/${s.slug}`} jsonLd={jsonLd} image={s.seo.image?.url}>
   <SolutionHero g={s} />
   <TaglineBand data={s.band} />
   <PillGrid id="fit-h2" h2={s.industryFit.h2} lede={s.industryFit.lede} items={s.industryFit.items} />

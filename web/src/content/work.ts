@@ -54,7 +54,7 @@ export type CaseStudy = {
   extra?: { eyebrow: string; h2: string; items: { h3: string; body: string }[] };
   tech: string[];
   note: string;
-  seo: { title: string; description: string; noindex?: boolean };
+  seo: { title: string; description: string; image?: { url: string; alt?: string }; llmSummary?: string; noindex?: boolean };
   /** Slugs of related case studies (defaults to same industry, then others). */
   related?: string[];
   /** Service, product and industry pages behind this case (internal links). */
@@ -106,7 +106,7 @@ export type WorkIndex = {
   /** Case-page aside button. */
   heroButton: { label: string; href: string };
   cta: { eyebrow: string; h2: string; lede: string; button: { label: string; href: string }; secondary: { label: string; href: string } };
-  seo: { title: string; description: string };
+  seo: { title: string; description: string; image?: { url: string; alt?: string }; llmSummary?: string; noindex?: boolean };
 };
 
 // Content: verified rewrite of the case studies published on infoloop.co

@@ -17,6 +17,7 @@
  */
 import * as HOME from "@/content/home";
 import { LOCAL_SITE, type SiteContent } from "@/lib/site-content";
+import { flattenSeoImage } from "@/lib/seo";
 
 export type { SiteContent } from "@/lib/site-content";
 
@@ -149,7 +150,7 @@ export async function getCollection<T = Json>(slug: string, query = ""): Promise
   let page = 1;
   for (;;) {
     // Normalise each doc, not the pagination envelope (an empty `docs` must stay an array).
-    const res = (await fetchRaw(`${slug}?limit=100&depth=1&page=${page}${query ? `&${query}` : ""}`)) as
+    const res = (await fetchRaw(`${slug}?limit=100&depth=2&page=${page}${query ? `&${query}` : ""}`)) as
       | { docs?: unknown[]; hasNextPage?: boolean }
       | null;
     if (!res) break;
@@ -172,8 +173,10 @@ const publishedOnly = PREVIEW ? "" : "&where[_status][equals]=published";
 
 /** /work index copy: Payload `work-page` global merged over local WORK. */
 export async function getWorkIndex(): Promise<WorkIndex> {
-  const remote = await fetchPayload<Json>("globals/work-page?depth=1");
-  return remote ? deepMerge(WORK, remote) : WORK;
+  const remote = await fetchPayload<Json>("globals/work-page?depth=2");
+  if (!remote) return WORK;
+  if (isObject(remote.seo)) flattenSeoImage(remote.seo as Json);
+  return deepMerge(WORK, remote);
 }
 
 /** Shape a CMS-only case study is merged over, so a partly filled document can never break the build. */
@@ -224,6 +227,7 @@ export async function getWork(): Promise<CaseStudy[]> {
     if (Array.isArray(doc.related)) doc.related = (doc.related as unknown[]).map((r) => (isObject(r) ? (r.slug as string) : (r as string))).filter(Boolean);
     if (isObject(doc.cover) && typeof doc.cover.url === "string") doc.cover = { url: doc.cover.url, alt: doc.cover.alt };
     else delete doc.cover;
+    if (isObject(doc.seo)) flattenSeoImage(doc.seo);
     if (Array.isArray(doc.gallery)) {
       doc.gallery = (doc.gallery as unknown[])
         .map((g) => (isObject(g) && isObject(g.image) && typeof g.image.url === "string" ? { url: g.image.url, alt: g.image.alt, caption: g.caption } : null))
@@ -252,8 +256,18 @@ import { ABOUT, type AboutContent } from "@/content/about";
 
 /** /about copy: Payload `about-page` global merged over local. */
 export async function getAbout(): Promise<AboutContent> {
-  const remote = await fetchPayload<Json>("globals/about-page?depth=1");
-  return remote ? deepMerge(ABOUT, remote) : ABOUT;
+  const remote = await fetchPayload<Json>("globals/about-page?depth=2");
+  if (!remote) return ABOUT;
+  if (isObject(remote.seo)) flattenSeoImage(remote.seo as Json);
+  const team = (remote as { team?: { members?: Json[] } }).team;
+  if (team && Array.isArray(team.members)) {
+    for (const m of team.members) {
+      if (isObject(m) && isObject(m.profile) && isObject((m.profile as Json).seo)) {
+        flattenSeoImage((m.profile as Json).seo as Json);
+      }
+    }
+  }
+  return deepMerge(ABOUT, remote);
 }
 
 /* ---------------- Brand assets ---------------- */
@@ -261,8 +275,10 @@ import { BRAND, type BrandContent } from "@/content/brand";
 
 /** /brand-assets copy: Payload `brand-page` global merged over local. */
 export async function getBrand(): Promise<BrandContent> {
-  const remote = await fetchPayload<Json>("globals/brand-page?depth=1");
-  return remote ? deepMerge(BRAND, remote) : BRAND;
+  const remote = await fetchPayload<Json>("globals/brand-page?depth=2");
+  if (!remote) return BRAND;
+  if (isObject(remote.seo)) flattenSeoImage(remote.seo as Json);
+  return deepMerge(BRAND, remote);
 }
 
 /* ---------------- Solutions group pages ---------------- */
@@ -270,12 +286,14 @@ import { SOLUTIONS, type SolutionGroup } from "@/content/solutions";
 
 /** The four group pages: Payload `solutions-pages` global merged over local, by slug. */
 export async function getSolutionGroups(): Promise<SolutionGroup[]> {
-  const remote = await fetchPayload<{ groups?: Json[] }>("globals/solutions-pages?depth=1");
+  const remote = await fetchPayload<{ groups?: Json[] }>("globals/solutions-pages?depth=2");
   const groups = remote?.groups;
   if (!Array.isArray(groups) || groups.length === 0) return SOLUTIONS;
   return SOLUTIONS.map((local) => {
     const r = groups.find((g) => g && g.slug === local.slug);
-    return r ? deepMerge(local, r) : local;
+    if (!r) return local;
+    if (isObject(r.seo)) flattenSeoImage(r.seo as Json);
+    return deepMerge(local, r);
   });
 }
 
@@ -290,7 +308,10 @@ export async function getServiceDetails(): Promise<ServiceDetail[]> {
     if (!doc.slug) continue;
     const local = bySlug.get(doc.slug);
     // Only slugs the site knows (menu items) get a page; unknown CMS slugs need a local skeleton first.
-    if (local) bySlug.set(doc.slug, deepMerge(local, doc));
+    if (local) {
+      if (isObject(doc.seo)) flattenSeoImage(doc.seo);
+      bySlug.set(doc.slug, deepMerge(local, doc));
+    }
   }
   return [...bySlug.values()];
 }
@@ -305,18 +326,20 @@ function mergeBySlug<T extends { slug: string }>(local: T[], remote: unknown): T
   if (!Array.isArray(rows) || rows.length === 0) return local;
   return local.map((l) => {
     const r = rows.find((x) => x && x.slug === l.slug);
-    return r ? deepMerge(l, r) : l;
+    if (!r) return l;
+    if (isObject(r.seo)) flattenSeoImage(r.seo as Json);
+    return deepMerge(l, r);
   });
 }
 
 /** Industry pages: Payload `industry-pages` merged over local, by slug. */
 export async function getIndustries(): Promise<IndustryDetail[]> {
-  return mergeBySlug(INDUSTRIES_DETAIL, await fetchPayload<Json>("globals/industry-pages?depth=1"));
+  return mergeBySlug(INDUSTRIES_DETAIL, await fetchPayload<Json>("globals/industry-pages?depth=2"));
 }
 
 /** Hire pages: Payload `hire-pages` merged over local, by slug. */
 export async function getHirePages(): Promise<HireDetail[]> {
-  return mergeBySlug(HIRE_DETAIL, await fetchPayload<Json>("globals/hire-pages?depth=1"));
+  return mergeBySlug(HIRE_DETAIL, await fetchPayload<Json>("globals/hire-pages?depth=2"));
 }
 
 /* ---------------- Products ---------------- */
@@ -324,8 +347,10 @@ import { PRODUCTS, PRODUCTS_INDEX, type Product, type ProductsIndex } from "@/co
 
 /** /products index copy: Payload `products-page` global merged over local. */
 export async function getProductsIndex(): Promise<ProductsIndex> {
-  const remote = await fetchPayload<Json>("globals/products-page?depth=1");
-  return remote ? deepMerge(PRODUCTS_INDEX, remote) : PRODUCTS_INDEX;
+  const remote = await fetchPayload<Json>("globals/products-page?depth=2");
+  if (!remote) return PRODUCTS_INDEX;
+  if (isObject(remote.seo)) flattenSeoImage(remote.seo as Json);
+  return deepMerge(PRODUCTS_INDEX, remote);
 }
 
 const EMPTY_PRODUCT: Product = {
@@ -365,6 +390,7 @@ export async function getProducts(): Promise<Product[]> {
         .filter(Boolean);
       if ((doc.screens as unknown[]).length === 0) delete doc.screens;
     }
+    if (isObject(doc.seo)) flattenSeoImage(doc.seo);
     const local = bySlug.get(doc.slug) ?? EMPTY_PRODUCT;
     bySlug.set(doc.slug, deepMerge(local, doc));
   }

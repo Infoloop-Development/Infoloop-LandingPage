@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { authenticated, publishedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
-import { strings } from '../fields'
+import { strings, seo } from '../fields'
 
 const TILES = ['erp', 'attendance', 'shopify', 'copilot', 'garage', 'webflow', 'lms', 'verko']
 
@@ -72,7 +72,7 @@ export const Services: CollectionConfig = {
           label: 'FAQ and SEO',
           fields: [
             { name: 'faq', type: 'array', admin: { description: 'Kept for answer engines; rendered only when the page shows a FAQ block.' }, fields: [{ name: 'q', type: 'text', required: true }, { name: 'a', type: 'textarea', required: true }] },
-            { name: 'seo', type: 'group', fields: [{ name: 'title', type: 'text', maxLength: 60 }, { name: 'description', type: 'textarea', maxLength: 158 }] },
+            seo,
           ],
         },
       ],

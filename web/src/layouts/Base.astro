@@ -8,6 +8,7 @@ import "@/styles/globals.css";
 import { SITE } from "@/content/site";
 import Analytics from "@/components/Analytics.astro";
 import ConsentBanner from "@/components/ConsentBanner.astro";
+import { absoluteAssetUrl } from "@/lib/seo";
 
 interface Props {
   title?: string;
@@ -16,10 +17,21 @@ interface Props {
   jsonLd?: unknown[];
   noindex?: boolean;
   ogType?: "website" | "article";
+  /** Per-page OG / Twitter image URL (absolute or relative). Falls back to /og.png. */
+  image?: string;
 }
-const { title = SITE.title, description = SITE.description, canonical = "/", jsonLd = [], noindex = false, ogType = "website" } = Astro.props;
-const canonicalUrl = new URL(canonical, Astro.site ?? SITE.url).toString();
-const ogImage = new URL("/og.png", Astro.site ?? SITE.url).toString();
+const {
+  title = SITE.title,
+  description = SITE.description,
+  canonical = "/",
+  jsonLd = [],
+  noindex = false,
+  ogType = "website",
+  image,
+} = Astro.props;
+const siteOrigin = (Astro.site ?? SITE.url).toString();
+const canonicalUrl = new URL(canonical, siteOrigin).toString();
+const ogImage = absoluteAssetUrl(image, siteOrigin);
 ---
 <!doctype html>
 <html lang="en" class="h-full">
@@ -30,7 +42,7 @@ const ogImage = new URL("/og.png", Astro.site ?? SITE.url).toString();
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
-    <link rel="alternate" type="application/rss+xml" title="Infoloop blog" href={new URL("/rss.xml", Astro.site ?? SITE.url).toString()} />
+    <link rel="alternate" type="application/rss+xml" title="Infoloop blog" href={new URL("/rss.xml", siteOrigin).toString()} />
     <meta name="robots" content={noindex ? "noindex, follow" : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"} />
     <meta name="theme-color" content="#ffffff" />
     <meta name="application-name" content="Infoloop" />
