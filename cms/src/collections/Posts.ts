@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { publishedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
-import { seo, slug } from '../fields'
+import { seo, slug, mediaUpload } from '../fields'
 import { editorAccess, hideUnlessCategory } from '../access/permissions'
 
 /** Blog posts. */
@@ -26,7 +26,7 @@ export const Posts: CollectionConfig = {
     { name: 'title', type: 'text', required: true },
     slug,
     { name: 'excerpt', type: 'textarea', admin: { description: 'One or two sentences. Used in lists and as the default meta description.' } },
-    { name: 'cover', type: 'upload', relationTo: 'media' },
+    mediaUpload('cover', { label: 'Cover image' }),
     { name: 'author', type: 'relationship', relationTo: 'users' },
     { name: 'publishedAt', type: 'date', admin: { position: 'sidebar', date: { pickerAppearance: 'dayOnly' } } },
     { name: 'topics', type: 'array', fields: [{ name: 'value', type: 'text', required: true }] },

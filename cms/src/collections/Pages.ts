@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { publishedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
-import { seo, slug } from '../fields'
+import { seo, slug, mediaUpload } from '../fields'
 import { editorAccess, hideUnlessCategory } from '../access/permissions'
 
 /** Free-form pages: About, Careers, Contact, Brand assets, Privacy, Terms, Trust center. */
@@ -69,7 +69,7 @@ export const Pages: CollectionConfig = {
               fields: [
                 { name: 'name', type: 'text', required: true },
                 { name: 'role', type: 'text' },
-                { name: 'photo', type: 'upload', relationTo: 'media' },
+                mediaUpload('photo', { label: 'Photo' }),
                 { name: 'linkedin', type: 'text' },
               ],
             },

@@ -59,7 +59,7 @@ const jsonLd = [
   },
 ];
 ---
-<Site title={seoTitle} description={seoDesc} canonical={`/work/${c.slug}`} jsonLd={jsonLd} ogType="article" noindex={!!c.seo?.noindex} image={c.seo?.image?.url ?? c.cover?.url}>
+<Site title={seoTitle} description={seoDesc} canonical={`/work/${c.slug}`} jsonLd={jsonLd} ogType="article" noindex={!!c.seo?.noindex} image={c.seo?.image?.url ?? c.cover?.url} imageAlt={c.seo?.image?.alt ?? c.cover?.alt}>
   <CaseHeader c={c} ctaHref={work.heroButton.href} />
   <CaseBody c={c} ctaHref={work.heroButton.href} />
   <RelatedWork items={related} />

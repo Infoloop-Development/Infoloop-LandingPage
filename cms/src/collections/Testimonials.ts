@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { approvedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
 import { editorAccess, hideUnlessCategory } from '../access/permissions'
+import { mediaUpload } from '../fields'
 
 /** Client quotes. Only quotes the client has approved in writing. */
 export const Testimonials: CollectionConfig = {
@@ -25,7 +26,7 @@ export const Testimonials: CollectionConfig = {
     { name: 'name', type: 'text', required: true },
     { name: 'role', type: 'text' },
     { name: 'company', type: 'text' },
-    { name: 'photo', type: 'upload', relationTo: 'media' },
+    mediaUpload('photo', { label: 'Photo' }),
     { name: 'platform', type: 'select', options: ['Trustpilot', 'Google', 'Clutch', 'GoodFirms', 'Direct'] },
     { name: 'rating', type: 'number', min: 1, max: 5 },
     { name: 'sourceUrl', type: 'text' },

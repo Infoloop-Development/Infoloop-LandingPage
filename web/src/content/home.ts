@@ -39,6 +39,14 @@ export const HERO = {
     role: "Founder, Infoloop",
     leftAlt: "Photo slot: the Infoloop team at work",
     rightAlt: "Photo slot: a client site running Infoloop software",
+  } as {
+    quote: string;
+    name: string;
+    role: string;
+    leftAlt: string;
+    rightAlt: string;
+    leftImage?: { url: string; alt?: string };
+    rightImage?: { url: string; alt?: string };
   },
   trustedLine: "Trusted by teams in 6 countries",
 };

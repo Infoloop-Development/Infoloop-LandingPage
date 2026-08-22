@@ -19,6 +19,8 @@ interface Props {
   ogType?: "website" | "article";
   /** Per-page OG / Twitter image URL (absolute or relative). Falls back to /og.png. */
   image?: string;
+  /** Alt text for OG / Twitter image. */
+  imageAlt?: string;
 }
 const {
   title = SITE.title,
@@ -28,10 +30,12 @@ const {
   noindex = false,
   ogType = "website",
   image,
+  imageAlt,
 } = Astro.props;
 const siteOrigin = (Astro.site ?? SITE.url).toString();
 const canonicalUrl = new URL(canonical, siteOrigin).toString();
 const ogImage = absoluteAssetUrl(image, siteOrigin);
+const ogImageAlt = imageAlt?.trim() || "Infoloop. We build. We run.";
 ---
 <!doctype html>
 <html lang="en" class="h-full">
@@ -55,11 +59,12 @@ const ogImage = absoluteAssetUrl(image, siteOrigin);
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Infoloop. We build. We run." />
+    <meta property="og:image:alt" content={ogImageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="icon" href="/favicon-192.png" sizes="192x192" type="image/png" />

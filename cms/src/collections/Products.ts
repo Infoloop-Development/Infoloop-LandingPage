@@ -1,7 +1,7 @@
 import type { CollectionConfig, Field } from 'payload'
 import { publishedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
-import { seo, slug, strings } from '../fields'
+import { seo, slug, strings, mediaWithAlt } from '../fields'
 import { INDUSTRY_KEYS } from '../fields/workKeys'
 import { editorAccess, editorDocAccess, hideUnlessCategory } from '../access/permissions'
 
@@ -60,7 +60,7 @@ export const Products: CollectionConfig = {
               type: 'array',
               label: 'Screenshots (in order: idea, features, dark statement, automation)',
               maxRows: 4,
-              fields: [{ name: 'image', type: 'upload', relationTo: 'media', required: true }],
+              fields: mediaWithAlt({ imageRequired: true, label: 'Screenshot' }),
             },
           ],
         },

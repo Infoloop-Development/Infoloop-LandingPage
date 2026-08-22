@@ -1,7 +1,7 @@
 import type { CollectionConfig, Field } from 'payload'
 import { publishedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
-import { seo, slug, strings } from '../fields'
+import { seo, slug, strings, mediaUpload, mediaWithAlt } from '../fields'
 
 import { INDUSTRY_KEYS, SERVICE_KEYS, TILES } from '../fields/workKeys'
 import { editorAccess, editorDocAccess, hideUnlessCategory } from '../access/permissions'
@@ -59,7 +59,7 @@ export const Work: CollectionConfig = {
             { name: 'serviceKeys', type: 'select', hasMany: true, options: SERVICE_KEYS, admin: { position: 'sidebar' } },
             { name: 'tags', type: 'text', admin: { description: 'Eyebrow, e.g. "ERP and manufacturing".' } },
             { name: 'tile', type: 'select', options: TILES, admin: { position: 'sidebar', description: 'Drawn cover style until a real screenshot is uploaded.' } },
-            { name: 'cover', type: 'upload', relationTo: 'media' },
+            mediaUpload('cover', { label: 'Cover image' }),
             { name: 'lede', type: 'textarea' },
             {
               name: 'card',
@@ -169,7 +169,7 @@ export const Work: CollectionConfig = {
               filterOptions: ({ id }) => (id ? { id: { not_equals: id } } : true),
             },
             { name: 'testimonial', type: 'relationship', relationTo: 'testimonials' },
-            { name: 'gallery', type: 'array', fields: [{ name: 'image', type: 'upload', relationTo: 'media', required: true }, { name: 'caption', type: 'text' }] },
+            { name: 'gallery', type: 'array', label: 'Gallery', fields: mediaWithAlt({ caption: true, imageRequired: true }) },
           ],
         },
         { label: 'SEO', fields: [seo] },

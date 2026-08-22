@@ -47,7 +47,7 @@ const jsonLd = [
   { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "About", item: `${S.url}/about` }, { "@type": "ListItem", position: 3, name: m.name, item: url }] },
 ];
 ---
-<Base title={p.seo.title} description={p.seo.description} canonical={`/${p.slug}`} jsonLd={jsonLd} image={p.seo.image?.url}>
+<Base title={p.seo.title} description={p.seo.description} canonical={`/${p.slug}`} jsonLd={jsonLd} image={p.seo.image?.url} imageAlt={p.seo.image?.alt}>
   <main id="main" class="flex-1 bg-paper">
     <ProfileCard m={m} p={p} />
     <p class="mx-auto flex w-full max-w-[672px] items-center justify-between px-6 py-5 text-[12px] text-ink/60">

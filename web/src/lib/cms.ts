@@ -128,10 +128,31 @@ const LOCAL_HOME: HomeContent = {
   cta: HOME.CTA,
 };
 
+/** Flatten a Payload media upload to { url, alt }. */
+function flattenMedia(value: unknown): { url: string; alt?: string } | undefined {
+  if (!isObject(value) || typeof value.url !== "string") return undefined;
+  return { url: value.url, alt: typeof value.alt === "string" ? value.alt : undefined };
+}
+
 /** Home page content: Payload `home` global merged over local defaults. */
 export async function getHome(): Promise<HomeContent> {
   const remote = await fetchPayload<Json>("globals/home?depth=2");
-  return remote ? deepMerge(LOCAL_HOME, remote) : LOCAL_HOME;
+  if (!remote) return LOCAL_HOME;
+  const hero = remote.hero as Json | undefined;
+  const card = hero && isObject(hero.card) ? (hero.card as Json) : undefined;
+  if (card) {
+    const left = flattenMedia(card.leftImage);
+    const right = flattenMedia(card.rightImage);
+    if (left) {
+      card.leftImage = left;
+      if (left.alt) card.leftAlt = left.alt;
+    } else delete card.leftImage;
+    if (right) {
+      card.rightImage = right;
+      if (right.alt) card.rightAlt = right.alt;
+    } else delete card.rightImage;
+  }
+  return deepMerge(LOCAL_HOME, remote);
 }
 
 /** Site-wide content (nav, footer, offices, social): Payload `site` global merged over local defaults. */
@@ -225,12 +246,17 @@ export async function getWork(): Promise<CaseStudy[]> {
     if (!doc.slug) continue;
     // Payload returns populated relationships and uploads as documents.
     if (Array.isArray(doc.related)) doc.related = (doc.related as unknown[]).map((r) => (isObject(r) ? (r.slug as string) : (r as string))).filter(Boolean);
-    if (isObject(doc.cover) && typeof doc.cover.url === "string") doc.cover = { url: doc.cover.url, alt: doc.cover.alt };
+    if (isObject(doc.cover) && typeof doc.cover.url === "string") doc.cover = { url: doc.cover.url, alt: typeof doc.cover.alt === "string" ? doc.cover.alt : undefined };
     else delete doc.cover;
     if (isObject(doc.seo)) flattenSeoImage(doc.seo);
     if (Array.isArray(doc.gallery)) {
       doc.gallery = (doc.gallery as unknown[])
-        .map((g) => (isObject(g) && isObject(g.image) && typeof g.image.url === "string" ? { url: g.image.url, alt: g.image.alt, caption: g.caption } : null))
+        .map((g) => {
+          if (!isObject(g) || !isObject(g.image) || typeof g.image.url !== "string") return null;
+          const override = typeof g.alt === "string" && g.alt.trim() ? g.alt.trim() : undefined;
+          const mediaAlt = typeof g.image.alt === "string" ? g.image.alt : undefined;
+          return { url: g.image.url, alt: override || mediaAlt, caption: g.caption };
+        })
         .filter(Boolean);
       if ((doc.gallery as unknown[]).length === 0) delete doc.gallery;
     }
@@ -386,7 +412,12 @@ export async function getProducts(): Promise<Product[]> {
     if (!doc.slug) continue;
     if (Array.isArray(doc.screens)) {
       doc.screens = (doc.screens as unknown[])
-        .map((g) => (isObject(g) && isObject(g.image) && typeof g.image.url === "string" ? { url: g.image.url, alt: g.image.alt } : null))
+        .map((g) => {
+          if (!isObject(g) || !isObject(g.image) || typeof g.image.url !== "string") return null;
+          const override = typeof g.alt === "string" && g.alt.trim() ? g.alt.trim() : undefined;
+          const mediaAlt = typeof g.image.alt === "string" ? g.image.alt : undefined;
+          return { url: g.image.url, alt: override || mediaAlt };
+        })
         .filter(Boolean);
       if ((doc.screens as unknown[]).length === 0) delete doc.screens;
     }

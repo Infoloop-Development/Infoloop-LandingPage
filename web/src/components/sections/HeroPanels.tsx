@@ -52,7 +52,7 @@ export function HeroPanels({ data = HERO }: { data?: typeof HERO } = {}) {
     // beneath it.
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <div ref={left} className="hero-side relative z-0">
-        <PhotoSlot alt={c.leftAlt} />
+        <PhotoSlot alt={c.leftImage?.alt || c.leftAlt} src={c.leftImage?.url} />
       </div>
       <figure className="relative z-10 flex min-h-[420px] flex-col justify-between overflow-hidden rounded-2xl bg-ink p-8 text-white sm:-order-1 sm:col-span-2 sm:p-10 lg:order-none lg:col-span-1 lg:min-h-[520px]">
         {/* Brand texture at the edges, echoing the kit's virtual backgrounds */}
@@ -85,19 +85,30 @@ export function HeroPanels({ data = HERO }: { data?: typeof HERO } = {}) {
         </div>
       </figure>
       <div ref={right} className="hero-side relative z-20">
-        <PhotoSlot alt={c.rightAlt} flip />
+        <PhotoSlot alt={c.rightImage?.alt || c.rightAlt} src={c.rightImage?.url} flip />
       </div>
     </div>
   );
 }
 
 /**
- * Image slot for the hero panels. Until real photos are cleared it carries
- * the brand's bar texture (as on the kit's virtual backgrounds) on a Mist
- * field. Replace with <Image fill className="object-cover" /> when photos
- * exist.
+ * Hero side panel: real CMS photo when present (with alt), otherwise the
+ * brand bar texture placeholder.
  */
-function PhotoSlot({ alt, flip = false }: { alt: string; flip?: boolean }) {
+function PhotoSlot({ alt, src, flip = false }: { alt: string; src?: string; flip?: boolean }) {
+  if (src) {
+    return (
+      <div className="relative h-full min-h-[280px] overflow-hidden rounded-2xl bg-mist">
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          className={`absolute inset-0 h-full w-full object-cover ${flip ? "scale-x-[-1]" : ""}`}
+        />
+      </div>
+    );
+  }
   const bars = [
     ["12%", "8%", "62%"],
     ["8%", "24%", "48%"],

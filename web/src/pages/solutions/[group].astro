@@ -39,7 +39,7 @@ const jsonLd = [
   { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: g.name, item: url }] },
 ];
 ---
-<Site title={g.seo.title} description={g.seo.description} canonical={`/solutions/${g.slug}`} jsonLd={jsonLd} image={g.seo.image?.url}>
+<Site title={g.seo.title} description={g.seo.description} canonical={`/solutions/${g.slug}`} jsonLd={jsonLd} image={g.seo.image?.url} imageAlt={g.seo.image?.alt}>
   <SolutionHero g={g} />
   <TaglineBand data={g.band} />
   {/* Cards link only to service pages that exist; the rest stay plain until built */}

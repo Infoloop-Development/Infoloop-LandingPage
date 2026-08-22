@@ -1,7 +1,7 @@
 import type { GlobalConfig } from 'payload'
 import { anyone } from '../access'
 import { editorAccess, hideUnlessCategory } from '../access/permissions'
-import { heading, link, strings } from '../fields'
+import { heading, link, strings, mediaUpload } from '../fields'
 
 /**
  * Landing page content. Field names mirror ../../web/src/content/home.ts
@@ -51,10 +51,10 @@ export const Home: GlobalConfig = {
                     { name: 'quote', type: 'textarea' },
                     { name: 'name', type: 'text' },
                     { name: 'role', type: 'text' },
-                    { name: 'leftAlt', type: 'text', label: 'Left photo alt text' },
-                    { name: 'rightAlt', type: 'text', label: 'Right photo alt text' },
-                    { name: 'leftImage', type: 'upload', relationTo: 'media' },
-                    { name: 'rightImage', type: 'upload', relationTo: 'media' },
+                    { name: 'leftAlt', type: 'text', label: 'Left photo alt text', admin: { description: 'Fallback if no image is uploaded, or override. Prefer Alt on the Media file when using Left image.' } },
+                    { name: 'rightAlt', type: 'text', label: 'Right photo alt text', admin: { description: 'Fallback if no image is uploaded, or override. Prefer Alt on the Media file when using Right image.' } },
+                    mediaUpload('leftImage', { label: 'Left image' }),
+                    mediaUpload('rightImage', { label: 'Right image' }),
                   ],
                 },
                 { name: 'trustedLine', type: 'text' },
@@ -78,7 +78,7 @@ export const Home: GlobalConfig = {
                   admin: { description: 'Optional client logos (replace the platform names once cleared).' },
                   fields: [
                     { name: 'name', type: 'text', required: true },
-                    { name: 'image', type: 'upload', relationTo: 'media', required: true },
+                    mediaUpload('image', { required: true, label: 'Logo image' }),
                   ],
                 },
               ],
@@ -251,7 +251,7 @@ export const Home: GlobalConfig = {
                     { name: 'name', type: 'text', required: true },
                     { name: 'kicker', type: 'text' },
                     { name: 'tile', type: 'select', options: ['attendance', 'garage', 'lms'], admin: { description: 'Thumbnail style.' } },
-                    { name: 'image', type: 'upload', relationTo: 'media', admin: { description: 'Optional real screenshot, replaces the drawn tile.' } },
+                    mediaUpload('image', { label: 'Screenshot', admin: { description: 'Optional real screenshot, replaces the drawn tile. Set Alt text on the Media file.' } }),
                     { name: 'href', type: 'text', required: true },
                     { name: 'body', type: 'textarea' },
                   ],
@@ -284,7 +284,7 @@ export const Home: GlobalConfig = {
                     { name: 'name', type: 'text' },
                     { name: 'role', type: 'text' },
                     { name: 'note', type: 'text' },
-                    { name: 'photo', type: 'upload', relationTo: 'media' },
+                    mediaUpload('photo', { label: 'Founder photo' }),
                   ],
                 },
                 {

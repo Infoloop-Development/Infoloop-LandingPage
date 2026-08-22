@@ -6,6 +6,7 @@ import {
   usersUpdateAccess,
   type CmsUser,
 } from '../access/permissions'
+import { mediaUpload } from '../fields'
 
 /**
  * CMS editors. Admins create users with a temporary password and access rules.
@@ -168,6 +169,6 @@ export const Users: CollectionConfig = {
       },
     },
     { name: 'title', type: 'text', admin: { description: 'Shown as the author line on blog posts.' } },
-    { name: 'photo', type: 'upload', relationTo: 'media' },
+    mediaUpload('photo', { label: 'Photo' }),
   ],
 }

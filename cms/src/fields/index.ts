@@ -1,4 +1,4 @@
-import type { ArrayField, Field, GroupField, TextField } from 'payload'
+import type { ArrayField, Field, GroupField, TextField, UploadField } from 'payload'
 
 /** A link with a label, an href and an optional one-line blurb. */
 export const link = (name = 'link', overrides: Partial<GroupField> = {}): GroupField => ({
@@ -59,6 +59,57 @@ export const navGroups = (name: string, description?: string): ArrayField => ({
   ],
 })
 
+/**
+ * Media upload with a clear reminder that alt text lives on the Media file
+ * (required there). Use everywhere images are attached on pages.
+ */
+export const mediaUpload = (name: string, overrides: Partial<UploadField> = {}): UploadField => {
+  const { admin: adminOverrides, ...rest } = overrides
+  return {
+    name,
+    type: 'upload',
+    relationTo: 'media',
+    ...rest,
+    name,
+    type: 'upload',
+    relationTo: 'media',
+    admin: {
+      description:
+        'After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.',
+      ...(adminOverrides as object),
+    },
+  } as UploadField
+}
+
+/**
+ * Image row for galleries / screenshot lists: media file + optional alt
+ * override (falls back to the Media file’s alt on the site).
+ */
+export const mediaWithAlt = (
+  opts: { imageName?: string; imageRequired?: boolean; caption?: boolean; label?: string } = {},
+): Field[] => {
+  const imageName = opts.imageName ?? 'image'
+  const fields: Field[] = [
+    mediaUpload(imageName, {
+      required: opts.imageRequired !== false,
+      label: opts.label ?? 'Image',
+    }),
+    {
+      name: 'alt',
+      type: 'text',
+      label: 'Alt text override',
+      admin: {
+        description:
+          'Optional. Overrides the Media file’s alt for this placement only. Leave blank to use the Media alt. Shown when the image does not load.',
+      },
+    },
+  ]
+  if (opts.caption) {
+    fields.push({ name: 'caption', type: 'text', label: 'Caption' })
+  }
+  return fields
+}
+
 /** SEO / social / LLM fields shared by page-like documents and globals. */
 export const seo: GroupField = {
   name: 'seo',
@@ -83,13 +134,13 @@ export const seo: GroupField = {
       label: 'Meta description',
       admin: { description: 'Search snippet and OG description. Aim for 110 to 158 characters.' },
     },
-    {
-      name: 'image',
-      type: 'upload',
-      relationTo: 'media',
+    mediaUpload('image', {
       label: 'OG / social image',
-      admin: { description: 'Optional. 1200×630 recommended. Used for og:image and Twitter card.' },
-    },
+      admin: {
+        description:
+          'Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).',
+      },
+    }),
     {
       name: 'llmSummary',
       type: 'textarea',
