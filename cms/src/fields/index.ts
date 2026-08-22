@@ -66,9 +66,6 @@ export const navGroups = (name: string, description?: string): ArrayField => ({
 export const mediaUpload = (name: string, overrides: Partial<UploadField> = {}): UploadField => {
   const { admin: adminOverrides, ...rest } = overrides
   return {
-    name,
-    type: 'upload',
-    relationTo: 'media',
     ...rest,
     name,
     type: 'upload',
@@ -76,7 +73,7 @@ export const mediaUpload = (name: string, overrides: Partial<UploadField> = {}):
     admin: {
       description:
         'After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.',
-      ...(adminOverrides as object),
+      ...(adminOverrides as Record<string, unknown>),
     },
   } as UploadField
 }
