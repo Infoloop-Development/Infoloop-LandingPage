@@ -1,13 +1,14 @@
 import type { GlobalConfig } from 'payload'
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { editorAccess, hideUnlessCategory } from '../access/permissions'
 import { link, strings, seo } from '../fields'
 
 /** /brand-assets copy. Mirrors web/src/content/brand.ts (BrandContent). */
 export const BrandPage: GlobalConfig = {
   slug: 'brand-page',
   label: 'Brand assets page',
-  access: { read: anyone, update: authenticated },
-  admin: { group: 'Pages' },
+  access: { read: anyone, update: editorAccess('brand') },
+  admin: { group: 'Pages', hidden: hideUnlessCategory('brand') },
   fields: [
     {
       name: 'hero',

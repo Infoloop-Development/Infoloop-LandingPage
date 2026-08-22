@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { editorAccess, hideUnlessCategory } from '../access/permissions'
 import { heading, link, strings } from '../fields'
 
 /**
@@ -11,8 +12,8 @@ import { heading, link, strings } from '../fields'
 export const Home: GlobalConfig = {
   slug: 'home',
   label: 'Home page',
-  access: { read: anyone, update: authenticated },
-  admin: { group: 'Pages' },
+  access: { read: anyone, update: editorAccess('home') },
+  admin: { group: 'Pages', hidden: hideUnlessCategory('home') },
   fields: [
     {
       type: 'tabs',

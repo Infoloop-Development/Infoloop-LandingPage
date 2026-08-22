@@ -283,13 +283,77 @@ export interface Service {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
   seo?: {
+    /**
+     * Browser tab and OG title. Max 60 characters.
+     */
     title?: string | null;
+    /**
+     * Search snippet and OG description. Aim for 110 to 158 characters.
+     */
     description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
+    noindex?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  alt: string;
+  caption?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -360,16 +424,26 @@ export interface Industry {
     label?: string | null;
     href?: string | null;
   };
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
   seo?: {
     /**
-     * Max 60 characters.
+     * Browser tab and OG title. Max 60 characters.
      */
     title?: string | null;
     /**
-     * 110 to 158 characters.
+     * Search snippet and OG description. Aim for 110 to 158 characters.
      */
     description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     */
     image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
     noindex?: boolean | null;
   };
   updatedAt: string;
@@ -575,67 +649,31 @@ export interface Work {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
   seo?: {
     /**
-     * Max 60 characters.
+     * Browser tab and OG title. Max 60 characters.
      */
     title?: string | null;
     /**
-     * 110 to 158 characters.
+     * Search snippet and OG description. Aim for 110 to 158 characters.
      */
     description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     */
     image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
     noindex?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  alt: string;
-  caption?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    card?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    og?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -728,16 +766,26 @@ export interface Hire {
     label?: string | null;
     href?: string | null;
   };
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
   seo?: {
     /**
-     * Max 60 characters.
+     * Browser tab and OG title. Max 60 characters.
      */
     title?: string | null;
     /**
-     * 110 to 158 characters.
+     * Search snippet and OG description. Aim for 110 to 158 characters.
      */
     description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     */
     image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
     noindex?: boolean | null;
   };
   updatedAt: string;
@@ -860,16 +908,26 @@ export interface Product {
      */
     button?: string | null;
   };
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
   seo?: {
     /**
-     * Max 60 characters.
+     * Browser tab and OG title. Max 60 characters.
      */
     title?: string | null;
     /**
-     * 110 to 158 characters.
+     * Search snippet and OG description. Aim for 110 to 158 characters.
      */
     description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     */
     image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
     noindex?: boolean | null;
   };
   updatedAt: string;
@@ -923,16 +981,26 @@ export interface Post {
       }[]
     | null;
   relatedServices?: (number | Service)[] | null;
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
   seo?: {
     /**
-     * Max 60 characters.
+     * Browser tab and OG title. Max 60 characters.
      */
     title?: string | null;
     /**
-     * 110 to 158 characters.
+     * Search snippet and OG description. Aim for 110 to 158 characters.
      */
     description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     */
     image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
     noindex?: boolean | null;
   };
   updatedAt: string;
@@ -940,13 +1008,60 @@ export interface Post {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Create editors with a temporary password. Choose full access or limit by category / individual pages. Tick “Must change password” so they set their own password on first login.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
   name?: string | null;
+  /**
+   * Admins can create and manage other users.
+   */
   role?: ('admin' | 'editor') | null;
+  /**
+   * Full = everything in the CMS. Limited = only the categories and pages below.
+   */
+  accessMode?: ('full' | 'limited') | null;
+  /**
+   * Which areas of the CMS this user can open. Leave individual page lists empty to allow every page in a category.
+   */
+  categories?:
+    | (
+        | 'home'
+        | 'site'
+        | 'services'
+        | 'solutions'
+        | 'products'
+        | 'work'
+        | 'industries'
+        | 'hire'
+        | 'about'
+        | 'brand'
+        | 'analytics'
+        | 'posts'
+        | 'testimonials'
+        | 'pages'
+        | 'media'
+      )[]
+    | null;
+  /**
+   * Optional. If set, user may only edit these service pages (not the whole Services category).
+   */
+  allowedServices?: (number | Service)[] | null;
+  /**
+   * Optional. Restrict to these products only.
+   */
+  allowedProducts?: (number | Product)[] | null;
+  /**
+   * Optional. Restrict to these case studies only.
+   */
+  allowedWork?: (number | Work)[] | null;
+  /**
+   * On by default for new users. After they log in with the temporary password they must set a new one. Tick again after you reset their password.
+   */
+  mustChangePassword?: boolean | null;
   /**
    * Shown as the author line on blog posts.
    */
@@ -1062,16 +1177,26 @@ export interface Page {
           }
       )[]
     | null;
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
   seo?: {
     /**
-     * Max 60 characters.
+     * Browser tab and OG title. Max 60 characters.
      */
     title?: string | null;
     /**
-     * 110 to 158 characters.
+     * Search snippet and OG description. Aim for 110 to 158 characters.
      */
     description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     */
     image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
     noindex?: boolean | null;
   };
   updatedAt: string;
@@ -1312,6 +1437,9 @@ export interface ServicesSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
+        llmSummary?: T;
+        noindex?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1360,6 +1488,7 @@ export interface IndustriesSelect<T extends boolean = true> {
         title?: T;
         description?: T;
         image?: T;
+        llmSummary?: T;
         noindex?: T;
       };
   updatedAt?: T;
@@ -1412,6 +1541,7 @@ export interface HireSelect<T extends boolean = true> {
         title?: T;
         description?: T;
         image?: T;
+        llmSummary?: T;
         noindex?: T;
       };
   updatedAt?: T;
@@ -1521,6 +1651,7 @@ export interface ProductsSelect<T extends boolean = true> {
         title?: T;
         description?: T;
         image?: T;
+        llmSummary?: T;
         noindex?: T;
       };
   updatedAt?: T;
@@ -1711,6 +1842,7 @@ export interface WorkSelect<T extends boolean = true> {
         title?: T;
         description?: T;
         image?: T;
+        llmSummary?: T;
         noindex?: T;
       };
   updatedAt?: T;
@@ -1749,6 +1881,7 @@ export interface PostsSelect<T extends boolean = true> {
         title?: T;
         description?: T;
         image?: T;
+        llmSummary?: T;
         noindex?: T;
       };
   updatedAt?: T;
@@ -1855,6 +1988,7 @@ export interface PagesSelect<T extends boolean = true> {
         title?: T;
         description?: T;
         image?: T;
+        llmSummary?: T;
         noindex?: T;
       };
   updatedAt?: T;
@@ -1921,6 +2055,12 @@ export interface MediaSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   role?: T;
+  accessMode?: T;
+  categories?: T;
+  allowedServices?: T;
+  allowedProducts?: T;
+  allowedWork?: T;
+  mustChangePassword?: T;
   title?: T;
   photo?: T;
   updatedAt?: T;
@@ -2612,9 +2752,27 @@ export interface WorkPage {
       blurb?: string | null;
     };
   };
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
   seo?: {
+    /**
+     * Browser tab and OG title. Max 60 characters.
+     */
     title?: string | null;
+    /**
+     * Search snippet and OG description. Aim for 110 to 158 characters.
+     */
     description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
+    noindex?: boolean | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -2639,9 +2797,27 @@ export interface ProductsPage {
       blurb?: string | null;
     };
   };
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
   seo?: {
+    /**
+     * Browser tab and OG title. Max 60 characters.
+     */
     title?: string | null;
+    /**
+     * Search snippet and OG description. Aim for 110 to 158 characters.
+     */
     description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
+    noindex?: boolean | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -2810,9 +2986,27 @@ export interface AboutPage {
                   id?: string | null;
                 }[]
               | null;
+            /**
+             * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+             */
             seo?: {
+              /**
+               * Browser tab and OG title. Max 60 characters.
+               */
               title?: string | null;
+              /**
+               * Search snippet and OG description. Aim for 110 to 158 characters.
+               */
               description?: string | null;
+              /**
+               * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+               */
+              image?: (number | null) | Media;
+              /**
+               * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+               */
+              llmSummary?: string | null;
+              noindex?: boolean | null;
             };
           };
           id?: string | null;
@@ -2828,9 +3022,27 @@ export interface AboutPage {
       | null;
     statement?: string | null;
   };
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
   seo?: {
+    /**
+     * Browser tab and OG title. Max 60 characters.
+     */
     title?: string | null;
+    /**
+     * Search snippet and OG description. Aim for 110 to 158 characters.
+     */
     description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
+    noindex?: boolean | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -2930,9 +3142,27 @@ export interface BrandPage {
   closing?: {
     statement?: string | null;
   };
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
   seo?: {
+    /**
+     * Browser tab and OG title. Max 60 characters.
+     */
     title?: string | null;
+    /**
+     * Search snippet and OG description. Aim for 110 to 158 characters.
+     */
     description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
+    noindex?: boolean | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -3064,9 +3294,27 @@ export interface SolutionsPage {
         other?: {
           h2?: string | null;
         };
+        /**
+         * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+         */
         seo?: {
+          /**
+           * Browser tab and OG title. Max 60 characters.
+           */
           title?: string | null;
+          /**
+           * Search snippet and OG description. Aim for 110 to 158 characters.
+           */
           description?: string | null;
+          /**
+           * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+           */
+          image?: (number | null) | Media;
+          /**
+           * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+           */
+          llmSummary?: string | null;
+          noindex?: boolean | null;
         };
         id?: string | null;
       }[]
@@ -3195,9 +3443,27 @@ export interface IndustryPage {
          * Posts in this category are listed first.
          */
         blogCategory?: string | null;
+        /**
+         * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+         */
         seo?: {
+          /**
+           * Browser tab and OG title. Max 60 characters.
+           */
           title?: string | null;
+          /**
+           * Search snippet and OG description. Aim for 110 to 158 characters.
+           */
           description?: string | null;
+          /**
+           * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+           */
+          image?: (number | null) | Media;
+          /**
+           * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+           */
+          llmSummary?: string | null;
+          noindex?: boolean | null;
         };
         id?: string | null;
       }[]
@@ -3349,9 +3615,27 @@ export interface HirePage {
               }[]
             | null;
         };
+        /**
+         * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+         */
         seo?: {
+          /**
+           * Browser tab and OG title. Max 60 characters.
+           */
           title?: string | null;
+          /**
+           * Search snippet and OG description. Aim for 110 to 158 characters.
+           */
           description?: string | null;
+          /**
+           * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+           */
+          image?: (number | null) | Media;
+          /**
+           * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+           */
+          llmSummary?: string | null;
+          noindex?: boolean | null;
         };
         id?: string | null;
       }[]
@@ -3970,6 +4254,9 @@ export interface WorkPageSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
+        llmSummary?: T;
+        noindex?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -4000,6 +4287,9 @@ export interface ProductsPageSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
+        llmSummary?: T;
+        noindex?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -4144,6 +4434,9 @@ export interface AboutPageSelect<T extends boolean = true> {
                       | {
                           title?: T;
                           description?: T;
+                          image?: T;
+                          llmSummary?: T;
+                          noindex?: T;
                         };
                   };
               id?: T;
@@ -4165,6 +4458,9 @@ export interface AboutPageSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
+        llmSummary?: T;
+        noindex?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -4266,6 +4562,9 @@ export interface BrandPageSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
+        llmSummary?: T;
+        noindex?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -4409,6 +4708,9 @@ export interface SolutionsPagesSelect<T extends boolean = true> {
           | {
               title?: T;
               description?: T;
+              image?: T;
+              llmSummary?: T;
+              noindex?: T;
             };
         id?: T;
       };
@@ -4546,6 +4848,9 @@ export interface IndustryPagesSelect<T extends boolean = true> {
           | {
               title?: T;
               description?: T;
+              image?: T;
+              llmSummary?: T;
+              noindex?: T;
             };
         id?: T;
       };
@@ -4712,6 +5017,9 @@ export interface HirePagesSelect<T extends boolean = true> {
           | {
               title?: T;
               description?: T;
+              image?: T;
+              llmSummary?: T;
+              noindex?: T;
             };
         id?: T;
       };

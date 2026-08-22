@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { editorAccess, hideUnlessCategory } from '../access/permissions'
 import { strings, seo } from '../fields'
 import { TILES } from '../fields/workKeys'
 
@@ -7,8 +8,8 @@ import { TILES } from '../fields/workKeys'
 export const IndustryPages: GlobalConfig = {
   slug: 'industry-pages',
   label: 'Industry pages',
-  access: { read: anyone, update: authenticated },
-  admin: { group: 'Pages' },
+  access: { read: anyone, update: editorAccess('industries') },
+  admin: { group: 'Pages', hidden: hideUnlessCategory('industries') },
   fields: [
     {
       name: 'pages',

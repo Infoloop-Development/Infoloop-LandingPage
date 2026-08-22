@@ -1,7 +1,8 @@
 import type { CollectionConfig, Field } from 'payload'
-import { authenticated, publishedOrAuthenticated } from '../access'
+import { publishedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
 import { seo, slug } from '../fields'
+import { editorAccess, hideUnlessCategory, type ContentCategory } from '../access/permissions'
 
 /**
  * Shared shape for the marketing page collections (services, industries,
@@ -9,13 +10,25 @@ import { seo, slug } from '../fields'
  * drafts and versions. Each collection adds its own fields on top.
  */
 export function pageLike(
-  config: Pick<CollectionConfig, 'slug' | 'labels'> & { group: string; extraFields?: Field[]; description?: string },
+  config: Pick<CollectionConfig, 'slug' | 'labels'> & {
+    group: string
+    category: ContentCategory
+    extraFields?: Field[]
+    description?: string
+  },
 ): CollectionConfig {
+  const write = editorAccess(config.category)
   return {
     slug: config.slug,
     labels: config.labels,
-    access: { read: publishedOrAuthenticated, create: authenticated, update: authenticated, delete: authenticated },
-    admin: { useAsTitle: 'title', defaultColumns: ['title', 'slug', '_status', 'updatedAt'], group: config.group, description: config.description },
+    access: { read: publishedOrAuthenticated, create: write, update: write, delete: write },
+    admin: {
+      useAsTitle: 'title',
+      defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
+      group: config.group,
+      description: config.description,
+      hidden: hideUnlessCategory(config.category),
+    },
     versions: { drafts: { autosave: true }, maxPerDoc: 20 },
     hooks: { afterChange: [rebuildAfterChange], afterDelete: [rebuildAfterDelete] },
     fields: [

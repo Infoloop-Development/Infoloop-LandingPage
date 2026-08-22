@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { editorAccess, hideUnlessCategory } from '../access/permissions'
 import { strings, seo } from '../fields'
 
 /**
@@ -11,8 +12,8 @@ import { strings, seo } from '../fields'
 export const SolutionsPages: GlobalConfig = {
   slug: 'solutions-pages',
   label: 'Solutions group pages',
-  access: { read: anyone, update: authenticated },
-  admin: { group: 'Pages' },
+  access: { read: anyone, update: editorAccess('solutions') },
+  admin: { group: 'Pages', hidden: hideUnlessCategory('solutions') },
   fields: [
     {
       name: 'groups',

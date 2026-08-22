@@ -41,6 +41,16 @@ export default buildConfig({
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: ' | Infoloop CMS' },
+    components: {
+      beforeNavLinks: ['/components/MustChangePasswordGate#MustChangePasswordGate'],
+      views: {
+        changePassword: {
+          Component: '/components/ChangePasswordView#ChangePasswordView',
+          path: '/change-password',
+          meta: { title: 'Set a new password' },
+        },
+      },
+    },
   },
   collections: [Services, Industries, Hire, Products, Work, Posts, Testimonials, Pages, Media, Users],
   globals: [
@@ -63,6 +73,8 @@ export default buildConfig({
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URL || '' },
     // Neon: connection string already carries sslmode=require.
+    // Set PAYLOAD_DATABASE_PUSH=true once after schema field changes in production.
+    push: process.env.PAYLOAD_DATABASE_PUSH === 'true',
   }),
   sharp,
   plugins: [],

@@ -1,8 +1,9 @@
 import type { CollectionConfig, Field } from 'payload'
-import { authenticated, publishedOrAuthenticated } from '../access'
+import { publishedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
 import { seo, slug, strings } from '../fields'
 import { INDUSTRY_KEYS } from '../fields/workKeys'
+import { editorAccess, editorDocAccess, hideUnlessCategory } from '../access/permissions'
 
 const features = (name: string, label: string, max: number): Field => ({
   name,
@@ -22,8 +23,18 @@ const features = (name: string, label: string, max: number): Field => ({
 export const Products: CollectionConfig = {
   slug: 'products',
   labels: { singular: 'Product', plural: 'Products' },
-  access: { read: publishedOrAuthenticated, create: authenticated, update: authenticated, delete: authenticated },
-  admin: { useAsTitle: 'name', defaultColumns: ['name', 'kicker', '_status', 'updatedAt'], group: 'Products' },
+  access: {
+    read: publishedOrAuthenticated,
+    create: editorAccess('products'),
+    update: editorDocAccess('products', 'allowedProducts'),
+    delete: editorDocAccess('products', 'allowedProducts'),
+  },
+  admin: {
+    useAsTitle: 'name',
+    defaultColumns: ['name', 'kicker', '_status', 'updatedAt'],
+    group: 'Products',
+    hidden: hideUnlessCategory('products'),
+  },
   versions: { drafts: { autosave: true }, maxPerDoc: 20 },
   hooks: { afterChange: [rebuildAfterChange], afterDelete: [rebuildAfterDelete] },
   fields: [

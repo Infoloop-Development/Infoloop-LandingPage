@@ -1,14 +1,25 @@
 import type { CollectionConfig } from 'payload'
-import { authenticated, publishedOrAuthenticated } from '../access'
+import { publishedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
 import { seo, slug } from '../fields'
+import { editorAccess, hideUnlessCategory } from '../access/permissions'
 
 /** Blog posts. */
 export const Posts: CollectionConfig = {
   slug: 'posts',
   labels: { singular: 'Post', plural: 'Blog posts' },
-  access: { read: publishedOrAuthenticated, create: authenticated, update: authenticated, delete: authenticated },
-  admin: { useAsTitle: 'title', defaultColumns: ['title', 'publishedAt', '_status', 'updatedAt'], group: 'Work and blog' },
+  access: {
+    read: publishedOrAuthenticated,
+    create: editorAccess('posts'),
+    update: editorAccess('posts'),
+    delete: editorAccess('posts'),
+  },
+  admin: {
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'publishedAt', '_status', 'updatedAt'],
+    group: 'Work and blog',
+    hidden: hideUnlessCategory('posts'),
+  },
   versions: { drafts: { autosave: true }, maxPerDoc: 20 },
   hooks: { afterChange: [rebuildAfterChange], afterDelete: [rebuildAfterDelete] },
   fields: [

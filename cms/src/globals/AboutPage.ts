@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { editorAccess, hideUnlessCategory } from '../access/permissions'
 import { link, strings, seo } from '../fields'
 
 const VALUE_KEYS = ['clarity', 'ownership', 'transparency', 'simplicity', 'speed', 'craft', 'partnership']
@@ -9,8 +10,8 @@ const PRIORITY_KEYS = ['people', 'clarity', 'door', 'words']
 export const AboutPage: GlobalConfig = {
   slug: 'about-page',
   label: 'About page',
-  access: { read: anyone, update: authenticated },
-  admin: { group: 'Pages' },
+  access: { read: anyone, update: editorAccess('about') },
+  admin: { group: 'Pages', hidden: hideUnlessCategory('about') },
   fields: [
     {
       type: 'tabs',

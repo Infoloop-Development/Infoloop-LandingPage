@@ -148,7 +148,17 @@ async function run() {
   if (email && password) {
     const existing = await payload.find({ collection: 'users', limit: 1 })
     if (existing.totalDocs === 0) {
-      await payload.create({ collection: 'users', data: { email, password, role: 'admin', name: 'Admin' } })
+      await payload.create({
+        collection: 'users',
+        data: {
+          email,
+          password,
+          role: 'admin',
+          name: 'Admin',
+          accessMode: 'full',
+          mustChangePassword: false,
+        },
+      })
       payload.logger.info(`Created admin user ${email}`)
     } else {
       payload.logger.info('Users exist; admin not created')

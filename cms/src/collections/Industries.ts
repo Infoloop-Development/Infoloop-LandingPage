@@ -4,6 +4,7 @@ export const Industries = pageLike({
   slug: 'industries',
   labels: { singular: 'Industry', plural: 'Industries' },
   group: 'Solutions',
+  category: 'industries',
   extraFields: [
     {
       name: 'group',

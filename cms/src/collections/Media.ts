@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { mediaEditorAccess, hideUnlessMedia } from '../access/permissions'
 
 /**
  * Uploads. Alt text is required (accessibility and image SEO). Files are
@@ -8,8 +9,8 @@ import { anyone, authenticated } from '../access'
  */
 export const Media: CollectionConfig = {
   slug: 'media',
-  access: { read: anyone, create: authenticated, update: authenticated, delete: authenticated },
-  admin: { group: 'Settings' },
+  access: { read: anyone, create: mediaEditorAccess, update: mediaEditorAccess, delete: mediaEditorAccess },
+  admin: { group: 'Settings', hidden: hideUnlessMedia() },
   upload: {
     // Relative to src/ (the config dir): cms/media, which is gitignored.
     staticDir: '../media',

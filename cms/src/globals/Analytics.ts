@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { editorAccess, hideUnlessCategory } from '../access/permissions'
 
 /**
  * Site analytics and measurement IDs. Editors paste vendor IDs here; the
@@ -9,9 +10,10 @@ import { anyone, authenticated } from '../access'
 export const Analytics: GlobalConfig = {
   slug: 'analytics',
   label: 'Analytics & tracking',
-  access: { read: anyone, update: authenticated },
+  access: { read: anyone, update: editorAccess('analytics') },
   admin: {
     group: 'Settings',
+    hidden: hideUnlessCategory('analytics'),
     description:
       'Connect Google Analytics and other tools without a code change. Paste the IDs from each vendor, tick the privacy checkbox, save, and wait for the site rebuild.',
   },

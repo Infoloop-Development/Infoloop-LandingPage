@@ -1,9 +1,10 @@
 import type { CollectionConfig, Field } from 'payload'
-import { authenticated, publishedOrAuthenticated } from '../access'
+import { publishedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
 import { seo, slug, strings } from '../fields'
 
 import { INDUSTRY_KEYS, SERVICE_KEYS, TILES } from '../fields/workKeys'
+import { editorAccess, editorDocAccess, hideUnlessCategory } from '../access/permissions'
 
 const h3Items = (name: string, label: string): Field => ({
   name,
@@ -23,8 +24,18 @@ const h3Items = (name: string, label: string): Field => ({
 export const Work: CollectionConfig = {
   slug: 'work',
   labels: { singular: 'Case study', plural: 'Work' },
-  access: { read: publishedOrAuthenticated, create: authenticated, update: authenticated, delete: authenticated },
-  admin: { useAsTitle: 'title', defaultColumns: ['title', 'client', 'industry', 'featured', '_status', 'updatedAt'], group: 'Work and blog' },
+  access: {
+    read: publishedOrAuthenticated,
+    create: editorAccess('work'),
+    update: editorDocAccess('work', 'allowedWork'),
+    delete: editorDocAccess('work', 'allowedWork'),
+  },
+  admin: {
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'client', 'industry', 'featured', '_status', 'updatedAt'],
+    group: 'Work and blog',
+    hidden: hideUnlessCategory('work'),
+  },
   versions: { drafts: { autosave: true }, maxPerDoc: 20 },
   hooks: { afterChange: [rebuildAfterChange], afterDelete: [rebuildAfterDelete] },
   fields: [

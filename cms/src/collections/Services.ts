@@ -1,7 +1,8 @@
 import type { CollectionConfig } from 'payload'
-import { authenticated, publishedOrAuthenticated } from '../access'
+import { publishedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
 import { strings, seo } from '../fields'
+import { editorAccess, editorDocAccess, hideUnlessCategory } from '../access/permissions'
 
 const TILES = ['erp', 'attendance', 'shopify', 'copilot', 'garage', 'webflow', 'lms', 'verko']
 
@@ -14,8 +15,19 @@ const TILES = ['erp', 'attendance', 'shopify', 'copilot', 'garage', 'webflow', '
 export const Services: CollectionConfig = {
   slug: 'services',
   labels: { singular: 'Service page', plural: 'Service pages' },
-  access: { read: publishedOrAuthenticated, create: authenticated, update: authenticated, delete: authenticated },
-  admin: { useAsTitle: 'name', defaultColumns: ['name', 'slug', 'group', '_status', 'updatedAt'], group: 'Solutions', description: 'One per Solutions menu item. Slug = menu href without the slash.' },
+  access: {
+    read: publishedOrAuthenticated,
+    create: editorAccess('services'),
+    update: editorDocAccess('services', 'allowedServices'),
+    delete: editorDocAccess('services', 'allowedServices'),
+  },
+  admin: {
+    useAsTitle: 'name',
+    defaultColumns: ['name', 'slug', 'group', '_status', 'updatedAt'],
+    group: 'Solutions',
+    description: 'One per Solutions menu item. Slug = menu href without the slash.',
+    hidden: hideUnlessCategory('services'),
+  },
   versions: { drafts: { autosave: true }, maxPerDoc: 20 },
   hooks: { afterChange: [rebuildAfterChange], afterDelete: [rebuildAfterDelete] },
   fields: [

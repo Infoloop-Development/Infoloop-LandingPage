@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { editorAccess, hideUnlessCategory } from '../access/permissions'
 import { link, strings, seo } from '../fields'
 import { INDUSTRY_KEYS, SERVICE_KEYS, TILES } from '../fields/workKeys'
 
@@ -7,8 +8,8 @@ import { INDUSTRY_KEYS, SERVICE_KEYS, TILES } from '../fields/workKeys'
 export const WorkPage: GlobalConfig = {
   slug: 'work-page',
   label: 'Work page',
-  access: { read: anyone, update: authenticated },
-  admin: { group: 'Pages' },
+  access: { read: anyone, update: editorAccess('work') },
+  admin: { group: 'Pages', hidden: hideUnlessCategory('work') },
   fields: [
     { name: 'eyebrow', type: 'text' },
     { name: 'h1', type: 'text', admin: { description: 'One H1, e.g. "Work".' } },

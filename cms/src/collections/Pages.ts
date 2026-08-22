@@ -1,14 +1,25 @@
 import type { CollectionConfig } from 'payload'
-import { authenticated, publishedOrAuthenticated } from '../access'
+import { publishedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
 import { seo, slug } from '../fields'
+import { editorAccess, hideUnlessCategory } from '../access/permissions'
 
 /** Free-form pages: About, Careers, Contact, Brand assets, Privacy, Terms, Trust center. */
 export const Pages: CollectionConfig = {
   slug: 'pages',
   labels: { singular: 'Page', plural: 'Pages' },
-  access: { read: publishedOrAuthenticated, create: authenticated, update: authenticated, delete: authenticated },
-  admin: { useAsTitle: 'title', defaultColumns: ['title', 'slug', '_status', 'updatedAt'], group: 'Pages' },
+  access: {
+    read: publishedOrAuthenticated,
+    create: editorAccess('pages'),
+    update: editorAccess('pages'),
+    delete: editorAccess('pages'),
+  },
+  admin: {
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
+    group: 'Pages',
+    hidden: hideUnlessCategory('pages'),
+  },
   versions: { drafts: { autosave: true }, maxPerDoc: 20 },
   hooks: { afterChange: [rebuildAfterChange], afterDelete: [rebuildAfterDelete] },
   fields: [

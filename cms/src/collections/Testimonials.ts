@@ -1,13 +1,24 @@
 import type { CollectionConfig } from 'payload'
-import { approvedOrAuthenticated, authenticated } from '../access'
+import { approvedOrAuthenticated } from '../access'
 import { rebuildAfterChange, rebuildAfterDelete } from '../hooks/revalidate'
+import { editorAccess, hideUnlessCategory } from '../access/permissions'
 
 /** Client quotes. Only quotes the client has approved in writing. */
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
   labels: { singular: 'Testimonial', plural: 'Testimonials' },
-  access: { read: approvedOrAuthenticated, create: authenticated, update: authenticated, delete: authenticated },
-  admin: { useAsTitle: 'name', defaultColumns: ['name', 'company', 'platform', 'updatedAt'], group: 'Work and blog' },
+  access: {
+    read: approvedOrAuthenticated,
+    create: editorAccess('testimonials'),
+    update: editorAccess('testimonials'),
+    delete: editorAccess('testimonials'),
+  },
+  admin: {
+    useAsTitle: 'name',
+    defaultColumns: ['name', 'company', 'platform', 'updatedAt'],
+    group: 'Work and blog',
+    hidden: hideUnlessCategory('testimonials'),
+  },
   hooks: { afterChange: [rebuildAfterChange], afterDelete: [rebuildAfterDelete] },
   fields: [
     { name: 'quote', type: 'textarea', required: true },

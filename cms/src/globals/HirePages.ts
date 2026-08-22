@@ -1,13 +1,14 @@
 import type { GlobalConfig } from 'payload'
-import { anyone, authenticated } from '../access'
+import { anyone } from '../access'
+import { editorAccess, hideUnlessCategory } from '../access/permissions'
 import { strings, seo } from '../fields'
 
 /** Hire talent pages (/hire-<role>). Mirrors web/src/content/hire.ts. */
 export const HirePages: GlobalConfig = {
   slug: 'hire-pages',
   label: 'Hire talent pages',
-  access: { read: anyone, update: authenticated },
-  admin: { group: 'Pages' },
+  access: { read: anyone, update: editorAccess('hire') },
+  admin: { group: 'Pages', hidden: hideUnlessCategory('hire') },
   fields: [
     {
       name: 'pages',
