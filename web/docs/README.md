@@ -8,6 +8,8 @@ Read them in this order.
 | [CMS-INTEGRATION.md](CMS-INTEGRATION.md) | How Astro and Payload fit together, what is CMS-backed today, and how to stand up a fresh CMS. |
 | [TRACKING.md](TRACKING.md) | Turning on GA4 and Clarity, the consent banner, the privacy policy change that ships with them, and connecting Search Console, Google Business Profile and Attio. |
 | [AEO-GEO.md](AEO-GEO.md) | Being found and quoted by search engines and answer engines: what the site already does, and what is worth doing next. |
+| [IMAGE-ALT.md](IMAGE-ALT.md) | Required media alt text in the CMS and how the site uses it. |
+| [CHATBOT-MODULE.md](CHATBOT-MODULE.md) | Groq-backed Infoloop-only site assistant (`/api/chat`). |
 
 The repository README at `../README.md` is the map of the codebase itself:
 which file builds which page.

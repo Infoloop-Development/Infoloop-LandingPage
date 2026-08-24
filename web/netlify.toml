@@ -11,6 +11,8 @@
 #   PAYLOAD_URL          https://cms.infoloop.co (Railway/Render URL of the Payload app)
 #   PAYLOAD_TOKEN        optional users API key, only needed for drafts/private reads
 #   CONTACT_WEBHOOK_URL  where /api/contact posts leads (CRM, Zapier, Slack)
+#   GROQ_API_KEY         free key from console.groq.com for /api/chat (must exist at build time)
+#   GROQ_MODEL           optional; default llama-3.3-70b-versatile
 
 
 # Old case study URLs (previous site) -> new /work/<slug> pages

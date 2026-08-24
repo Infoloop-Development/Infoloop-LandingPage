@@ -10,6 +10,7 @@ import Base from "@/layouts/Base.astro";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { RevealObserver } from "@/components/RevealObserver";
+import { Chatbot } from "@/components/Chatbot";
 import { getSite } from "@/lib/cms";
 
 interface Props {
@@ -37,6 +38,7 @@ const site = await getSite();
   </main>
   <Footer site={site} />
   <RevealObserver client:idle />
+  <Chatbot client:idle />
   {/* Even marquee speed: duration = half the track width / 100px per second,
       so every strip reads at the same pace. Re-runs once fonts load and on
       resize. Without JS the CSS fallback duration applies. */}

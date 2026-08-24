@@ -76,6 +76,8 @@ Copy `.env.example` to `.env`:
 PAYLOAD_URL=            # e.g. https://cms.infoloop.co ; unset = local content
 PAYLOAD_TOKEN=          # optional users API key (drafts / private reads)
 CONTACT_WEBHOOK_URL=    # where /api/contact forwards leads
+GROQ_API_KEY=           # console.groq.com — required for /api/chat (at build time)
+GROQ_MODEL=             # optional; default llama-3.3-70b-versatile
 ```
 
 ## Deploy (Netlify)
