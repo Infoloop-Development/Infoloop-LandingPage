@@ -15,6 +15,8 @@ import { Work } from './collections/Work'
 import { Posts } from './collections/Posts'
 import { Testimonials } from './collections/Testimonials'
 import { Pages } from './collections/Pages'
+import { ChatFeatures } from './collections/ChatFeatures'
+import { SalesInquiryTickets } from './collections/SalesInquiryTickets'
 import { Home } from './globals/Home'
 import { Site } from './globals/Site'
 import { WorkPage } from './globals/WorkPage'
@@ -42,7 +44,10 @@ export default buildConfig({
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: ' | Infoloop CMS' },
     components: {
-      beforeNavLinks: ['/components/MustChangePasswordGate#MustChangePasswordGate'],
+      beforeNavLinks: [
+        '/components/MustChangePasswordGate#MustChangePasswordGate',
+        '/components/tickets/WaitingBell#WaitingBell',
+      ],
       views: {
         changePassword: {
           Component: '/components/ChangePasswordView#ChangePasswordView',
@@ -52,7 +57,20 @@ export default buildConfig({
       },
     },
   },
-  collections: [Services, Industries, Hire, Products, Work, Posts, Testimonials, Pages, Media, Users],
+  collections: [
+    Services,
+    Industries,
+    Hire,
+    Products,
+    Work,
+    Posts,
+    Testimonials,
+    Pages,
+    ChatFeatures,
+    SalesInquiryTickets,
+    Media,
+    Users,
+  ],
   globals: [
     { ...Home, hooks: { afterChange: [rebuildAfterGlobalChange] } },
     { ...Site, hooks: { afterChange: [rebuildAfterGlobalChange] } },

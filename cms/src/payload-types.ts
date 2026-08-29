@@ -75,6 +75,8 @@ export interface Config {
     posts: Post;
     testimonials: Testimonial;
     pages: Page;
+    'chat-features': ChatFeature;
+    'sales-inquiry-tickets': SalesInquiryTicket;
     media: Media;
     users: User;
     'payload-kv': PayloadKv;
@@ -92,6 +94,8 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    'chat-features': ChatFeaturesSelect<false> | ChatFeaturesSelect<true>;
+    'sales-inquiry-tickets': SalesInquiryTicketsSelect<false> | SalesInquiryTicketsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -296,7 +300,7 @@ export interface Service {
      */
     description?: string | null;
     /**
-     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
      */
     image?: (number | null) | Media;
     /**
@@ -310,12 +314,20 @@ export interface Service {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Every image needs Alt text. It is shown when the image fails to load and is used by screen readers and SEO.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
+  /**
+   * Required. Short plain-language description of the image. Used when the image does not load, for screen readers, and for social / SEO previews.
+   */
   alt: string;
+  /**
+   * Optional. Visible caption under the image on some pages (separate from alt text).
+   */
   caption?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -437,7 +449,7 @@ export interface Industry {
      */
     description?: string | null;
     /**
-     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
      */
     image?: (number | null) | Media;
     /**
@@ -499,6 +511,9 @@ export interface Work {
    * Drawn cover style until a real screenshot is uploaded.
    */
   tile?: ('erp' | 'attendance' | 'shopify' | 'copilot' | 'garage' | 'webflow' | 'lms' | 'verko') | null;
+  /**
+   * After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.
+   */
   cover?: (number | null) | Media;
   lede?: string | null;
   card?: {
@@ -644,7 +659,14 @@ export interface Work {
   testimonial?: (number | null) | Testimonial;
   gallery?:
     | {
+        /**
+         * After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.
+         */
         image: number | Media;
+        /**
+         * Optional. Overrides the Media file’s alt for this placement only. Leave blank to use the Media alt. Shown when the image does not load.
+         */
+        alt?: string | null;
         caption?: string | null;
         id?: string | null;
       }[]
@@ -662,7 +684,7 @@ export interface Work {
      */
     description?: string | null;
     /**
-     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
      */
     image?: (number | null) | Media;
     /**
@@ -685,6 +707,9 @@ export interface Testimonial {
   name: string;
   role?: string | null;
   company?: string | null;
+  /**
+   * After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.
+   */
   photo?: (number | null) | Media;
   platform?: ('Trustpilot' | 'Google' | 'Clutch' | 'GoodFirms' | 'Direct') | null;
   rating?: number | null;
@@ -779,7 +804,7 @@ export interface Hire {
      */
     description?: string | null;
     /**
-     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
      */
     image?: (number | null) | Media;
     /**
@@ -837,7 +862,14 @@ export interface Product {
   lede?: string | null;
   screens?:
     | {
+        /**
+         * After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.
+         */
         image: number | Media;
+        /**
+         * Optional. Overrides the Media file’s alt for this placement only. Leave blank to use the Media alt. Shown when the image does not load.
+         */
+        alt?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -921,7 +953,7 @@ export interface Product {
      */
     description?: string | null;
     /**
-     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
      */
     image?: (number | null) | Media;
     /**
@@ -949,6 +981,9 @@ export interface Post {
    * One or two sentences. Used in lists and as the default meta description.
    */
   excerpt?: string | null;
+  /**
+   * After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.
+   */
   cover?: (number | null) | Media;
   author?: (number | null) | User;
   publishedAt?: string | null;
@@ -994,7 +1029,7 @@ export interface Post {
      */
     description?: string | null;
     /**
-     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
      */
     image?: (number | null) | Media;
     /**
@@ -1044,6 +1079,8 @@ export interface User {
         | 'testimonials'
         | 'pages'
         | 'media'
+        | 'chat-features'
+        | 'sales-tickets'
       )[]
     | null;
   /**
@@ -1066,6 +1103,9 @@ export interface User {
    * Shown as the author line on blog posts.
    */
   title?: string | null;
+  /**
+   * After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.
+   */
   photo?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
@@ -1166,6 +1206,9 @@ export interface Page {
               | {
                   name: string;
                   role?: string | null;
+                  /**
+                   * After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.
+                   */
                   photo?: (number | null) | Media;
                   linkedin?: string | null;
                   id?: string | null;
@@ -1190,7 +1233,7 @@ export interface Page {
      */
     description?: string | null;
     /**
-     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
      */
     image?: (number | null) | Media;
     /**
@@ -1202,6 +1245,113 @@ export interface Page {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Catalog the chatbot can suggest when a visitor wants a build. Complexity maps to fixed hours on the website API (not editable by the model).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-features".
+ */
+export interface ChatFeature {
+  id: number;
+  name: string;
+  /**
+   * Stable id the model returns in tool calls, e.g. user-auth.
+   */
+  key: string;
+  description: string;
+  complexity: 'simple' | 'medium' | 'complex';
+  platforms: ('web' | 'mobile' | 'backend')[];
+  tags?:
+    ('ecommerce' | 'marketplace' | 'saas' | 'social' | 'booking' | 'ai' | 'admin' | 'payments' | 'general')[] | null;
+  active?: boolean | null;
+  sortOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Leads and rough estimates captured by the Infoloop site chatbot.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sales-inquiry-tickets".
+ */
+export interface SalesInquiryTicket {
+  id: number;
+  ticketId: string;
+  projectName: string;
+  visitorName: string;
+  visitorEmail: string;
+  visitorMobile: string;
+  chatSummary: string;
+  estimate: {
+    /**
+     * USD, buffered. No raw hours stored for staff display.
+     */
+    hourlyTotal: number;
+    milestoneTotal: number;
+    months: number;
+    stack?: string | null;
+    features?:
+      | {
+          key?: string | null;
+          name?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  transcript?:
+    | {
+        role?: ('user' | 'assistant' | 'system' | 'agent') | null;
+        message?: string | null;
+        timestamp?: string | null;
+        agentName?: string | null;
+        agentUserId?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Live sales handoff. “Waiting” highlights the list row in red.
+   */
+  handoffStatus?: ('none' | 'requested' | 'active' | 'ended') | null;
+  handoffRequestedAt?: string | null;
+  handoffJoinedAt?: string | null;
+  handoffAgent?: (number | null) | User;
+  handoffAgentName?: string | null;
+  /**
+   * Public URL of agent photo for the site chat.
+   */
+  handoffAgentPhoto?: string | null;
+  status: 'Received' | 'Open' | 'In Progress' | 'Closed';
+  /**
+   * Call minutes and follow-ups after outreach.
+   */
+  notes?:
+    | {
+        body: string;
+        author?: string | null;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  statusHistory?:
+    | {
+        status?: ('Received' | 'Open' | 'In Progress' | 'Closed') | null;
+        reason?: string | null;
+        changedAt?: string | null;
+        changedBy?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Last time the visitor resumed this quote via Ivy.
+   */
+  lastVisitorReturnAt?: string | null;
+  /**
+   * How many times the visitor has returned via Ivy.
+   */
+  resumeCount?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1258,6 +1408,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pages';
         value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'chat-features';
+        value: number | ChatFeature;
+      } | null)
+    | ({
+        relationTo: 'sales-inquiry-tickets';
+        value: number | SalesInquiryTicket;
       } | null)
     | ({
         relationTo: 'media';
@@ -1573,6 +1731,7 @@ export interface ProductsSelect<T extends boolean = true> {
     | T
     | {
         image?: T;
+        alt?: T;
         id?: T;
       };
   idea?:
@@ -1833,6 +1992,7 @@ export interface WorkSelect<T extends boolean = true> {
     | T
     | {
         image?: T;
+        alt?: T;
         caption?: T;
         id?: T;
       };
@@ -1997,6 +2157,87 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-features_select".
+ */
+export interface ChatFeaturesSelect<T extends boolean = true> {
+  name?: T;
+  key?: T;
+  description?: T;
+  complexity?: T;
+  platforms?: T;
+  tags?: T;
+  active?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sales-inquiry-tickets_select".
+ */
+export interface SalesInquiryTicketsSelect<T extends boolean = true> {
+  ticketId?: T;
+  projectName?: T;
+  visitorName?: T;
+  visitorEmail?: T;
+  visitorMobile?: T;
+  chatSummary?: T;
+  estimate?:
+    | T
+    | {
+        hourlyTotal?: T;
+        milestoneTotal?: T;
+        months?: T;
+        stack?: T;
+        features?:
+          | T
+          | {
+              key?: T;
+              name?: T;
+              id?: T;
+            };
+      };
+  transcript?:
+    | T
+    | {
+        role?: T;
+        message?: T;
+        timestamp?: T;
+        agentName?: T;
+        agentUserId?: T;
+        id?: T;
+      };
+  handoffStatus?: T;
+  handoffRequestedAt?: T;
+  handoffJoinedAt?: T;
+  handoffAgent?: T;
+  handoffAgentName?: T;
+  handoffAgentPhoto?: T;
+  status?: T;
+  notes?:
+    | T
+    | {
+        body?: T;
+        author?: T;
+        at?: T;
+        id?: T;
+      };
+  statusHistory?:
+    | T
+    | {
+        status?: T;
+        reason?: T;
+        changedAt?: T;
+        changedBy?: T;
+        id?: T;
+      };
+  lastVisitorReturnAt?: T;
+  resumeCount?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -2157,9 +2398,21 @@ export interface Home {
       quote?: string | null;
       name?: string | null;
       role?: string | null;
+      /**
+       * Fallback if no image is uploaded, or override. Prefer Alt on the Media file when using Left image.
+       */
       leftAlt?: string | null;
+      /**
+       * Fallback if no image is uploaded, or override. Prefer Alt on the Media file when using Right image.
+       */
       rightAlt?: string | null;
+      /**
+       * After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.
+       */
       leftImage?: (number | null) | Media;
+      /**
+       * After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.
+       */
       rightImage?: (number | null) | Media;
     };
     trustedLine?: string | null;
@@ -2182,6 +2435,9 @@ export interface Home {
     logos?:
       | {
           name: string;
+          /**
+           * After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.
+           */
           image: number | Media;
           id?: string | null;
         }[]
@@ -2363,7 +2619,7 @@ export interface Home {
            */
           tile?: ('attendance' | 'garage' | 'lms') | null;
           /**
-           * Optional real screenshot, replaces the drawn tile.
+           * Optional real screenshot, replaces the drawn tile. Set Alt text on the Media file.
            */
           image?: (number | null) | Media;
           href: string;
@@ -2395,6 +2651,9 @@ export interface Home {
       name?: string | null;
       role?: string | null;
       note?: string | null;
+      /**
+       * After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.
+       */
       photo?: (number | null) | Media;
     };
     links?:
@@ -2765,7 +3024,7 @@ export interface WorkPage {
      */
     description?: string | null;
     /**
-     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
      */
     image?: (number | null) | Media;
     /**
@@ -2810,7 +3069,7 @@ export interface ProductsPage {
      */
     description?: string | null;
     /**
-     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
      */
     image?: (number | null) | Media;
     /**
@@ -2999,7 +3258,7 @@ export interface AboutPage {
                */
               description?: string | null;
               /**
-               * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+               * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
                */
               image?: (number | null) | Media;
               /**
@@ -3035,7 +3294,7 @@ export interface AboutPage {
      */
     description?: string | null;
     /**
-     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
      */
     image?: (number | null) | Media;
     /**
@@ -3155,7 +3414,7 @@ export interface BrandPage {
      */
     description?: string | null;
     /**
-     * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
      */
     image?: (number | null) | Media;
     /**
@@ -3307,7 +3566,7 @@ export interface SolutionsPage {
            */
           description?: string | null;
           /**
-           * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+           * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
            */
           image?: (number | null) | Media;
           /**
@@ -3456,7 +3715,7 @@ export interface IndustryPage {
            */
           description?: string | null;
           /**
-           * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+           * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
            */
           image?: (number | null) | Media;
           /**
@@ -3628,7 +3887,7 @@ export interface HirePage {
            */
           description?: string | null;
           /**
-           * Optional. 1200×630 recommended. Used for og:image and Twitter card.
+           * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
            */
           image?: (number | null) | Media;
           /**

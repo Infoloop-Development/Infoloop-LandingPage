@@ -1,43 +1,77 @@
 # Site chatbot (Groq)
 
-Floating **Infoloop assistant** on every page that uses `Site.astro`. Answers only about Infoloop (services, products, process, published price ranges, hire, contact). Off-topic questions get a short refusal and a link to `/contact`.
+Floating **Ivy** (Infoloop assistant) on every page that uses `Site.astro`. Answers Infoloop FAQs and, on build intent, proposes features, captures a lead, then returns a **server-computed** rough estimate and opens a **Sales Inquiry Ticket** in Payload.
 
 ## Stack
 
 | Piece | Where |
 | --- | --- |
 | UI | `web/src/components/Chatbot.tsx` (`client:idle` from `Site.astro`) |
+| Message formatting | `web/src/components/ChatMessageBody.tsx` |
 | API | `POST /api/chat` → `web/src/pages/api/chat.ts` (`prerender = false`) |
-| Knowledge + system prompt | `web/src/content/chat-knowledge.ts` |
-| Provider | [Groq](https://console.groq.com) OpenAI-compatible Chat Completions |
+| Knowledge + system prompt | `web/src/content/chat-knowledge.ts` (QuirkBees ~3yr builder persona on Infoloop site) |
+| Feature catalog (local fallback) | `web/src/content/chat-features.ts` |
+| Catalog fetch | `web/src/lib/chat-features.ts` → Payload `chat-features` |
+| Estimate math | `web/src/lib/chat-estimate.ts` (hours never shown in UI) |
+| Ticket create | `web/src/lib/chat-ticket.ts` → Payload `sales-inquiry-tickets` |
+| CMS catalog | `cms/src/collections/ChatFeatures.ts` |
+| CMS tickets + admin UI | `cms/src/collections/SalesInquiryTickets.ts`, `cms/src/components/tickets/*` |
+| Provider | [Groq](https://console.groq.com) Chat Completions + tool calls |
 
-Default model: `llama-3.3-70b-versatile` (override with `GROQ_MODEL`).
+Default model: `openai/gpt-oss-20b` (override with `GROQ_MODEL`).
 
 ## Environment
 
-Set in Netlify (same host as `/api/contact`). **Must be present at build time** — Astro inlines `import.meta.env` into the function, same as `CONTACT_WEBHOOK_URL`.
+Set in Netlify (same host as `/api/contact`). **Must be present at build time** — Astro inlines `import.meta.env` into the function.
 
 | Variable | Required | Notes |
 | --- | --- | --- |
-| `GROQ_API_KEY` | Yes for live chat | Free key from Groq console |
-| `GROQ_MODEL` | No | Defaults to `llama-3.3-70b-versatile` |
+| `GROQ_API_KEY` | Yes for live chat | Groq console |
+| `GROQ_MODEL` | No | Defaults to `openai/gpt-oss-20b` |
+| `PAYLOAD_URL` | For live catalog + tickets | CMS origin |
+| `PAYLOAD_TOKEN` | For tickets (and private CMS reads) | Users API key that can **create** `sales-inquiry-tickets` |
 
-Without the key the widget still renders; the API returns 503 with a contact fallback.
+Without `GROQ_API_KEY` the widget still renders; `/api/chat` returns 503. Without Payload, the local feature catalog is used and estimates still work, but tickets are skipped (logged).
 
-Also add `GROQ_API_KEY` to local `web/.env` when testing `astro dev`.
+## Build-intent + estimate flow
+
+1. Visitor describes a project to build → model may call `select_project_features` (feature **keys** only from the catalog).
+2. Reply: affirmative, suggested features, stack (web: React / Node / Next; mobile: **React Native** unless they insist on Flutter), offer of on-the-spot estimate.
+3. UI shows a **mandatory** lead form (full name, mobile, email). Chat input stays locked until submitted.
+4. `action: "estimate"` on the API: validates lead, sums catalog hours by complexity, applies **30% buffer**, computes:
+   - hourly total at **$10/hr**
+   - milestone total at **$15/hr**
+   - months = `ceil(bufferedHours / 160)` (min 1)
+5. Visible reply format (no raw hours):
+   > On an hourly basis this would be roughly $X total, or on a milestone basis roughly $Y total, and the project would take approximately Z months to complete.
+6. Fixed disclaimer (exact wording, including em dash):
+   > This is an Info Loop trained AI model — the estimate above is a rough, automatically generated approximation to give you a starting idea, not a binding quote, and final scope/pricing will be confirmed in a live consultation.
+7. Separate Groq call summarizes the transcript for sales; Payload ticket is created with status **Received** and initial `statusHistory`.
+
+### Complexity → base hours (server only)
+
+| Complexity | Hours |
+| --- | --- |
+| simple | 16 |
+| medium | 40 |
+| complex | 80 |
+
+## CMS: Sales Inquiry Tickets
+
+- List defaults: Ticket ID, Project Name, Status.
+- Detail: ticket ID as title; contact fields; Description (AI summary); Estimation (hourly / milestone / months); collapsible Chat History bubbles; Status select with **reason modal** (`StatusWithReason`); Notes in the sidebar; Status timeline at the bottom.
+- After schema changes: set `PAYLOAD_DATABASE_PUSH=true` once on the CMS host (or run migrations), grant editors the **Sales inquiry tickets** / **Chat feature catalog** categories as needed.
 
 ## Behaviour guards
 
-- Server: max 800 chars per message, last 8 turns of history, ~25s timeout, low temperature, 500 max tokens
-- Client: 20 user messages per page session, suggestion chips on first open
-- System prompt: Infoloop-only; no invented certifications or unpublished facts
-
-Edit facts in `chat-knowledge.ts` when offerings or price guidance change, then rebuild.
-
-## Hosting note
-
-`/api/chat` needs Astro SSR / Netlify Functions. A pure static host (no functions) will not run the chat API. Use the same Netlify site that already runs `/api/contact`.
+- Server: max 800 chars per message, up to 40 history turns, ~25s timeout, tool-calls for feature pick.
+- Client: 20 user messages per open panel; close/reload resets the thread.
+- Model must not invent prices or hours; estimate numbers are computed only on the server after lead capture.
 
 ## Analytics
 
-Optional events via `trackEvent`: `chat_opened`, `chat_message`, `chat_cta_click`.
+`chat_opened`, `chat_message`, `chat_cta_click`, `chat_lead`, `chat_estimate`.
+
+## Hosting note
+
+`/api/chat` needs Astro SSR / Netlify Functions. Use the same Netlify site that runs `/api/contact`.

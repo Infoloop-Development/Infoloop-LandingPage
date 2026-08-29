@@ -77,7 +77,7 @@ PAYLOAD_URL=            # e.g. https://cms.infoloop.co ; unset = local content
 PAYLOAD_TOKEN=          # optional users API key (drafts / private reads)
 CONTACT_WEBHOOK_URL=    # where /api/contact forwards leads
 GROQ_API_KEY=           # console.groq.com — required for /api/chat (at build time)
-GROQ_MODEL=             # optional; default llama-3.3-70b-versatile
+GROQ_MODEL=             # optional; default openai/gpt-oss-20b
 ```
 
 ## Deploy (Netlify)

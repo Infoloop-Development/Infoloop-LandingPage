@@ -17,6 +17,8 @@ export const CONTENT_CATEGORIES = [
   { label: 'Testimonials', value: 'testimonials' },
   { label: 'Free-form pages', value: 'pages' },
   { label: 'Media library', value: 'media' },
+  { label: 'Chat feature catalog', value: 'chat-features' },
+  { label: 'Sales inquiry tickets', value: 'sales-tickets' },
 ] as const
 
 export type ContentCategory = (typeof CONTENT_CATEGORIES)[number]['value']
