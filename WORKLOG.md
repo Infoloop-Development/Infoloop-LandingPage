@@ -24,7 +24,7 @@ Running log of agent/handover work. Ask anytime for a status summary (“status�
 - Commit: `bfc629b` on `production` + `main`
 
 ### Tracking setup
-- `WORKLOG.md` + `.cursor/rules/work-tracking.mdc` (always-on) — local, not committed yet
+- `WORKLOG.md` + `.cursor/rules/work-tracking.mdc` (always-on) committed so progress can be reported on request
 
 ---
 
@@ -33,7 +33,6 @@ Running log of agent/handover work. Ask anytime for a status summary (“status�
 | Item | Notes |
 |------|--------|
 | `image-size` + `extract-zip` Dependabot alerts | No patched npm release; only via Netlify **local-dev**. Breaking “fix” = downgrade `@astrojs/netlify` — skipped on purpose |
-| Commit tracking files | `WORKLOG.md` + `.cursor/` still untracked — say if you want them pushed |
 
 ---
 
