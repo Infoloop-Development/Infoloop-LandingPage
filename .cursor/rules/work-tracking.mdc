@@ -1,0 +1,20 @@
+---
+description: Keep a running work log and report progress when asked
+alwaysApply: true
+---
+
+# Work tracking
+
+Maintain `WORKLOG.md` at the repo root as the source of truth for what we do.
+
+## When finishing meaningful work
+Append a short dated entry to `WORKLOG.md`:
+- What changed (1–3 bullets)
+- Where (cms / web / both)
+- Commit hash if committed
+- Open follow-ups if any
+
+Skip trivial chatter; do log features, fixes, deploys, dependency/security work, and decisions.
+
+## When the user asks for status / what we did / progress
+Summarize from `WORKLOG.md` (and this chat if newer than the file). Keep it brief unless they ask for detail.
