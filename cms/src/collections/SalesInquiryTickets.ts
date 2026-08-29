@@ -15,20 +15,38 @@ const HANDOFF_STATUSES = [
   { label: 'Ended', value: 'ended' },
 ] as const
 
+type TranscriptRole = 'user' | 'assistant' | 'system' | 'agent'
+
 type TranscriptRow = {
   id?: string
-  role?: string
+  role?: TranscriptRole
   message?: string
   timestamp?: string
   agentName?: string
   agentUserId?: string
 }
 
-function agentDisplayName(user: CmsUser & { name?: string | null; email?: string }) {
+type NoteRow = {
+  body: string
+  author?: string | null
+  at?: string | null
+  id?: string | null
+}
+
+function agentDisplayName(user: CmsUser) {
   const n = typeof user.name === 'string' ? user.name.trim() : ''
   if (n) return n
   const email = typeof user.email === 'string' ? user.email : ''
   return email.split('@')[0] || 'Sales'
+}
+
+function userIdAsNumber(id: number | string | undefined): number | undefined {
+  if (typeof id === 'number' && Number.isFinite(id)) return id
+  if (typeof id === 'string' && id.trim()) {
+    const n = Number(id)
+    if (Number.isFinite(n)) return n
+  }
+  return undefined
 }
 
 /** Chatbot (API key) or editors may create; only editors read/update. */
@@ -37,13 +55,15 @@ const createAccess = ({ req: { user } }: { req: { user?: unknown } }) => Boolean
 const stampNoteAuthors: CollectionBeforeChangeHook = ({ data, req }) => {
   if (!data?.notes || !Array.isArray(data.notes)) return data
   const actor = req.user as CmsUser | undefined
-  const name = actor?.email || 'staff'
+  const name = (typeof actor?.email === 'string' && actor.email) || 'staff'
   const now = new Date().toISOString()
-  data.notes = data.notes
-    .filter((row: { body?: unknown }) => typeof row?.body === 'string' && row.body.trim().length > 0)
-    .map((row: { author?: string; at?: string; body?: unknown; id?: string }) => ({
+  data.notes = (data.notes as { body?: unknown; author?: string; at?: string; id?: string }[])
+    .filter((row): row is { body: string; author?: string; at?: string; id?: string } =>
+      typeof row?.body === 'string' && row.body.trim().length > 0,
+    )
+    .map((row) => ({
       ...row,
-      body: typeof row.body === 'string' ? row.body.trim() : row.body,
+      body: row.body.trim(),
       author: row.author || name,
       at: row.at || now,
     }))
@@ -54,10 +74,9 @@ const stampNoteAuthors: CollectionBeforeChangeHook = ({ data, req }) => {
  * When status changes without a matching statusHistory append from the custom
  * field UI, reject the save. Seed Received on create.
  */
-const enforceStatusReason: CollectionBeforeChangeHook = ({ data, operation, originalDoc, req }) => {
+const enforceStatusReason: CollectionBeforeChangeHook = ({ data, operation, originalDoc }) => {
   if (!data) return data
   const now = new Date().toISOString()
-  const actor = (req.user as CmsUser | undefined)?.email || 'system'
 
   if (operation === 'create') {
     if (!data.ticketId) {
@@ -155,7 +174,7 @@ export const SalesInquiryTickets: CollectionConfig = {
           return Response.json({ message: 'Invalid JSON' }, { status: 400 })
         }
 
-        const actorEmail = (user as CmsUser & { email?: string }).email || 'staff'
+        const actorEmail = (typeof user.email === 'string' && user.email) || 'staff'
 
         const doc = await req.payload.findByID({
           collection: 'sales-inquiry-tickets',
@@ -165,11 +184,20 @@ export const SalesInquiryTickets: CollectionConfig = {
           overrideAccess: false,
         })
 
-        const existing = Array.isArray(doc.notes) ? [...doc.notes] : []
-        let next = existing
+        const existing: NoteRow[] = Array.isArray(doc.notes) ? [...doc.notes] : []
+        let next: NoteRow[] = existing
 
         if (Array.isArray(body.notes)) {
-          next = body.notes.filter((n) => typeof n?.body === 'string' && n.body.trim())
+          next = body.notes
+            .filter((n): n is { body: string; author?: string; at?: string; id?: string } =>
+              typeof n?.body === 'string' && n.body.trim().length > 0,
+            )
+            .map((n) => ({
+              ...n,
+              body: n.body.trim(),
+              author: n.author || actorEmail,
+              at: n.at || new Date().toISOString(),
+            }))
         } else if (typeof body.body === 'string' && body.body.trim()) {
           next = [
             ...existing,
@@ -199,12 +227,16 @@ export const SalesInquiryTickets: CollectionConfig = {
       path: '/:id/handoff/start',
       method: 'post',
       handler: async (req: PayloadRequest) => {
-        const user = req.user as (CmsUser & { id?: string | number; name?: string | null; email?: string; photo?: unknown }) | undefined
+        const user = req.user as CmsUser | undefined
         if (!user || !canAccessCategory(user, 'sales-tickets')) {
           return Response.json({ message: 'You are not allowed to perform this action.' }, { status: 403 })
         }
         const id = req.routeParams?.id
         if (!id) return Response.json({ message: 'Missing id' }, { status: 400 })
+        const agentId = userIdAsNumber(user.id)
+        if (agentId == null) {
+          return Response.json({ message: 'Invalid user id' }, { status: 400 })
+        }
 
         const doc = await req.payload.findByID({
           collection: 'sales-inquiry-tickets',
@@ -216,6 +248,7 @@ export const SalesInquiryTickets: CollectionConfig = {
 
         const now = new Date().toISOString()
         const displayName = agentDisplayName(user)
+        const actorLabel = (typeof user.email === 'string' && user.email) || displayName
         const transcript: TranscriptRow[] = Array.isArray(doc.transcript) ? [...(doc.transcript as TranscriptRow[])] : []
         transcript.push({
           role: 'system',
@@ -227,7 +260,7 @@ export const SalesInquiryTickets: CollectionConfig = {
         try {
           const fullUser = await req.payload.findByID({
             collection: 'users',
-            id: String(user.id),
+            id: agentId,
             depth: 1,
             req,
             overrideAccess: true,
@@ -260,13 +293,13 @@ export const SalesInquiryTickets: CollectionConfig = {
           message: `Hi — I'm ${displayName}. I've got everything discussed so far and can help you navigate from here.`,
           timestamp: now,
           agentName: displayName,
-          agentUserId: String(user.id ?? ''),
+          agentUserId: String(agentId),
         })
 
-        const notes = Array.isArray(doc.notes) ? [...doc.notes] : []
+        const notes: NoteRow[] = Array.isArray(doc.notes) ? [...doc.notes] : []
         notes.push({
           body: `Live handoff started — ${displayName} joined the visitor chat. Messages after the live-chat divider are with the sales executive.`,
-          author: (user as { email?: string }).email || displayName,
+          author: actorLabel,
           at: now,
         })
 
@@ -277,7 +310,7 @@ export const SalesInquiryTickets: CollectionConfig = {
             status: nextStatus,
             reason: `Live chat started by ${displayName}`,
             changedAt: now,
-            changedBy: (user as { email?: string }).email || displayName,
+            changedBy: actorLabel,
           })
         }
 
@@ -287,7 +320,7 @@ export const SalesInquiryTickets: CollectionConfig = {
           data: {
             handoffStatus: 'active',
             handoffJoinedAt: now,
-            handoffAgent: user.id,
+            handoffAgent: agentId,
             handoffAgentName: displayName,
             handoffAgentPhoto: agentPhotoUrl || undefined,
             transcript,
@@ -306,12 +339,13 @@ export const SalesInquiryTickets: CollectionConfig = {
       path: '/:id/handoff/message',
       method: 'post',
       handler: async (req: PayloadRequest) => {
-        const user = req.user as (CmsUser & { id?: string | number; name?: string | null; email?: string }) | undefined
+        const user = req.user as CmsUser | undefined
         if (!user || !canAccessCategory(user, 'sales-tickets')) {
           return Response.json({ message: 'You are not allowed to perform this action.' }, { status: 403 })
         }
         const id = req.routeParams?.id
         if (!id) return Response.json({ message: 'Missing id' }, { status: 400 })
+        const agentId = userIdAsNumber(user.id)
 
         let body: { message?: string }
         try {
@@ -343,14 +377,14 @@ export const SalesInquiryTickets: CollectionConfig = {
           message: message.slice(0, 2000),
           timestamp: now,
           agentName: displayName,
-          agentUserId: String(user.id ?? ''),
+          agentUserId: String(agentId ?? user.id ?? ''),
         })
 
         const patch: Record<string, unknown> = { transcript }
         if (doc.handoffStatus === 'requested') {
           patch.handoffStatus = 'active'
           patch.handoffJoinedAt = now
-          patch.handoffAgent = user.id
+          if (agentId != null) patch.handoffAgent = agentId
           patch.handoffAgentName = displayName
         }
 

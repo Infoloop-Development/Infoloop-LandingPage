@@ -25,6 +25,8 @@ export type ContentCategory = (typeof CONTENT_CATEGORIES)[number]['value']
 
 export type CmsUser = {
   id: number | string
+  email?: string | null
+  name?: string | null
   role?: string | null
   accessMode?: 'full' | 'limited' | null
   categories?: ContentCategory[] | null
