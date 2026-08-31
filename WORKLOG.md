@@ -34,6 +34,7 @@ Running log of agent/handover work. Ask anytime for a status summary (â€œstatusâ
 - Live chat failed because `/api/chat` does not run on Render **Static** + Netlify adapter
 - Switched `web` to `@astrojs/node` standalone for Render Web Service
 - CMS stays on Render; Groq/PAYLOAD_* belong on **web** env only
+- First Render build failed on old commit still using `@astrojs/netlify` + missing `TRACKING_DISCLOSED` while CMS analytics is on
 
 ---
 
@@ -41,7 +42,7 @@ Running log of agent/handover work. Ask anytime for a status summary (â€œstatusâ
 
 | Item | Notes |
 |------|--------|
-| Finish Render Web Service for `Infoloop-WebMain` | Language **Node**, root `web`, start `node ./dist/server/entry.mjs`, set GROQ + PAYLOAD env, redeploy |
+| Redeploy `Infoloop-WebMain` after Node-adapter push | Root `web`, start `node ./dist/server/entry.mjs`, env must include `TRACKING_DISCLOSED=true` (CMS has analytics), plus GROQ + PAYLOAD_* + `HOST=0.0.0.0` |
 | `image-size` + `extract-zip` Dependabot alerts | Unpatched Netlify-dev deps; skipped on purpose |
 
 ---
