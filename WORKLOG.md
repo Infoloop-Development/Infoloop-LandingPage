@@ -28,11 +28,21 @@ Running log of agent/handover work. Ask anytime for a status summary (“status�
 
 ---
 
+## 2026-08-31
+
+### Render: web needs Node Web Service for Ivy
+- Live chat failed because `/api/chat` does not run on Render **Static** + Netlify adapter
+- Switched `web` to `@astrojs/node` standalone for Render Web Service
+- CMS stays on Render; Groq/PAYLOAD_* belong on **web** env only
+
+---
+
 ## Open / left
 
 | Item | Notes |
 |------|--------|
-| `image-size` + `extract-zip` Dependabot alerts | No patched npm release; only via Netlify **local-dev**. Breaking “fix” = downgrade `@astrojs/netlify` — skipped on purpose |
+| Finish Render Web Service for `Infoloop-WebMain` | Language **Node**, root `web`, start `node ./dist/server/entry.mjs`, set GROQ + PAYLOAD env, redeploy |
+| `image-size` + `extract-zip` Dependabot alerts | Unpatched Netlify-dev deps; skipped on purpose |
 
 ---
 
