@@ -31,6 +31,7 @@ Running log of agent/handover work. Ask anytime for a status summary (â€œstatusâ
 ## 2026-08-31
 
 ### Render: web needs Node Web Service for Ivy
+- Bumped `astro` to 7.2.9 so `@astrojs/node` startup (`app.getLogger`) works on Render
 - Live chat failed because `/api/chat` does not run on Render **Static** + Netlify adapter
 - Switched `web` to `@astrojs/node` standalone for Render Web Service
 - CMS stays on Render; Groq/PAYLOAD_* belong on **web** env only
