@@ -5,8 +5,8 @@ import {
   buildDiscoveryMessage,
   buildReviewMessage,
   extractUserFeatureKeys,
-  isBuildIntentMessage,
   isMergedScopeChoice,
+  isQuoteFlowTriggerMessage,
   isSuggestFeaturesRequest,
   isUserOnlyScopeChoice,
   mergeFeatureKeys,
@@ -682,18 +682,30 @@ export const POST: APIRoute = async ({ request }) => {
 ${catalogPublic.map((f) => `- ${f.key}: ${f.name} [${f.platforms.join(",")}] — ${f.description}`).join("\n")}`;
 
   try {
-    // First build-intent: invent a clean title, always ask platform (never assume mobile/web)
-    if (!buildFlow && isBuildIntentMessage(message)) {
-      const named = await nameProjectFromMessage(message, groqChat, groqModel());
+    // Enter quote flow on first build-intent OR mid-chat drift into features / estimate talk
+    if (!buildFlow && isQuoteFlowTriggerMessage(message)) {
+      const historyBits = history
+        .filter((h) => h.role === "user" || h.role === "assistant")
+        .slice(-6)
+        .map((h) => h.content)
+        .join("\n");
+      const namingSource = [historyBits, message].filter(Boolean).join("\n").slice(0, 900) || message;
+      const named = await nameProjectFromMessage(namingSource, groqChat, groqModel());
       const flow: BuildFlow = {
         step: "clarify",
         projectTitle: named.projectTitle,
         platform: null,
         flutterOnly: named.flutterOnly,
-        brief: named.brief,
+        brief: named.brief || message,
       };
+      const driftNote =
+        isSuggestFeaturesRequest(message) || /\bfeatures?\b/i.test(message)
+          ? "Happy to map features properly so we can give you a rough quote afterward.\n\n"
+          : /\b(quote|estimate|cost|price|pricing|budget|how much)\b/i.test(message)
+            ? "Happy to run a rough quote. We will lock platform and features first.\n\n"
+            : "";
       return json({
-        reply: scrubDashes(buildClarifyMessage(named.projectTitle, named.brief)),
+        reply: scrubDashes(`${driftNote}${buildClarifyMessage(named.projectTitle, named.brief)}`),
         phase: "clarify",
         buildFlow: flow,
       });

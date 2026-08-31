@@ -39,6 +39,24 @@ export function isSuggestFeaturesRequest(text: string): boolean {
   return SUGGEST_RE.test(text);
 }
 
+const QUOTE_DRIFT_RE =
+  /\b((rough )?(quote|estimate)|cost|price|pricing|budget|how much|timeline|how long)\b.{0,100}\b(app|application|software|system|platform|website|web app|mobile|project|build)\b|\b(app|application|software|system|platform|website|project|build)\b.{0,100}\b((rough )?(quote|estimate)|cost|price|pricing|budget|how much)\b/i;
+
+const FEATURE_DRIFT_RE =
+  /\b(what features|which features|feature list|features (would|should|could|do|can) (you|we|it)|suggest( some)? features|recommend( some)? features|propose( some)? features|what (would|should) (you |we )?(include|add|build)|scope (for|of) (the |this |my |our )?(app|project|software)|features for (my|our|the|this))\b/i;
+
+/**
+ * Mid-chat drift into features / pricing / quote — enter the formal quote flow
+ * (platform → features → lead → estimate) instead of freeform feature chat.
+ */
+export function isQuoteFlowTriggerMessage(text: string): boolean {
+  if (isBuildIntentMessage(text)) return true;
+  if (isSuggestFeaturesRequest(text)) return true;
+  if (QUOTE_DRIFT_RE.test(text)) return true;
+  if (FEATURE_DRIFT_RE.test(text)) return true;
+  return false;
+}
+
 export function isUserOnlyScopeChoice(text: string): boolean {
   return USER_ONLY_RE.test(text);
 }
