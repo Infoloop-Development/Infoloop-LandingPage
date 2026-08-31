@@ -129,12 +129,12 @@ export const INDUSTRIES_DETAIL: IndustryDetail[] = [
       {
         "value": "50+",
         "label": "software projects delivered, from attendance and stock to AI helpers and online shops",
-        "href": "/work"
+        "href": "/work.html"
       },
       {
         "value": "99.9%",
         "label": "uptime on the software we run for clients, watched every day of the season",
-        "href": "/work"
+        "href": "/work.html"
       },
       {
         "value": "6",
@@ -307,7 +307,7 @@ export const INDUSTRIES_DETAIL: IndustryDetail[] = [
       {
         "value": "2.1x",
         "label": "qualified leads from a new Webflow website for a software company",
-        "href": "/work"
+        "href": "/work.html"
       },
       {
         "value": "99.9%",
@@ -476,7 +476,7 @@ export const INDUSTRIES_DETAIL: IndustryDetail[] = [
       {
         "value": "50+",
         "label": "projects delivered across 6 countries, with a named person who replies within one business day",
-        "href": "/work"
+        "href": "/work.html"
       }
     ],
     "challenges": {
@@ -630,7 +630,7 @@ export const INDUSTRIES_DETAIL: IndustryDetail[] = [
       {
         "value": "2.1x",
         "label": "qualified leads for a software company after a new Webflow site",
-        "href": "/work"
+        "href": "/work.html"
       },
       {
         "value": "4.8",
@@ -799,7 +799,7 @@ export const INDUSTRIES_DETAIL: IndustryDetail[] = [
       {
         "value": "99.9%",
         "label": "uptime on the software we run for clients, watched and patched every month",
-        "href": "/work"
+        "href": "/work.html"
       },
       {
         "value": "4.8",
@@ -1450,7 +1450,7 @@ export const INDUSTRIES_DETAIL: IndustryDetail[] = [
       {
         "value": "50+",
         "label": "projects delivered, each from a written scope before work started",
-        "href": "/work"
+        "href": "/work.html"
       },
       {
         "value": "4.8",
@@ -1609,7 +1609,7 @@ export const INDUSTRIES_DETAIL: IndustryDetail[] = [
       {
         "value": "50+",
         "label": "projects delivered for companies that needed software to just work",
-        "href": "/work"
+        "href": "/work.html"
       },
       {
         "value": "6",
@@ -1941,7 +1941,7 @@ export const INDUSTRIES_DETAIL: IndustryDetail[] = [
       {
         "value": "2.1x",
         "label": "more qualified leads for a software company after a new Webflow site, in four months",
-        "href": "/work"
+        "href": "/work.html"
       },
       {
         "value": "72%",
@@ -2110,7 +2110,7 @@ export const INDUSTRIES_DETAIL: IndustryDetail[] = [
       {
         "value": "50+",
         "label": "projects delivered for clients in 6 countries",
-        "href": "/work"
+        "href": "/work.html"
       },
       {
         "value": "4.8",

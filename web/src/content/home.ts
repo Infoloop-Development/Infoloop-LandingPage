@@ -179,7 +179,7 @@ export const PRODUCTS = {
   eyebrow: "Products",
   h2: "Products",
   lede: "Our in-house products are designed to solve real problems, scale reliably and deliver measurable value.",
-  cta: { label: "All products", href: "/products" },
+  cta: { label: "All products", href: "/products.html" },
   items: [
     {
       name: "OpsDeck",
@@ -287,7 +287,7 @@ export const PROOF = {
   eyebrow: "Proof, not promises",
   h2: "Real results for real businesses.",
   lede: "Numbers you can check, from recent work.",
-  cta: { label: "View case studies", href: "/work" },
+  cta: { label: "View case studies", href: "/work.html" },
   featured: [
     {
       sector: "Manufacturing",
@@ -309,7 +309,7 @@ export const PROOF = {
       before: "Flat organic traffic, few demo requests",
       after: "Traffic doubled, demo requests more than doubled in four months",
       bar: 100,
-      href: "/work",
+      href: "/work.html",
     },
     {
       sector: "Financial services",

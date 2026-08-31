@@ -189,9 +189,9 @@ export const COMPANY_LINKS: NavLink[] = [
 
 /** Top-level nav after Solutions. Items with children open a small dropdown. */
 export const NAV_PRIMARY: (NavLink & { children?: NavLink[] })[] = [
-  { label: "Work", href: "/work" },
-  { label: "Products", href: "/products", children: PRODUCT_LINKS },
-  { label: "Blog", href: "/blog" },
+  { label: "Work", href: "/work.html" },
+  { label: "Products", href: "/products.html", children: PRODUCT_LINKS },
+  { label: "Blog", href: "/blog.html" },
   { label: "Company", href: "/about", children: COMPANY_LINKS },
 ];
 
@@ -280,6 +280,6 @@ export function allRoutes(): string[] {
     g.items.forEach((i) => add(i.href));
   });
   [...NAV_PRIMARY, ...PRODUCT_LINKS, ...COMPANY_LINKS, ...FOOTER_LEGAL].forEach((l) => add(l.href));
-  ["/services", "/industries", "/hire", "/products", "/solutions"].forEach(add);
+  ["/services", "/industries", "/hire", "/products.html", "/solutions"].forEach(add);
   return [...set];
 }

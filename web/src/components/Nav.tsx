@@ -27,7 +27,7 @@ const SOLUTION_TABS: Tab[] = [
   { key: "hire", label: "Hire talent", allLabel: "All roles", href: "/hire", groups: HIRE },
 ];
 const PRODUCT_TABS: Tab[] = [
-  { key: "saas", label: "SaaS", allLabel: "All products", href: "/products", groups: [{ title: "SaaS", href: "/products", items: PRODUCT_LINKS }] },
+  { key: "saas", label: "SaaS", allLabel: "All products", href: "/products.html", groups: [{ title: "SaaS", href: "/products.html", items: PRODUCT_LINKS }] },
 ];
 const COMPANY_TABS: Tab[] = [
   {
