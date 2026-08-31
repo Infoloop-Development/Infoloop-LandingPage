@@ -31,6 +31,13 @@ const EMPTY: AnalyticsConfig = {
   consentRequired: true,
 };
 
+function envFlag(name: string): string {
+  // Render/Node injects secrets on process.env; Vite may not mirror non-PUBLIC_ keys onto import.meta.env.
+  const fromMeta = (import.meta.env as Record<string, string | undefined>)[name];
+  const fromProcess = typeof process !== "undefined" ? process.env[name] : undefined;
+  return String(fromMeta ?? fromProcess ?? "").trim();
+}
+
 function fromEnv(): AnalyticsConfig {
   const env = import.meta.env;
   return {
@@ -42,7 +49,7 @@ function fromEnv(): AnalyticsConfig {
     linkedinPartnerId: String(env.PUBLIC_LINKEDIN_PARTNER_ID ?? ""),
     posthogKey: String(env.PUBLIC_POSTHOG_KEY ?? ""),
     posthogHost: String(env.PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com"),
-    privacyDisclosed: env.TRACKING_DISCLOSED === "true",
+    privacyDisclosed: envFlag("TRACKING_DISCLOSED") === "true",
     consentRequired: env.PUBLIC_CONSENT_REQUIRED !== "false",
   };
 }
