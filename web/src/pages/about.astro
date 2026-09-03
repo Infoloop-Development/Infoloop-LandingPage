@@ -64,7 +64,7 @@ const jsonLd = [
   { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "About", item: `${S.url}/about` }] },
 ];
 ---
-<Site title={ABOUT.seo.title} description={ABOUT.seo.description} canonical="/about" jsonLd={jsonLd} image={ABOUT.seo.image?.url} imageAlt={ABOUT.seo.image?.alt}>
+<Site title={ABOUT.seo.title} description={ABOUT.seo.description} canonical="/about" jsonLd={jsonLd} noindex={!!ABOUT.seo.noindex} image={ABOUT.seo.image?.url} imageAlt={ABOUT.seo.image?.alt}>
   {/* Our story: text left, photo right over a hatched panel (7Span) */}
   <section class="relative" aria-labelledby="story-h1">
     <div class="absolute inset-y-0 right-0 hidden w-[30%] lg:block" style={`background-image: ${hatch}`} aria-hidden="true"></div>

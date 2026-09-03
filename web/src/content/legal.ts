@@ -29,7 +29,23 @@ const UPDATED = "18 August 2026";
  * Privacy copy depends on whether analytics is disclosed (CMS Analytics
  * global or TRACKING_DISCLOSED=true). Use getPrivacy() at page build time.
  */
-export function getPrivacy(trackingDisclosed = false): LegalDoc {
+/** Which tools are configured, so the policy can name the recipients and cookies that actually apply. */
+export type TrackingTools = { google?: boolean; clarity?: boolean; posthog?: boolean; linkedin?: boolean };
+
+export function getPrivacy(trackingDisclosed = false, tools: TrackingTools = {}): LegalDoc {
+  const cookieLines = [
+    ...(tools.google ? ["_ga and _ga_<id>, set by Google Analytics (through Google Tag Manager where used) to tell returning visitors apart; first-party; up to two years."] : []),
+    ...(tools.clarity ? ["_clck and _clsk, set by Microsoft Clarity to link the pages of one visit; first-party; up to one year."] : []),
+    ...(tools.posthog ? ["ph_<key>_posthog, set by PostHog to tell returning visitors apart; first-party; one year."] : []),
+    ...(tools.linkedin ? ["bcookie, li_gc and lidc, set by LinkedIn Insight; third-party; up to two years."] : []),
+    "il-consent, a value in your browser's local storage that remembers the answer you gave the cookie banner; it is not sent anywhere.",
+  ];
+  const recipients = [
+    ...(tools.google ? ["Google (Google Analytics and Google Tag Manager), only after you allow analytics cookies"] : []),
+    ...(tools.clarity ? ["Microsoft (Clarity), only after you allow analytics cookies"] : []),
+    ...(tools.posthog ? ["PostHog, only after you allow analytics cookies"] : []),
+    ...(tools.linkedin ? ["LinkedIn (Insight Tag), only after you allow analytics cookies"] : []),
+  ];
   return {
   eyebrow: "Legal",
   h1: "Privacy policy",
@@ -71,12 +87,16 @@ export function getPrivacy(trackingDisclosed = false): LegalDoc {
           {
             h2: "Website analytics",
             paragraphs: [
-              "We measure how the website is used so we can see which pages help people and which do not. This is about pages, not people: we look at totals, not at what any one visitor did.",
+              tools.clarity
+                ? "We measure how the website is used so we can see which pages help people and which do not. Besides page totals, Microsoft Clarity records how individual pages are used: mouse movement, clicks, scrolling and the order of pages in a visit, with anything you type into a form masked before it is stored. We use those recordings to fix confusing pages, not to identify you."
+                : "We measure how the website is used so we can see which pages help people and which do not. This is about pages, not people: we look at totals, not at what any one visitor did.",
+              "None of this runs until you click Allow on the cookie banner. Decline and the site works exactly the same, with no analytics cookies set.",
             ],
             bullets: [
               "What is collected: pages viewed, how you arrived (for example a search engine or a link), rough location from your IP address at country or city level, and the type of device and browser.",
               "What is not collected: your name, email or phone number, unless you type them into a form yourself.",
-              "You can opt out with any browser setting or extension that blocks analytics, and the website works exactly the same.",
+              ...cookieLines.map((c) => `Cookie: ${c}`),
+              "You can change your answer at any time with the button at the foot of this page, and any browser setting or extension that blocks analytics also works.",
             ],
           },
         ]
@@ -94,12 +114,15 @@ export function getPrivacy(trackingDisclosed = false): LegalDoc {
       h2: "The basis we rely on",
       paragraphs: [
         "When you send us a form we rely on your consent, which you can withdraw at any time by emailing us. When we reply to a business enquiry, keep a record of an agreement, or protect the site from abuse, we rely on our legitimate interest in running the business. We do not make automated decisions about you.",
+        ...(trackingDisclosed
+          ? ["Analytics cookies are set only with your consent, given on the cookie banner, and you can withdraw it at any time from the button at the foot of this page."]
+          : []),
       ],
     },
     {
       h2: "Who else sees it",
       paragraphs: [
-        "The people at Infoloop who need it to answer you. Beyond that, only the suppliers who run the parts of this website: our hosting provider, and the tool that delivers form messages to our inbox. They process the data on our instructions and for no other purpose.",
+        `The people at Infoloop who need it to answer you. Beyond that, only the suppliers who run the parts of this website: our hosting provider, the tool that delivers form messages to our inbox${recipients.length ? `, and the analytics providers listed here: ${recipients.join("; ")}` : ""}. They process the data on our instructions and for no other purpose.`,
         "We hand over data to anybody else only when the law requires it. If we ever change a supplier in a way that changes where your data sits, this page is updated with the date it took effect.",
       ],
     },

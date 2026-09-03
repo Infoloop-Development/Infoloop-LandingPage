@@ -1,0 +1,17 @@
+# Render Blueprint hints for Infoloop-WebMain.
+# If the service was created in the UI, set Start Command to `npm start` manually
+# (Settings → Build & Deploy). Root Directory must remain `web`.
+services:
+  - type: web
+    name: Infoloop-WebMain
+    runtime: node
+    rootDir: web
+    plan: starter
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: HOST
+        value: "0.0.0.0"

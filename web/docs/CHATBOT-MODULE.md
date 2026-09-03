@@ -22,7 +22,7 @@ Default model: `openai/gpt-oss-20b` (override with `GROQ_MODEL`).
 
 ## Environment
 
-Set in Netlify (same host as `/api/contact`). **Must be present at build time** — Astro inlines `import.meta.env` into the function.
+Set on the Render web service (same host as `/api/contact`). **Must be present at build time** — Astro inlines `import.meta.env` into the server bundle, so a changed variable needs a redeploy.
 
 | Variable | Required | Notes |
 | --- | --- | --- |
@@ -72,6 +72,19 @@ Without `GROQ_API_KEY` the widget still renders; `/api/chat` returns 503. Withou
 
 `chat_opened`, `chat_message`, `chat_cta_click`, `chat_lead`, `chat_estimate`.
 
+## Ticket access tokens
+
+Every action that names a ticket (`resume_load`, `resume_append`, `handoff_*`, and `estimate` on
+an existing ticket) must carry the `ticketToken` the server issued with that ticket: an HMAC of
+the ticket id keyed by `CHAT_TICKET_SECRET` (falls back to `PAYLOAD_TOKEN`). Without it the
+server answers 403. Before this, ticket ids were sequential and unauthenticated, so any visitor
+could read or rewrite any lead's quote by counting. `resume_lookup` still returns a prospect's
+tickets (with tokens) for a matching email; proving mailbox ownership (an emailed code) is the
+next step if that is a concern.
+
+`/api/chat` also enforces a body cap of 64 KB and 40 requests per minute per client address.
+
 ## Hosting note
 
-`/api/chat` needs Astro SSR / Netlify Functions. Use the same Netlify site that runs `/api/contact`.
+`/api/chat` is an on-demand route run by the Node adapter on the Render web service, the same
+process that serves `/api/contact`. It does not work on a static host.

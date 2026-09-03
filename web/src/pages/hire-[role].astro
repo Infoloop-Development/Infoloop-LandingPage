@@ -45,7 +45,7 @@ const jsonLd = [
   { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: `Hire ${d.role}`, item: url }] },
 ];
 ---
-<Site title={d.seo.title} description={d.seo.description} canonical={`/${d.slug}`} jsonLd={jsonLd} image={d.seo.image?.url} imageAlt={d.seo.image?.alt}>
+<Site title={d.seo.title} description={d.seo.description} canonical={`/${d.slug}`} jsonLd={jsonLd} noindex={!!d.seo.noindex} image={d.seo.image?.url} imageAlt={d.seo.image?.alt}>
   <HireHero d={d} roles={relatedRoles} built={built} />
   <TaglineBand data={d.band} />
   <WhyGrid d={d} />

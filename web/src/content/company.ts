@@ -13,6 +13,7 @@
  *   agreed response times) and names what we do NOT hold. No certification is
  *   claimed. If that changes, change this file the same day.
  */
+import type { PageSeo } from "./seo-types";
 
 export type Role = {
   title: string;
@@ -70,7 +71,7 @@ export const CAREERS = {
   seo: {
     title: "Careers at Infoloop",
     description: "Work at Infoloop: a small team that builds software and then runs it. How we hire, what the job is really like, and how to send us your work.",
-  },
+  } as PageSeo,
 };
 
 export const TESTIMONIALS = {
@@ -89,7 +90,7 @@ export const TESTIMONIALS = {
   seo: {
     title: "Client testimonials | Infoloop",
     description: "What Infoloop clients say about the software we built and still run, each quote linked to the case study and the measured result behind it.",
-  },
+  } as PageSeo,
 };
 
 export const TRUST = {
@@ -142,5 +143,5 @@ export const TRUST = {
   seo: {
     title: "Trust center: security and ownership | Infoloop",
     description: "How Infoloop handles your code, accounts, data and risk: ownership in your name, reviewed access, agreed response times, and what we do not claim.",
-  },
+  } as PageSeo,
 };

@@ -1,6 +1,84 @@
 # Deploying infoloop.co
 
-This document explains how to build and deploy the Astro site in `web/` to Netlify, and how to cut the `infoloop.co` domain over from the site that serves it today. Read the cutover section before you create anything in Netlify: the new site is not live yet, the domain is attached to a different Netlify project, and the order of operations matters.
+> **Hosting moved to Render in August 2026.** The site runs as a Render **Web Service**
+> (Astro's Node adapter) behind Cloudflare, and the CMS as a second Render Web Service.
+> Section 0 below is the current runbook. Sections 1 to 11 describe the original Netlify
+> deployment and the cutover from the old static site; they are kept for history and for
+> the checks that still apply (smoke checklist, redirects, headers), but **Render does not
+> read `web/netlify.toml`**: redirects now live in `web/redirects.mjs`, and security and
+> caching headers in `web/server.mjs`.
+
+## 0. Render runbook (current)
+
+### The web service (`Infoloop-WebMain`)
+
+| Setting | Value |
+| --- | --- |
+| Root directory | `web` |
+| Build command | `npm ci && npm run build` (the build ends with the link check in `scripts/check-links.mjs`; a dead internal link or a `.html` link fails the deploy on purpose) |
+| Start command | **`npm start`** (runs `web/server.mjs`). `node ./dist/server/entry.mjs` still works but serves without the security headers and without long-lived asset caching |
+| Health check path | `/` |
+| Node | 22 or newer (`engines` in `web/package.json`) |
+
+`server.mjs` binds `0.0.0.0` and reads `PORT` from Render, so `HOST` no longer has to be set by hand.
+
+### Environment variables on the web service
+
+Astro inlines every `import.meta.env` read into the server bundle **at build time**. Changing a
+variable in the Render dashboard therefore needs a redeploy (Render does this automatically
+when you save an env var), not just a restart.
+
+| Variable | Required | Notes |
+| --- | --- | --- |
+| `PAYLOAD_URL` | For CMS content | CMS origin, e.g. `https://infoloop-cms.onrender.com`. Unset = build from the repo content. |
+| `PAYLOAD_TOKEN` | For tickets and private reads | API key of the **dedicated service user** minted by `cms/scripts/ensure-chatbot-api-key.ts` (limited to tickets and the chat catalog; never an admin key). |
+| `CHAT_TICKET_SECRET` | Recommended | Random string (`openssl rand -hex 32`). Signs the per-ticket tokens that stop one visitor opening another visitor's quote. Falls back to `PAYLOAD_TOKEN` when unset. |
+| `GROQ_API_KEY`, `GROQ_MODEL` | For the chatbot | Without the key the widget still renders and `/api/chat` answers 503. |
+| `CONTACT_WEBHOOK_URL` | Before launch | Where the contact form posts leads. **Unset means submissions go nowhere.** |
+| `ATTIO_API_KEY` | Optional | Additive CRM push from the contact form. |
+| `TRACKING_DISCLOSED` | See note | Set `true` **only until** the CMS box *Settings > Analytics & tracking > Privacy policy updated* is ticked, then remove it. While the env var is set, the CMS checkbox cannot turn disclosure off. |
+| `PUBLIC_*` analytics vars | Optional | Fallbacks; CMS values win when set. See `web/docs/ANALYTICS-MODULE.md`. |
+
+### The CMS service
+
+Root `cms`, build `npm ci && npm run build`, start `npm start`, plus `DATABASE_URL`,
+`PAYLOAD_SECRET`, `PAYLOAD_PUBLIC_SERVER_URL` (the service's own https origin),
+`CORS_ORIGINS` (must include `https://infoloop.co`) and `SITE_BUILD_HOOK_URL` (the web
+service's **Deploy Hook** from its Settings page, so publishing rebuilds the site).
+
+Two things Render does not give you for free:
+
+- **Schema changes do not apply themselves.** `PAYLOAD_DATABASE_PUSH=true` on the service does
+  nothing in production (`next start` sets `NODE_ENV=production` and the Postgres adapter only
+  pushes outside production). After any change to collections, globals or select options, run
+  `npm run db:push` from `cms/` on a developer machine with `cms/.env` pointing at the target
+  database. This release adds five globals, new post fields and four editor categories, so it
+  needs one push before the CMS can save them.
+- **Uploads are not persistent.** Media is written to the container disk and lost on every
+  deploy unless you attach a Render Disk mounted at `/opt/render/project/src/cms/media`, or
+  configure a storage adapter (`@payloadcms/storage-s3` with any S3-compatible bucket).
+  Until one of those is in place, treat images uploaded in the CMS as temporary.
+
+### Previews
+
+Render preview environments serve on `*.onrender.com` with the site's normal
+`index, follow` robots meta. Do not link a preview publicly; if you need previews to stay
+out of Google, add a `noindex` rule for that hostname at Cloudflare or protect the preview
+with Render's access control.
+
+### What was lost in the move, and where it lives now
+
+| Netlify feature | Now |
+| --- | --- |
+| `[[redirects]]` in `netlify.toml` | `web/redirects.mjs`, served as real 301s by the Node adapter (46 old URLs in both `/x` and `/x.html` forms) |
+| Security headers | `web/server.mjs` |
+| `/_astro/*` immutable caching | `web/server.mjs` (the adapter alone serves assets with `max-age=0`) |
+| `404.html` served with a 404 status | Same on the Node adapter (`web/src/pages/404.astro`) |
+| Pretty URLs (`/work` from `work.html`) | Not needed: the build now emits `work/index.html` (`build.format: "directory"`), which every host, including this one, resolves |
+
+---
+
+This document originally explained how to build and deploy the Astro site in `web/` to Netlify, and how to cut the `infoloop.co` domain over from the site that serves it today. Read the cutover section before you create anything in Netlify: the new site is not live yet, the domain is attached to a different Netlify project, and the order of operations matters.
 
 ---
 
@@ -9,10 +87,10 @@ This document explains how to build and deploy the Astro site in `web/` to Netli
 | Item | Value |
 | --- | --- |
 | Source directory | `web/` (the repository root is **not** the site root) |
-| Framework | Astro 7, `output: "static"`, `@astrojs/netlify` adapter |
+| Framework | Astro 7, prerendered pages, `@astrojs/node` adapter (was `@astrojs/netlify` on Netlify) |
 | Pages produced | 84 HTML files plus `sitemap-index.xml`, `sitemap-0.xml`, `rss.xml`, `robots.txt`, `llms.txt` |
-| Server code | One endpoint, `/api/contact`, deployed as a Netlify function |
-| URL style | Extensionless, no trailing slash (`trailingSlash: "never"`, `build.format: "file"`), so `/work` is served from `work.html` |
+| Server code | Two on-demand endpoints, `/api/contact` and `/api/chat`, run by the Node server |
+| URL style | Extensionless, no trailing slash (`trailingSlash: "never"`, `build.format: "directory"`), so `/work` is served from `work/index.html` |
 | Canonical host | `https://infoloop.co`, hard coded as `site` in `web/astro.config.mjs` |
 
 Everything else is static. The Payload CMS in `cms/` is read at build time only. If `PAYLOAD_URL` is unset or unreachable the build falls back to the TypeScript content files in `web/src/content/` and still produces the same 84 pages, so a CMS outage cannot break a deploy.

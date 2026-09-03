@@ -8,11 +8,17 @@ import LegalDoc from "@/components/legal/LegalDoc.astro";
 import { CtaPanel } from "@/components/sections/CtaPanel";
 import { getPrivacy } from "@/content/legal";
 import { getSite } from "@/lib/cms";
-import { getAnalytics } from "@/lib/analytics";
+import { getAnalytics, cookieTrackers } from "@/lib/analytics";
 
 const site = await getSite();
 const analytics = await getAnalytics();
-const PRIVACY = getPrivacy(analytics.privacyDisclosed);
+const PRIVACY = getPrivacy(analytics.privacyDisclosed, {
+  google: Boolean(analytics.ga4Id || analytics.gtmId),
+  clarity: Boolean(analytics.clarityId),
+  posthog: Boolean(analytics.posthogKey),
+  linkedin: Boolean(analytics.linkedinPartnerId),
+});
+const consentApplies = analytics.privacyDisclosed && analytics.consentRequired && cookieTrackers(analytics);
 const S = site.site;
 const url = `${S.url}/privacy`;
 const jsonLd = [
@@ -22,5 +28,18 @@ const jsonLd = [
 ---
 <Site title={PRIVACY.seo.title} description={PRIVACY.seo.description} canonical="/privacy" jsonLd={jsonLd}>
   <LegalDoc doc={PRIVACY} />
+  {consentApplies && (
+    <section class="container-x pb-12 sm:pb-16" aria-labelledby="cookie-choice-h2">
+      <div class="grid gap-6 border border-ink bg-paper p-7 sm:p-9 lg:grid-cols-12 lg:items-center lg:gap-10">
+        <div class="lg:col-span-8">
+          <h2 id="cookie-choice-h2" class="font-display text-[21px] font-bold leading-tight text-ink">Change your cookie choice</h2>
+          <p class="mt-2 max-w-2xl text-[16px] leading-relaxed text-ink/80">Brings the cookie banner back so you can allow or decline analytics again. Cookies already set expire on their own schedule.</p>
+        </div>
+        <div class="lg:col-span-4 lg:justify-self-end">
+          <button type="button" class="btn btn-ink" data-consent-manage>Change my choice</button>
+        </div>
+      </div>
+    </section>
+  )}
   <CtaPanel id="privacy-cta-h2" h2="Want your details removed?" lede="Email us and a named person replies within one business day. No form to fill in, no ticket number." button={{ label: "Email us", href: `mailto:${S.email}` }} />
 </Site>

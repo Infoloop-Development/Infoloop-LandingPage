@@ -22,6 +22,11 @@ import { SOLUTIONS } from '../../../web/src/content/solutions'
 import { INDUSTRIES_DETAIL } from '../../../web/src/content/industries'
 import { HIRE_DETAIL } from '../../../web/src/content/hire'
 import { SERVICES_DETAIL } from '../../../web/src/content/services'
+import { HUBS } from '../../../web/src/content/hubs'
+import { CAREERS, TESTIMONIALS, TRUST } from '../../../web/src/content/company'
+import { CONTACT } from '../../../web/src/content/contact'
+import { TECHNOLOGIES } from '../../../web/src/content/technologies'
+import { BLOG } from '../../../web/src/content/blog'
 
 type Json = Record<string, unknown>
 
@@ -36,7 +41,28 @@ function toPayload(v: unknown): unknown {
   return v
 }
 
+const args = process.argv.slice(2)
+const withAnalytics = args.includes('--with-analytics')
+
 async function run() {
+  // This script OVERWRITES every page global with the repo copy and re-publishes
+  // every seeded document. That is right for a fresh CMS and wrong for one that
+  // editors have been working in, so it refuses to run without an explicit yes.
+  if (process.env.SEED_CONFIRM !== 'yes' && !args.includes('--yes')) {
+    console.error(
+      [
+        'Refusing to seed: this overwrites every page global and re-publishes every seeded',
+        'document in the database at DATABASE_URL. Run it on a fresh CMS, or when you mean',
+        'to reset editors\' changes to the repo copy.',
+        '',
+        '  npm run seed -- --yes                    # seed content globals and collections',
+        '  npm run seed -- --yes --with-analytics   # ALSO reset Settings > Analytics to empty',
+        '',
+        'or set SEED_CONFIRM=yes in the environment.',
+      ].join('\n'),
+    )
+    process.exit(1)
+  }
   const payload = await getPayload({ config })
 
   const home = toPayload({
@@ -127,7 +153,17 @@ async function run() {
   }
   payload.logger.info(`Seeded ${SERVICES_DETAIL.length} service pages`)
 
-  await payload.updateGlobal({
+  // The page globals added for the pages that used to read local content only.
+  // Same rule as the rest: an empty field keeps the copy that ships with the site.
+  await payload.updateGlobal({ slug: 'hub-pages', data: toPayload({ pages: HUBS }) as never })
+  await payload.updateGlobal({ slug: 'company-pages', data: toPayload({ careers: CAREERS, testimonials: TESTIMONIALS, trust: TRUST }) as never })
+  await payload.updateGlobal({ slug: 'contact-page', data: toPayload(CONTACT) as never })
+  await payload.updateGlobal({ slug: 'technologies-page', data: toPayload(TECHNOLOGIES) as never })
+  await payload.updateGlobal({ slug: 'blog-page', data: toPayload(BLOG) as never })
+  payload.logger.info('Seeded hub-pages, company-pages, contact-page, technologies-page, blog-page')
+
+  // Analytics holds live tracking IDs; only reset it when asked, never as a side effect.
+  if (withAnalytics) await payload.updateGlobal({
     slug: 'analytics',
     data: {
       google: { ga4Id: '', gtmId: '', gscVerification: '' },

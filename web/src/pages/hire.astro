@@ -9,10 +9,10 @@ import { HubGroups } from "@/components/hub/HubGroups";
 import { CtaPanel } from "@/components/sections/CtaPanel";
 import { RatingsRow } from "@/components/sections/RatingsRow";
 import { Hi } from "@/components/ui";
-import { HUBS } from "@/content/hubs";
+import { getHubs } from "@/lib/cms";
 import { getHirePages, getSite } from "@/lib/cms";
 
-const hub = HUBS.find((h) => h.slug === "hire")!;
+const hub = (await getHubs()).find((h) => h.slug === "hire")!;
 const site = await getSite();
 const S = site.site;
 const url = `${S.url}/hire`;
@@ -43,7 +43,7 @@ const jsonLd = [
   { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Hire talent", item: url }] },
 ];
 ---
-<Site title={hub.seo.title} description={hub.seo.description} canonical="/hire" jsonLd={jsonLd}>
+<Site title={hub.seo.title} description={hub.seo.description} canonical="/hire" jsonLd={jsonLd} image={hub.seo.image?.url} imageAlt={hub.seo.image?.alt} noindex={!!hub.seo.noindex}>
   <section class="border-b border-ink" aria-labelledby="hub-h1">
     <div class="container-x py-12 sm:py-16">
       <p class="eyebrow text-ink/70 hero-in">{hub.eyebrow}</p>

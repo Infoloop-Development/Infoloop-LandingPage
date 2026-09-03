@@ -12,8 +12,8 @@ import { TaglineBand } from "@/components/sections/TaglineBand";
 import { CtaPanel } from "@/components/sections/CtaPanel";
 import { RatingsRow } from "@/components/sections/RatingsRow";
 import { ArrowUpRight, Hi } from "@/components/ui";
-import { TECHNOLOGIES as T } from "@/content/technologies";
-import { getSite } from "@/lib/cms";
+import { getSite, getTechnologies } from "@/lib/cms";
+const T = await getTechnologies();
 
 const site = await getSite();
 const S = site.site;
@@ -36,7 +36,7 @@ const jsonLd = [
   { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Technologies", item: url }] },
 ];
 ---
-<Site title={T.seo.title} description={T.seo.description} canonical="/technologies" jsonLd={jsonLd}>
+<Site title={T.seo.title} description={T.seo.description} canonical="/technologies" jsonLd={jsonLd} image={T.seo.image?.url} imageAlt={T.seo.image?.alt} noindex={!!T.seo.noindex}>
   {/* Hero: copy left, a panel of every mark on the right (7Span runs a video here) */}
   <section class="relative" aria-labelledby="tech-h1">
     <div class="container-x grid gap-10 py-12 sm:py-16 lg:grid-cols-12 lg:items-center lg:gap-14">

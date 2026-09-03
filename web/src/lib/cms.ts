@@ -72,8 +72,25 @@ export function deepMerge<T>(local: T, remote: unknown): T {
   return out as T;
 }
 
+/**
+ * One request per distinct path for the life of the process. Every page asks
+ * for the site and analytics globals, so an 85-page build made several hundred
+ * identical requests to the CMS; now it makes one each. Prerendered pages are
+ * frozen at build time anyway, so nothing observable changes.
+ */
+const inflight = new Map<string, Promise<unknown | null>>();
+
 /** Raw JSON from the Payload REST API, or null when unset/unreachable. */
-async function fetchRaw(path: string): Promise<unknown | null> {
+function fetchRaw(path: string): Promise<unknown | null> {
+  let p = inflight.get(path);
+  if (!p) {
+    p = fetchRawUncached(path);
+    inflight.set(path, p);
+  }
+  return p;
+}
+
+async function fetchRawUncached(path: string): Promise<unknown | null> {
   if (!PAYLOAD_URL) return null;
   try {
     const res = await fetch(`${PAYLOAD_URL.replace(/\/$/, "")}/api/${path}`, {
@@ -431,4 +448,48 @@ export async function getProducts(): Promise<Product[]> {
     p.cta = { h2: p.cta?.h2 || `See ${p.name} on [[your use case]].`, lede: p.cta?.lede || "A 20 minute walkthrough, then a clear scope, timeline and price.", button: p.cta?.button || `Book a ${p.name} demo` };
   }
   return list.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+}
+
+/* ---------------- Hub, company, contact, technologies and blog index pages ---------------- */
+import { HUBS, type Hub } from "@/content/hubs";
+import { CAREERS, TESTIMONIALS, TRUST } from "@/content/company";
+import { CONTACT } from "@/content/contact";
+import { TECHNOLOGIES } from "@/content/technologies";
+import { BLOG, type BlogIndex } from "@/content/blog";
+
+/** One global (or one group of a global) merged over its local copy, seo image flattened. */
+function mergeGlobal<T>(local: T, remote: unknown): T {
+  if (!isObject(remote)) return local;
+  if (isObject(remote.seo)) flattenSeoImage(remote.seo as Json);
+  return deepMerge(local, remote);
+}
+
+/** The three hub pages (/services, /industries, /hire): Payload `hub-pages` merged over local, by slug. */
+export async function getHubs(): Promise<Hub[]> {
+  return mergeBySlug(HUBS, await fetchPayload<Json>("globals/hub-pages?depth=2"));
+}
+
+/** /careers, /testimonials and /trust-center: one `company-pages` global, three groups. */
+export async function getCompany() {
+  const r = await fetchPayload<Json>("globals/company-pages?depth=2");
+  return {
+    careers: mergeGlobal(CAREERS, r?.careers),
+    testimonials: mergeGlobal(TESTIMONIALS, r?.testimonials),
+    trust: mergeGlobal(TRUST, r?.trust),
+  };
+}
+
+/** /contact copy, including the form's dropdown lists. */
+export async function getContact(): Promise<typeof CONTACT> {
+  return mergeGlobal(CONTACT, await fetchPayload<Json>("globals/contact-page?depth=2"));
+}
+
+/** /technologies copy. */
+export async function getTechnologies(): Promise<typeof TECHNOLOGIES> {
+  return mergeGlobal(TECHNOLOGIES, await fetchPayload<Json>("globals/technologies-page?depth=2"));
+}
+
+/** /blog index copy and the two blocks repeated on every article. Posts themselves: see lib/posts.ts. */
+export async function getBlogIndex(): Promise<BlogIndex> {
+  return mergeGlobal(BLOG, await fetchPayload<Json>("globals/blog-page?depth=2"));
 }

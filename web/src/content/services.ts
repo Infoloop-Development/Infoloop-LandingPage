@@ -339,7 +339,7 @@ export const SERVICES_DETAIL: ServiceDetail[] = [
         {
           value: "2.1x",
           label: "qualified leads from a new website for a software company",
-          href: "/work.html"
+          href: "/work"
         },
         {
           value: "11 wks",
@@ -547,7 +547,7 @@ export const SERVICES_DETAIL: ServiceDetail[] = [
         {
           value: "2.1x",
           label: "qualified leads from a new Webflow website for a software company",
-          href: "/work.html"
+          href: "/work"
         },
         {
           value: "+38%",
@@ -562,7 +562,7 @@ export const SERVICES_DETAIL: ServiceDetail[] = [
       ],
       tile: "webflow",
       caption: "A new Webflow website for a software company: 2.1x qualified leads in four months",
-      href: "/work.html"
+      href: "/work"
     },
     band: [
       "Built on ready-made platforms.",
@@ -760,7 +760,7 @@ export const SERVICES_DETAIL: ServiceDetail[] = [
         {
           value: "2.1x",
           label: "qualified leads from a new Webflow website for a software company",
-          href: "/work.html"
+          href: "/work"
         },
         {
           value: "11 wks",
@@ -1188,7 +1188,7 @@ export const SERVICES_DETAIL: ServiceDetail[] = [
         {
           value: "2.1x",
           label: "qualified leads from a new Webflow website for a software company",
-          href: "/work.html"
+          href: "/work"
         },
         {
           value: "90%",
@@ -2899,7 +2899,7 @@ export const SERVICES_DETAIL: ServiceDetail[] = [
         {
           value: "2.1x",
           label: "qualified leads from a new Webflow website for a software company",
-          href: "/work.html"
+          href: "/work"
         },
         {
           value: "90%",

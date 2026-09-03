@@ -41,8 +41,11 @@ npm install
 npm run dev                  # http://localhost:3000/admin
 ```
 
-Payload pushes the schema to the database on first request in dev. For
-production use migrations:
+Schema push is opt-in: `npm run db:push` (or `PAYLOAD_DATABASE_PUSH=true npm run dev`)
+applies collection, global and field changes to the database in `cms/.env`. Nothing pushes
+in production (`next start` sets `NODE_ENV=production`, and the Postgres adapter only pushes
+outside it), so after any schema change run `npm run db:push` against the production
+database from a developer machine, or use migrations:
 
 ```bash
 npm run payload migrate:create
@@ -76,9 +79,11 @@ NETLIFY_BUILD_HOOK_URL=            # from Netlify > Build hooks
 
 **Railway** (or Render, same steps): new service from this folder / the repo with root
 `cms`. Build `npm run build`, start `npm start`, add the env vars above, attach a
-domain (`cms.infoloop.co`). The `Dockerfile` in this folder also works for either host.
+domain (`cms.infoloop.co`). The `Dockerfile` in this folder needs `output: "standalone"`
+in `next.config.ts` before it builds; Render does not use it.
 Uploads land in `media/` on the container disk by default, which does not persist
-between deploys; for production add a storage adapter (see Media).
+between deploys; for production attach a Render Disk at `cms/media` or add a storage
+adapter (see Media). Until then every image uploaded in the CMS disappears on the next deploy.
 
 **Netlify hook**: after the first deploy, create a Build hook in Netlify and set
 `NETLIFY_BUILD_HOOK_URL` here. `src/hooks/revalidate.ts` POSTs it after any publish

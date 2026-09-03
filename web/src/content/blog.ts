@@ -4,6 +4,7 @@
  * "Scroll Down to Discover Insights and Ideas." / "Search Blog" /
  * "Top Categories" / "All Articles" / "Load More").
  */
+import type { PageSeo } from "./seo-types";
 export type BlogIndex = {
   h1: string;
   lede: string;
@@ -18,7 +19,7 @@ export type BlogIndex = {
   articleCta: { h3: string; body: string; button: { label: string; href: string } };
   moreH2: string;
   moreSub: string;
-  seo: { title: string; description: string };
+  seo: PageSeo;
 };
 
 export const BLOG: BlogIndex = {

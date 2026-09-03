@@ -9,8 +9,8 @@ import { TaglineBand } from "@/components/sections/TaglineBand";
 import { Process } from "@/components/sections/Process";
 import { CtaPanel } from "@/components/sections/CtaPanel";
 import { Hi, ArrowUpRight } from "@/components/ui";
-import { CAREERS as C } from "@/content/company";
-import { getSite } from "@/lib/cms";
+import { getCompany, getSite } from "@/lib/cms";
+const C = (await getCompany()).careers;
 
 const site = await getSite();
 const S = site.site;
@@ -22,7 +22,7 @@ const jsonLd = [
   { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Careers", item: url }] },
 ];
 ---
-<Site title={C.seo.title} description={C.seo.description} canonical="/careers" jsonLd={jsonLd}>
+<Site title={C.seo.title} description={C.seo.description} canonical="/careers" jsonLd={jsonLd} image={C.seo.image?.url} imageAlt={C.seo.image?.alt} noindex={!!C.seo.noindex}>
   <section class="border-b border-ink" aria-labelledby="careers-h1">
     <div class="container-x py-12 sm:py-16">
       <p class="eyebrow text-ink/70 hero-in">{C.eyebrow}</p>

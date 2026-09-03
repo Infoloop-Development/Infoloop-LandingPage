@@ -99,6 +99,8 @@ type ResumeTicketOption = {
   ticketId: string;
   projectName: string;
   status: string;
+  /** Server-issued proof this browser may open the ticket; sent back on every ticket action. */
+  token?: string;
 };
 
 const SESSION_CAP = 20;
@@ -143,6 +145,7 @@ export function Chatbot() {
   const [resumeErrors, setResumeErrors] = useState<{ email?: string }>({});
   const [resumeTickets, setResumeTickets] = useState<ResumeTicketOption[]>([]);
   const [ticketDocId, setTicketDocId] = useState<string | number | null>(null);
+  const [ticketToken, setTicketToken] = useState<string | null>(null);
   const [handoffStatus, setHandoffStatus] = useState<"none" | "requested" | "active" | "ended">("none");
   const [handoffAgent, setHandoffAgent] = useState<{ name: string; photo?: string } | null>(null);
   const [suggestHandoff, setSuggestHandoff] = useState(false);
@@ -151,6 +154,7 @@ export function Chatbot() {
   const leadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const appendTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ticketDocIdRef = useRef<string | number | null>(null);
+  const ticketTokenRef = useRef<string | null>(null);
   const handoffPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const transcriptCountRef = useRef(0);
   const seenAgentJoinRef = useRef(false);
@@ -159,6 +163,10 @@ export function Chatbot() {
   useEffect(() => {
     ticketDocIdRef.current = ticketDocId;
   }, [ticketDocId]);
+
+  useEffect(() => {
+    ticketTokenRef.current = ticketToken;
+  }, [ticketToken]);
 
   useEffect(() => {
     handoffStatusRef.current = handoffStatus;
@@ -180,6 +188,7 @@ export function Chatbot() {
       const body = JSON.stringify({
         action: "handoff_end",
         ticketDocId: docId,
+        ticketToken: ticketTokenRef.current,
         reason: "visitor_left",
       });
       try {
@@ -225,7 +234,7 @@ export function Chatbot() {
       void fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "handoff_end", ticketDocId: docId, reason: "visitor_closed" }),
+        body: JSON.stringify({ action: "handoff_end", ticketDocId: docId, ticketToken: ticketTokenRef.current, reason: "visitor_closed" }),
         keepalive: true,
       }).catch(() => {});
     }
@@ -246,6 +255,7 @@ export function Chatbot() {
     setResumeErrors({});
     setResumeTickets([]);
     setTicketDocId(null);
+    setTicketToken(null);
     setHandoffStatus("none");
     setHandoffAgent(null);
     setSuggestHandoff(false);
@@ -263,7 +273,7 @@ export function Chatbot() {
       void fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "resume_append", ticketDocId: docId, turns }),
+        body: JSON.stringify({ action: "resume_append", ticketDocId: docId, ticketToken: ticketTokenRef.current, turns }),
       }).catch(() => {});
     }, 600);
   };
@@ -287,6 +297,7 @@ export function Chatbot() {
           body: JSON.stringify({
             action: "handoff_poll",
             ticketDocId: docId,
+            ticketToken: ticketTokenRef.current,
             sinceCount: transcriptCountRef.current,
           }),
         });
@@ -366,7 +377,7 @@ export function Chatbot() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "handoff_request", ticketDocId: docId }),
+        body: JSON.stringify({ action: "handoff_request", ticketDocId: docId, ticketToken: ticketTokenRef.current }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         reply?: string;
@@ -693,6 +704,7 @@ export function Chatbot() {
         body: JSON.stringify({
           action: "resume_load",
           ticketDocId: ticket.id,
+          ticketToken: ticket.token,
           projectName: ticket.projectName,
         }),
       });
@@ -701,6 +713,7 @@ export function Chatbot() {
         reply?: string;
         ticketId?: string;
         ticketDocId?: string | number;
+        ticketToken?: string;
         projectTitle?: string;
         estimate?: PublicEstimate;
         lead?: Lead;
@@ -722,6 +735,7 @@ export function Chatbot() {
       if (data.lead) setLead(data.lead);
       if (data.proposal?.featureKeys?.length) setProposal(data.proposal);
       setTicketDocId(data.ticketDocId ?? ticket.id);
+      setTicketToken(data.ticketToken ?? ticket.token ?? null);
       setResumeStep("active");
       setSuggestHandoff(true);
       setBuildFlow(null);
@@ -761,7 +775,7 @@ export function Chatbot() {
           lead: currentLead,
           proposal: currentProposal,
           transcript: transcriptPayload(msgs),
-          ...(ticketDocIdRef.current ? { ticketDocId: ticketDocIdRef.current } : {}),
+          ...(ticketDocIdRef.current ? { ticketDocId: ticketDocIdRef.current, ticketToken: ticketTokenRef.current } : {}),
         }),
       });
       const data = (await res.json().catch(() => ({}))) as {
@@ -770,6 +784,7 @@ export function Chatbot() {
         needLead?: boolean;
         ticketId?: string;
         ticketDocId?: string | number;
+        ticketToken?: string;
         estimate?: PublicEstimate;
         projectTitle?: string;
       };
@@ -791,6 +806,7 @@ export function Chatbot() {
       }
       if (data.ticketDocId != null) {
         setTicketDocId(data.ticketDocId);
+        setTicketToken(data.ticketToken ?? null);
         setSuggestHandoff(true);
       }
       setMessages((m) => [
@@ -864,7 +880,7 @@ export function Chatbot() {
           await fetch("/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "handoff_visitor_message", ticketDocId: docId, message }),
+            body: JSON.stringify({ action: "handoff_visitor_message", ticketDocId: docId, ticketToken: ticketTokenRef.current, message }),
           });
         }
       } catch {

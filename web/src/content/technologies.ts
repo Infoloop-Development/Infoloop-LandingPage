@@ -7,6 +7,7 @@
  * Rule for this file: a technology belongs here only if we would put a
  * client's production work on it today. It is a claim, not a wish list.
  */
+import type { PageSeo } from "./seo-types";
 
 export type TechItem = {
   name: string;
@@ -120,5 +121,5 @@ export const TECHNOLOGIES = {
   seo: {
     title: "Technologies we build with | Infoloop",
     description: "The tools Infoloop puts into production and then runs: React, Next.js, Vue, Node, NestJS, Laravel, Flutter, Swift, Webflow, WordPress, Shopify and Figma.",
-  },
+  } as PageSeo,
 };

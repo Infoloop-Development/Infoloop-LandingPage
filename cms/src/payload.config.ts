@@ -26,6 +26,11 @@ import { BrandPage } from './globals/BrandPage'
 import { SolutionsPages } from './globals/SolutionsPages'
 import { IndustryPages } from './globals/IndustryPages'
 import { HirePages } from './globals/HirePages'
+import { HubPages } from './globals/HubPages'
+import { CompanyPages } from './globals/CompanyPages'
+import { ContactPage } from './globals/ContactPage'
+import { TechnologiesPage } from './globals/TechnologiesPage'
+import { BlogPage } from './globals/BlogPage'
 import { Analytics } from './globals/Analytics'
 import { rebuildAfterGlobalChange } from './hooks/revalidate'
 
@@ -34,8 +39,8 @@ const dirname = path.dirname(filename)
 
 /**
  * Infoloop CMS (Payload 3, Postgres on Neon, hosted on Railway or Render).
- * The public site is a static Astro build on Netlify that reads this API at
- * build time; publishing here pings the Netlify build hook (hooks/revalidate).
+ * The public site is an Astro build (Node adapter on Render) that reads this
+ * API at build time; publishing here pings the site's deploy hook (hooks/revalidate).
  */
 export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL || undefined,
@@ -81,6 +86,11 @@ export default buildConfig({
     { ...SolutionsPages, hooks: { afterChange: [rebuildAfterGlobalChange] } },
     { ...IndustryPages, hooks: { afterChange: [rebuildAfterGlobalChange] } },
     { ...HirePages, hooks: { afterChange: [rebuildAfterGlobalChange] } },
+    { ...HubPages, hooks: { afterChange: [rebuildAfterGlobalChange] } },
+    { ...CompanyPages, hooks: { afterChange: [rebuildAfterGlobalChange] } },
+    { ...ContactPage, hooks: { afterChange: [rebuildAfterGlobalChange] } },
+    { ...TechnologiesPage, hooks: { afterChange: [rebuildAfterGlobalChange] } },
+    { ...BlogPage, hooks: { afterChange: [rebuildAfterGlobalChange] } },
     { ...Analytics, hooks: { afterChange: [rebuildAfterGlobalChange] } },
   ],
   editor: lexicalEditor(),

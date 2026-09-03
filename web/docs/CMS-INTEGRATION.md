@@ -174,10 +174,10 @@ This list was produced by checking every file in `web/src/content/` against the 
 
 | Local content, editable only in the repo | Pages it drives | Notes |
 | --- | --- | --- |
-| `web/src/content/blog.ts` (`BLOG`) | `/blog` index copy | No global exists. |
+| `web/src/content/blog.ts` (`BLOG`) | `/blog` index copy | `blog-page` global (`getBlogIndex()`), wired September 2026. |
 | `web/src/content/posts/*.md` (5 markdown files) | `/blog/<slug>` | These are an **Astro** content collection defined in `web/src/content.config.ts`, loaded through `web/src/lib/posts.ts`. A Payload `posts` collection exists and is fully specified, but nothing in the site reads it. The blog is repo-only today. |
-| `web/src/content/company.ts` (`CAREERS`, `TESTIMONIALS`, `TRUST`) | `/careers`, `/testimonials`, `/trust-center` | No global exists. |
-| `web/src/content/contact.ts` (`CONTACT`) | `/contact`, the contact form and brochure gate | No global exists. |
+| `web/src/content/company.ts` (`CAREERS`, `TESTIMONIALS`, `TRUST`) | `/careers`, `/testimonials`, `/trust-center` | `company-pages` global (`getCompany()`), wired September 2026. |
+| `web/src/content/contact.ts` (`CONTACT`) | `/contact`, the contact form and brochure gate | `contact-page` global (`getContact()`), wired September 2026; the form dropdown lists are editable too. |
 | `web/src/content/legal.ts` (`PRIVACY`, `TERMS`, `SITEMAP`) | `/privacy`, `/terms`, `/sitemap` | Deliberately repo-only. `PRIVACY` also switches on the `TRACKING_DISCLOSED` build flag, so it must change in the same commit and deploy as any tracking change. |
 | `web/src/content/hubs.ts` (`HUBS`) | `/services`, `/industries`, `/hire` hero and group copy | No global exists. The cards themselves are generated from the detail pages. |
 | `web/src/content/technologies.ts` (`TECHNOLOGIES`) | `/technologies` | No global exists. |
@@ -192,7 +192,7 @@ These exist in the CMS and appear in the admin panel, but no accessor in `cms.ts
 | --- | --- | --- |
 | `industries` collection | `cms/src/collections/Industries.ts` | Superseded by the `industry-pages` global. |
 | `hire` collection | `cms/src/collections/Hire.ts` | Superseded by the `hire-pages` global. |
-| `posts` collection | `cms/src/collections/Posts.ts` | The blog runs on markdown instead. |
+| `posts` collection | `cms/src/collections/Posts.ts` | **Wired.** Published posts render at `/blog/<slug>`; a CMS post with the same slug replaces the markdown one. The CMS renders the body to HTML on save (`bodyHtml`), so the site never parses Lexical. |
 | `testimonials` collection | `cms/src/collections/Testimonials.ts` | `/testimonials` is built from `company.ts` and case study quotes. |
 | `pages` collection | `cms/src/collections/Pages.ts` | Block-based free-form pages. Nothing consumes the blocks. |
 
@@ -310,7 +310,7 @@ npm install
 npm run dev
 ```
 
-The admin panel is at `http://localhost:3000/admin`. In dev, the Postgres adapter pushes the schema to the database on the first request, so the tables appear on their own.
+The admin panel is at `http://localhost:3000/admin`. Schema push is opt-in: run `npm run db:push` (or start dev with `PAYLOAD_DATABASE_PUSH=true`) and the tables appear. In production nothing pushes automatically; see `web/docs/DEPLOYMENT.md` section 0.
 
 ### 4. Create the first admin and load the content
 
@@ -357,7 +357,7 @@ Railway or Render, from this repository with the service root set to `cms`:
 - Build command `npm run build`
 - Start command `npm start`
 - Environment variables as in step 2, with `PAYLOAD_PUBLIC_SERVER_URL` set to the real hostname, for example `https://cms.infoloop.co`, and `CORS_ORIGINS` including `https://infoloop.co`
-- A `Dockerfile` exists in `cms/` and works on either host
+- A `Dockerfile` exists in `cms/` but expects `output: "standalone"` in `next.config.ts`, which is not set; Render builds from the repo without it
 
 For production, do not rely on schema push. Generate and run migrations:
 
@@ -406,7 +406,7 @@ These are open, not oversights. Each one is recorded here rather than guessed at
 
 - **Media storage.** No adapter is configured. `cms/README.md` sketches two options, Bunny Storage through `@payloadcms/storage-s3` and Cloudinary through `payload-cloudinary`. To be decided.
 - **CMS host.** Railway or Render. Both are supported by the same build and start commands and by the `Dockerfile`. To be decided.
-- **Whether the blog moves into Payload.** The `posts` collection is complete and unused; the blog runs on five markdown files with an Astro schema in `web/src/content.config.ts`. Moving it means writing a `getPosts()` accessor and reconciling the two field sets. To be decided.
+- **Blog in Payload: done (September 2026).** `web/src/lib/posts.ts` merges published `posts` documents over the markdown files by slug. Remaining decision: whether to move the five markdown posts into the CMS and delete the files. Original note: The `posts` collection is complete and unused; the blog runs on five markdown files with an Astro schema in `web/src/content.config.ts`. Moving it means writing a `getPosts()` accessor and reconciling the two field sets. To be decided.
 - **What to do with the four other unused collections.** `industries`, `hire`, `testimonials` and `pages` should either be wired to accessors or removed from `cms/src/payload.config.ts`, so the admin panel does not offer editors work that has no effect. To be decided.
 - **Whether editors may create pages without a developer.** Today they cannot, for services, industries, hire and solutions. Changing that means giving those four the same skeleton-merge treatment as `work` and `products`. To be decided.
 - **Whether the API stays public-read.** It is `anyone` today, which is why `PAYLOAD_TOKEN` is optional. Locking it down means issuing a `users` API key and setting `PAYLOAD_TOKEN` in Netlify.

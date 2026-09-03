@@ -9,8 +9,8 @@ import { TaglineBand } from "@/components/sections/TaglineBand";
 import { CtaPanel } from "@/components/sections/CtaPanel";
 import { Cross } from "@/components/about/AboutParts";
 import { Hi, Check } from "@/components/ui";
-import { TRUST as T } from "@/content/company";
-import { getSite } from "@/lib/cms";
+import { getCompany, getSite } from "@/lib/cms";
+const T = (await getCompany()).trust;
 
 const site = await getSite();
 const S = site.site;
@@ -20,7 +20,7 @@ const jsonLd = [
   { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Trust center", item: url }] },
 ];
 ---
-<Site title={T.seo.title} description={T.seo.description} canonical="/trust-center" jsonLd={jsonLd}>
+<Site title={T.seo.title} description={T.seo.description} canonical="/trust-center" jsonLd={jsonLd} image={T.seo.image?.url} imageAlt={T.seo.image?.alt} noindex={!!T.seo.noindex}>
   <section class="border-b border-ink" aria-labelledby="trust-h1">
     <div class="container-x py-12 sm:py-16">
       <p class="eyebrow text-ink/70 hero-in">{T.eyebrow}</p>

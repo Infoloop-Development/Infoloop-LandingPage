@@ -9,6 +9,8 @@ export type AnalyticsConfig = {
   ga4Id: string;
   gtmId: string;
   gscVerification: string;
+  bingVerification: string;
+  ahrefsVerification: string;
   plausibleDomain: string;
   clarityId: string;
   linkedinPartnerId: string;
@@ -22,6 +24,8 @@ const EMPTY: AnalyticsConfig = {
   ga4Id: "",
   gtmId: "",
   gscVerification: "",
+  bingVerification: "",
+  ahrefsVerification: "",
   plausibleDomain: "",
   clarityId: "",
   linkedinPartnerId: "",
@@ -44,6 +48,8 @@ function fromEnv(): AnalyticsConfig {
     ga4Id: String(env.PUBLIC_GA4_ID ?? ""),
     gtmId: String(env.PUBLIC_GTM_ID ?? ""),
     gscVerification: String(env.PUBLIC_GSC_VERIFICATION ?? ""),
+    bingVerification: String(env.PUBLIC_BING_VERIFICATION ?? ""),
+    ahrefsVerification: String(env.PUBLIC_AHREFS_VERIFICATION ?? ""),
     plausibleDomain: String(env.PUBLIC_PLAUSIBLE_DOMAIN ?? ""),
     clarityId: String(env.PUBLIC_CLARITY_ID ?? ""),
     linkedinPartnerId: String(env.PUBLIC_LINKEDIN_PARTNER_ID ?? ""),
@@ -58,6 +64,8 @@ type CmsAnalytics = {
   google?: { ga4Id?: string; gtmId?: string; gscVerification?: string };
   other?: {
     plausibleDomain?: string;
+    bingVerification?: string;
+    ahrefsVerification?: string;
     clarityId?: string;
     linkedinPartnerId?: string;
     posthogKey?: string;
@@ -111,6 +119,8 @@ export async function getAnalytics(): Promise<AnalyticsConfig> {
     ga4Id: pick(g?.ga4Id, env.ga4Id),
     gtmId: pick(g?.gtmId, env.gtmId),
     gscVerification: pick(g?.gscVerification, env.gscVerification),
+    bingVerification: pick(o?.bingVerification, env.bingVerification),
+    ahrefsVerification: pick(o?.ahrefsVerification, env.ahrefsVerification),
     plausibleDomain: pick(o?.plausibleDomain, env.plausibleDomain),
     clarityId: pick(o?.clarityId, env.clarityId),
     linkedinPartnerId: pick(o?.linkedinPartnerId, env.linkedinPartnerId),

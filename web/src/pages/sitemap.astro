@@ -41,9 +41,9 @@ const groups = [
   { h2: "Services", links: [{ label: "All services", href: "/services" }, ...SERVICES_DETAIL.map((s) => ({ label: s.name, href: `/${s.slug}` }))] },
   { h2: "Industries", links: [{ label: "All industries", href: "/industries" }, ...industries.map((d) => ({ label: d.name, href: `/industry/${d.slug}` }))] },
   { h2: "Hire talent", links: [{ label: "All roles", href: "/hire" }, ...hire.map((d) => ({ label: `Hire ${d.role}`, href: `/${d.slug}` }))] },
-  { h2: "Products", links: [{ label: "All products", href: "/products.html" }, ...PRODUCTS.map((p) => ({ label: p.name, href: `/products/${p.slug}` }))] },
-  { h2: "Work", links: [{ label: "All case studies", href: "/work.html" }, ...cases.map((c) => ({ label: c.card.title, href: `/work/${c.slug}` }))] },
-  { h2: "Blog", links: [{ label: "All articles", href: "/blog.html" }, ...posts.map((p) => ({ label: p.title, href: `/blog/${p.slug}` }))] },
+  { h2: "Products", links: [{ label: "All products", href: "/products" }, ...PRODUCTS.map((p) => ({ label: p.name, href: `/products/${p.slug}` }))] },
+  { h2: "Work", links: [{ label: "All case studies", href: "/work" }, ...cases.map((c) => ({ label: c.card.title, href: `/work/${c.slug}` }))] },
+  { h2: "Blog", links: [{ label: "All articles", href: "/blog" }, ...posts.map((p) => ({ label: p.title, href: `/blog/${p.slug}` }))] },
   { h2: "Legal", links: [{ label: "Privacy policy", href: "/privacy" }, { label: "Terms of use", href: "/terms" }, { label: "Sitemap", href: "/sitemap" }] },
 ];
 const count = groups.reduce((n, g) => n + g.links.length, 0);

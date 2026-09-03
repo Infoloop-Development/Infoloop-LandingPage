@@ -1,5 +1,12 @@
 # Tracking and analytics
 
+> **Read `ANALYTICS-MODULE.md` first.** Since late August 2026 the tracking IDs live in the CMS
+> (*Settings > Analytics & tracking*) and a non-empty CMS value **overrides** the environment
+> variables this document describes. The environment path below still works as a fallback, and
+> the privacy-policy guard, consent banner and event list are unchanged. PostHog and LinkedIn
+> Insight now wait for consent like Clarity does, and `/privacy` gains a "Change your cookie
+> choice" button whenever a consent banner is in use.
+
 This document explains how analytics is wired into the site, how to turn a tool on, and what has to change in the privacy policy at the same moment. The site ships with no tracking at all. That is a deliberate default, and the build actively refuses to let you break it: if you configure a tracker without also declaring that the privacy policy has been updated, the build fails. Everything below was verified against the code in `web/` on 18 August 2026. This file lives at `web/docs/TRACKING.md`, which is the path the code comments point at.
 
 ---

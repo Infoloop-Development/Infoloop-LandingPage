@@ -16,7 +16,8 @@ export function absoluteAssetUrl(src: string | undefined | null, siteOrigin: str
   }
 }
 
-export type SeoImage = { url: string; alt?: string };
+export type { SeoImage, PageSeo } from "@/content/seo-types";
+import type { SeoImage } from "@/content/seo-types";
 
 /** Flatten Payload upload on seo.image to { url, alt }. */
 export function flattenSeoImage(seo: Record<string, unknown> | undefined): void {

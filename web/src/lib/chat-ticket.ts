@@ -39,6 +39,41 @@ export type ResumeTicketDetail = ResumeTicketSummary & {
   transcript: TranscriptTurn[];
 };
 
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+/**
+ * Proof that a browser created or resumed a given ticket.
+ *
+ * Every ticket-scoped action on /api/chat (resume, transcript sync, live
+ * handoff) used to trust a client-supplied numeric ticketDocId, and ids are
+ * sequential, so anyone could read or rewrite any lead's ticket by counting.
+ * The server now hands out an HMAC of the id whenever it legitimately gives a
+ * browser a ticket (estimate, resume by email) and requires it back on every
+ * later call. The secret never leaves the server; without it the token cannot
+ * be forged. CHAT_TICKET_SECRET is preferred; PAYLOAD_TOKEN is the fallback so
+ * an existing deployment keeps working without a new variable.
+ */
+function ticketSecret(): string {
+  return (
+    (import.meta.env.CHAT_TICKET_SECRET as string | undefined)?.trim() ||
+    (import.meta.env.PAYLOAD_TOKEN as string | undefined)?.trim() ||
+    ""
+  );
+}
+
+export function ticketToken(id: string | number): string | undefined {
+  const secret = ticketSecret();
+  if (!secret) return undefined;
+  return createHmac("sha256", secret).update(String(id)).digest("hex");
+}
+
+export function ticketAuthorized(id: unknown, token: unknown): boolean {
+  if (id === undefined || id === null || id === "" || typeof token !== "string" || !token) return false;
+  const expected = ticketToken(id as string | number);
+  if (!expected || token.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(token), Buffer.from(expected));
+}
+
 function payloadConfig() {
   const base = (import.meta.env.PAYLOAD_URL as string | undefined)?.replace(/\/$/, "");
   const token = import.meta.env.PAYLOAD_TOKEN as string | undefined;

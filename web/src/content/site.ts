@@ -34,6 +34,40 @@ export const SITE = {
   areaServed: "United States",
 };
 
+/**
+ * /404. Worth more attention than a 404 usually gets: redirects.mjs maps 46
+ * known old URLs, so anything that reaches this page is a link we did not
+ * anticipate. The copy therefore does two jobs, get the visitor moving again,
+ * and ask them to tell us, because an unmapped inbound link is something we
+ * want to hear about rather than lose quietly.
+ */
+export const NOT_FOUND = {
+  eyebrow: "404",
+  h1: "That page is not here [[any more]]",
+  lede: "The link may be old, or we may have moved the page when we rebuilt this site. Nothing is broken on your end.",
+  destinationsH2: "Try one of these instead",
+  destinations: [
+    { label: "Services", href: "/services", blurb: "Everything we build, grow, transform and advise on." },
+    { label: "Industries", href: "/industries", blurb: "The sectors we know well enough to argue with you." },
+    { label: "Hire talent", href: "/hire", blurb: "Experienced people, in weeks rather than months." },
+    { label: "Work", href: "/work", blurb: "Case studies with the measured result." },
+    { label: "Blog", href: "/blog", blurb: "Plain writing on software, AI and websites." },
+    { label: "Sitemap", href: "/sitemap", blurb: "Every page on this site, in one list." },
+  ],
+  reportTitle: "Followed a link to get here?",
+  reportBody: "Then something on our side is out of date and we would like to fix it. Tell us where the link was and we will sort it.",
+  reportButton: "Report a broken link",
+  cta: {
+    h2: "Or just tell us what you are looking for",
+    lede: "Describe the problem in plain words. We will point you at the right page, or tell you honestly that we are not the right firm for it.",
+    button: "Talk to us",
+  },
+  seo: {
+    title: "Page not found | Infoloop",
+    description: "That page is not here any more. Links to our services, industries, hire talent, work and blog, and a way to tell us if a link brought you here.",
+  },
+};
+
 export type NavLink = { label: string; href: string; blurb?: string };
 export type NavGroup = { title: string; href?: string; blurb?: string; items: NavLink[] };
 
@@ -189,9 +223,9 @@ export const COMPANY_LINKS: NavLink[] = [
 
 /** Top-level nav after Solutions. Items with children open a small dropdown. */
 export const NAV_PRIMARY: (NavLink & { children?: NavLink[] })[] = [
-  { label: "Work", href: "/work.html" },
-  { label: "Products", href: "/products.html", children: PRODUCT_LINKS },
-  { label: "Blog", href: "/blog.html" },
+  { label: "Work", href: "/work" },
+  { label: "Products", href: "/products", children: PRODUCT_LINKS },
+  { label: "Blog", href: "/blog" },
   { label: "Company", href: "/about", children: COMPANY_LINKS },
 ];
 
@@ -268,18 +302,3 @@ export const RATINGS = [
   { score: "4.7", platform: "Clutch" },
   { score: "4.7", platform: "GoodFirms" },
 ];
-
-/** Every route the header and footer link to, for sitemap.ts. */
-export function allRoutes(): string[] {
-  const set = new Set<string>(["/"]);
-  const add = (h: string) => {
-    if (h.startsWith("/") && !h.startsWith("/#") && !h.includes("#")) set.add(h);
-  };
-  [...SERVICES, ...INDUSTRIES, ...HIRE, ...FOOTER_COLUMNS].forEach((g) => {
-    if (g.href) add(g.href);
-    g.items.forEach((i) => add(i.href));
-  });
-  [...NAV_PRIMARY, ...PRODUCT_LINKS, ...COMPANY_LINKS, ...FOOTER_LEGAL].forEach((l) => add(l.href));
-  ["/services", "/industries", "/hire", "/products.html", "/solutions"].forEach(add);
-  return [...set];
-}

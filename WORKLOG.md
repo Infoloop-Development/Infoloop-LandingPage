@@ -4,27 +4,25 @@ Running log of agent/handover work. Ask anytime for a status summary (“status�
 
 ---
 
-## 2026-08-29
+## 2026-09-03
 
-### Ivy: resume quote + live sales handoff + waiting bell
-- Resume previous quote (soft chip, email lookup, project picker, same ticket)
-- Live sales handoff (Waiting badge, admin Start chat, agent join/avatars, AI vs agent transcript)
-- Admin-wide notification bell + sound when someone is Waiting
-- Related fixes: tickets list clickable, reconnect not dumping old Admin chat, DB columns
-- Commit: `8277933` (cms + web)
+### Integrate developer fixed zip (`Infoloop-LandingPage-fixed.zip`)
+- Synced zip `web/` + `cms/` into repo (kept local `.env` files)
+- Fixed corrupt trailing `\\n` in `cms/package.json` from the zip
+- `build.format: "directory"` + `server.mjs` (`npm start`) + `redirects.mjs` + link checker
+- Clean URLs again (`/blog`, `/work`, `/products` — no `.html` hacks)
+- Chat hardening (rate limit, body cap, ticket tokens)
+- CMS: new globals (Blog/Company/Contact/Hub/Technologies) + `SITE_BUILD_HOOK_URL`
+- Local verify: `npm run build` Links OK; `npm start` serves `/blog` `/work` `/products` 200
+- Added root `render.yaml` documenting Start Command = `npm start`
 
-### Build / deploy hygiene
-- Remove macOS-only `@next/swc-darwin-arm64` direct dependency — `26102b7`
-- Fix SalesInquiryTickets TypeScript errors for CMS production build — `3797e4f`
+**Render WebMain (do in dashboard if not already):**
+- Start Command → `npm start` (not `node ./dist/server/entry.mjs`)
+- Manual Deploy after this push
 
-### Security / Dependabot (inherited from design zip)
-- CMS: `sharp` → 0.35.4, `vitest` → 4.1.11, `esbuild` override `>=0.25`
-- Web: `sharp` override + `@astrojs/netlify` → 8.2.4
-- Commit message documents these came from the provided design zip, not later Infoloop work
-- Commit: `bfc629b` on `production` + `main`
-
-### Tracking setup
-- `WORKLOG.md` + `.cursor/rules/work-tracking.mdc` (always-on) committed so progress can be reported on request
+**CMS (do in dashboard / locally):**
+- Set `SITE_BUILD_HOOK_URL` to Infoloop-WebMain Deploy Hook (or keep existing `NETLIFY_BUILD_HOOK_URL`)
+- From a machine that can reach Neon: `cd cms && npm run db:push` (schema push hung in this agent environment)
 
 ---
 
@@ -32,10 +30,21 @@ Running log of agent/handover work. Ask anytime for a status summary (“status�
 
 ### Render: web needs Node Web Service for Ivy
 - Bumped `astro` to 7.2.9 so `@astrojs/node` startup (`app.getLogger`) works on Render
-- Live chat failed because `/api/chat` does not run on Render **Static** + Netlify adapter
 - Switched `web` to `@astrojs/node` standalone for Render Web Service
-- CMS stays on Render; Groq/PAYLOAD_* belong on **web** env only
-- First Render build failed on old commit still using `@astrojs/netlify` + missing `TRACKING_DISCLOSED` while CMS analytics is on
+- Temporary `.html` nav plugs for blog/work/products (superseded by zip directory format)
+
+---
+
+## 2026-08-29
+
+### Ivy: resume quote + live sales handoff + waiting bell
+- Commit: `8277933` (cms + web)
+
+### Security / Dependabot (inherited from design zip)
+- Commit: `bfc629b` on `production` + `main`
+
+### Tracking setup
+- `WORKLOG.md` + `.cursor/rules/work-tracking.mdc`
 
 ---
 
@@ -43,8 +52,9 @@ Running log of agent/handover work. Ask anytime for a status summary (“status�
 
 | Item | Notes |
 |------|--------|
-| Redeploy `Infoloop-WebMain` after Node-adapter push | Root `web`, start `node ./dist/server/entry.mjs`, env must include `TRACKING_DISCLOSED=true` (CMS has analytics), plus GROQ + PAYLOAD_* + `HOST=0.0.0.0` |
-| `image-size` + `extract-zip` Dependabot alerts | Unpatched Netlify-dev deps; skipped on purpose |
+| Render WebMain Start Command | Must be `npm start` after this deploy |
+| CMS `SITE_BUILD_HOOK_URL` + `npm run db:push` | New globals need schema push from a networked machine |
+| `image-size` + `extract-zip` Dependabot | Unpatched Netlify-dev deps; skipped |
 
 ---
 

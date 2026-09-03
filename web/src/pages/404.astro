@@ -1,0 +1,64 @@
+---
+/**
+ * /404. Astro emits 404.html and the Node adapter serves it with a real 404
+ * status for any unmatched path, so nothing else is needed on the host.
+ *
+ * noindex, because a 404 in the index is a 404 in someone's search results.
+ * It stays "follow" so the links out of it still pass through.
+ */
+import Site from "@/layouts/Site.astro";
+import { CtaPanel } from "@/components/sections/CtaPanel";
+import { Hi, ArrowUpRight } from "@/components/ui";
+import { NOT_FOUND as N } from "@/content/site";
+import { getSite } from "@/lib/cms";
+
+const site = await getSite();
+const S = site.site;
+/* Prefilled so a report arrives with the address already in it, rather than
+   asking a stranger who is already lost to describe where they were. */
+const reportHref = `mailto:${S.email}?subject=${encodeURIComponent("Broken link on infoloop.co")}&body=${encodeURIComponent("I followed a link and landed on a page that does not exist.\n\nThe page I was trying to reach:\n\nWhere the link was (site, email, search result):\n\n")}`;
+---
+<Site title={N.seo.title} description={N.seo.description} canonical="/404" noindex>
+  <section class="border-b border-ink" aria-labelledby="nf-h1">
+    <div class="container-x py-14 sm:py-20">
+      <p class="eyebrow text-orange hero-in">{N.eyebrow}</p>
+      <h1 id="nf-h1" class="display-h2 mt-3 max-w-3xl text-ink hero-in" style="--d: 60ms"><Hi text={N.h1} /></h1>
+      <p class="lede mt-4 max-w-2xl text-ink/80 hero-in" style="--d: 120ms">{N.lede}</p>
+    </div>
+  </section>
+
+  {/* Somewhere to go, not just an apology */}
+  <section class="container-x py-12 sm:py-16" aria-labelledby="nf-dest-h2">
+    <h2 id="nf-dest-h2" class="display-h3 text-ink reveal">{N.destinationsH2}</h2>
+    <ul class="mt-6 grid auto-rows-fr gap-px border border-ink bg-ink sm:grid-cols-2 lg:grid-cols-3">
+      {N.destinations.map((d, i) => (
+        <li class="flex reveal" style={`--reveal-delay: ${i * 50}ms`}>
+          <a href={d.href} class="group flex w-full flex-col justify-between gap-4 bg-white p-6 transition-colors hover:bg-paper">
+            <span>
+              <span class="flex items-center justify-between gap-3">
+                <span class="font-display text-[19px] font-bold leading-tight text-ink group-hover:text-orange">{d.label}</span>
+                <ArrowUpRight className="h-4 w-4 shrink-0 text-ink/35 transition duration-150 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-orange" />
+              </span>
+              <span class="mt-2 block text-[15px] leading-relaxed text-ink/70">{d.blurb}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  {/* If a link sent them here, that is our problem to fix */}
+  <section class="container-x pb-12 sm:pb-16" aria-labelledby="nf-report-h2">
+    <div class="grid gap-6 border border-ink bg-paper p-7 sm:p-9 lg:grid-cols-12 lg:items-center lg:gap-10">
+      <div class="lg:col-span-8">
+        <h2 id="nf-report-h2" class="font-display text-[21px] font-bold leading-tight text-ink">{N.reportTitle}</h2>
+        <p class="mt-2 max-w-2xl text-[16px] leading-relaxed text-ink/80">{N.reportBody}</p>
+      </div>
+      <div class="lg:col-span-4 lg:justify-self-end">
+        <a href={reportHref} class="btn btn-ink">{N.reportButton}</a>
+      </div>
+    </div>
+  </section>
+
+  <CtaPanel id="nf-cta-h2" h2={N.cta.h2} lede={N.cta.lede} button={{ label: N.cta.button, href: "/contact" }} />
+</Site>

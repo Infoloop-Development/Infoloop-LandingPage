@@ -68,7 +68,7 @@ export const SOLUTIONS: SolutionGroup[] = [
       metrics: [
         { value: "+38%", label: "conversion after a Shopify rebuild", href: "/work/dtc-shopify-rebuild" },
         { value: "$1.2M", label: "saved a year with ERP-connected maintenance software", href: "/work/manufacturing-erp-predictive-maintenance" },
-        { value: "2.1x", label: "qualified leads from a new Webflow website", href: "/work.html" },
+        { value: "2.1x", label: "qualified leads from a new Webflow website", href: "/work" },
       ],
       tile: "shopify",
       caption: "Shopify rebuild for a DTC brand, live in weeks and still run by us",
@@ -130,7 +130,7 @@ export const SOLUTIONS: SolutionGroup[] = [
       metrics: [
         { value: "90%", label: "less timesheet admin for a three-plant manufacturer", href: "/work/manufacturing-attendance-opsdeck" },
         { value: "+38%", label: "conversion after a store rebuild we still manage", href: "/work/dtc-shopify-rebuild" },
-        { value: "2.1x", label: "qualified leads from a website built to rank", href: "/work.html" },
+        { value: "2.1x", label: "qualified leads from a website built to rank", href: "/work" },
       ],
       tile: "attendance",
       caption: "Attendance software for a manufacturer, live in three weeks, run monthly",
@@ -233,7 +233,7 @@ export const SOLUTIONS: SolutionGroup[] = [
     button: "Let us talk it through",
     proof: {
       metrics: [
-        { value: "50+", label: "projects delivered behind the advice", href: "/work.html" },
+        { value: "50+", label: "projects delivered behind the advice", href: "/work" },
         { value: "6", label: "countries where software we built runs", href: "/about" },
         { value: "4.8", label: "average client rating across four review platforms", href: "/about" },
       ],

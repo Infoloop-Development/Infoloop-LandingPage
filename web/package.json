@@ -7,11 +7,14 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/check-links.mjs dist/client",
+    "start": "node ./server.mjs",
     "preview": "astro preview",
     "astro": "astro",
-    "check": "tsc --noEmit -p tsconfig.json",
-    "typecheck": "astro check"
+    "check": "astro sync && tsc --noEmit -p tsconfig.json",
+    "typecheck": "astro check",
+    "check:links": "node scripts/check-links.mjs dist/client",
+    "indexnow": "node scripts/indexnow.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^11.1.4",

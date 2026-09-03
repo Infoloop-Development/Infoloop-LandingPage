@@ -64,6 +64,22 @@ export const Analytics: GlobalConfig = {
       label: 'Other tools (optional)',
       fields: [
         {
+          name: 'bingVerification',
+          type: 'text',
+          label: 'Bing Webmaster Tools verification (optional)',
+          admin: {
+            description: 'HTML meta-tag content from Bing Webmaster Tools (msvalidate.01). Not a tracker. Bing feeds ChatGPT search, so verify it. Prefer DNS verification when you can.',
+          },
+        },
+        {
+          name: 'ahrefsVerification',
+          type: 'text',
+          label: 'Ahrefs site verification (optional)',
+          admin: {
+            description: 'Token from Ahrefs Site Audit > verify ownership (ahrefs-site-verification). Not a tracker; unlocks the full crawl and Webmaster Tools data.',
+          },
+        },
+        {
           name: 'plausibleDomain',
           type: 'text',
           label: 'Plausible domain',

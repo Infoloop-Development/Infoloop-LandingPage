@@ -10,8 +10,8 @@ import { RatingsRow } from "@/components/sections/RatingsRow";
 import { CtaPanel } from "@/components/sections/CtaPanel";
 import { CaseCard } from "@/components/work/CaseCard";
 import { Hi } from "@/components/ui";
-import { TESTIMONIALS as T } from "@/content/company";
-import { getSite, getWork } from "@/lib/cms";
+import { getCompany, getSite, getWork } from "@/lib/cms";
+const T = (await getCompany()).testimonials;
 
 const site = await getSite();
 const S = site.site;
@@ -41,13 +41,13 @@ const jsonLd = [
   { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Testimonials", item: url }] },
 ];
 ---
-<Site title={T.seo.title} description={T.seo.description} canonical="/testimonials" jsonLd={jsonLd}>
+<Site title={T.seo.title} description={T.seo.description} canonical="/testimonials" jsonLd={jsonLd} image={T.seo.image?.url} imageAlt={T.seo.image?.alt} noindex={!!T.seo.noindex}>
   <section class="border-b border-ink" aria-labelledby="test-h1">
     <div class="container-x py-12 sm:py-16">
       <p class="eyebrow text-ink/70 hero-in">{T.eyebrow}</p>
       <h1 id="test-h1" class="display-h2 mt-3 max-w-4xl text-ink hero-in" style="--d: 60ms"><Hi text={T.h1} /></h1>
       <p class="lede mt-4 max-w-3xl text-ink/80 hero-in" style="--d: 120ms">{T.lede}</p>
-      <a href="/work.html" class="btn btn-ink mt-8 hero-in" style="--d: 180ms">{T.button}</a>
+      <a href="/work" class="btn btn-ink mt-8 hero-in" style="--d: 180ms">{T.button}</a>
     </div>
   </section>
 

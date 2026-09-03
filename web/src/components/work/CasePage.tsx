@@ -36,7 +36,7 @@ export function CaseHeader({ c, ctaHref = "/contact" }: { c: CaseStudy; ctaHref?
   return (
     <header className="bg-white" aria-labelledby="case-h1">
       <div className="container-x pt-10 sm:pt-12">
-        <a href="/work.html" className="link-arrow inline-flex text-[13.5px] text-ink/70 hover:text-orange hero-in">
+        <a href="/work" className="link-arrow inline-flex text-[13.5px] text-ink/70 hover:text-orange hero-in">
           <span aria-hidden="true" className="mr-1.5">&larr;</span> Work
         </a>
         <div className="mt-8 hero-in" style={{ "--d": "60ms" } as React.CSSProperties}>
@@ -236,7 +236,7 @@ export function CaseBody({ c, ctaHref = "/contact" }: { c: CaseStudy; ctaHref?: 
 }
 
 /** 7. More of our work: three 7Span-style cards (replaces the testimonial slot) */
-export function RelatedWork({ items, allHref = "/work.html" }: { items: CaseStudy[]; allHref?: string }) {
+export function RelatedWork({ items, allHref = "/work" }: { items: CaseStudy[]; allHref?: string }) {
   if (items.length === 0) return null;
   return (
     <section className="container-x mt-16 sm:mt-24" aria-labelledby="related-h2">

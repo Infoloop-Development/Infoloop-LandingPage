@@ -35,4 +35,4 @@ The admin nav only shows categories (and pages) they were granted. API update/de
 ## Notes
 
 - Public site builds are unchanged (still public-read for published content).  
-- After deploy, if new user fields are missing in the DB, set `PAYLOAD_DATABASE_PUSH=true` on the CMS service for one restart, then turn it off.  
+- After deploy, if new user fields are missing in the DB, run `npm run db:push` from `cms/` on a developer machine with `cms/.env` pointing at the database. (Setting `PAYLOAD_DATABASE_PUSH=true` on the Render service does nothing: the Postgres adapter only pushes outside `NODE_ENV=production`.)  

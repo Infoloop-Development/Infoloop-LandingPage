@@ -10,8 +10,9 @@ type Status = "idle" | "sending" | "sent" | "error";
  * looking for, about project, budget, timeline, how did you hear about us.
  * Posts JSON to /api/contact with a honeypot and page/UTM stamps.
  */
-export function ContactForm() {
-  const F = CONTACT.form;
+export function ContactForm({ form = CONTACT.form }: { form?: typeof CONTACT.form } = {}) {
+  // The page passes the CMS-merged copy; the local file is the fallback so the island still renders alone.
+  const F = form;
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const doneRef = useRef<HTMLHeadingElement>(null);

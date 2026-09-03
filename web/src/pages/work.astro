@@ -50,7 +50,7 @@ const jsonLd = [
   },
 ];
 ---
-<Site title={work.seo.title} description={work.seo.description} canonical="/work" jsonLd={jsonLd} image={work.seo.image?.url} imageAlt={work.seo.image?.alt}>
+<Site title={work.seo.title} description={work.seo.description} canonical="/work" jsonLd={jsonLd} noindex={!!work.seo.noindex} image={work.seo.image?.url} imageAlt={work.seo.image?.alt}>
   <WorkHero data={work} />
   <FeaturedTabs tabs={tabs} button={work.browser.featuredButton} />
   <section class="container-x mt-12 sm:mt-16" aria-labelledby="all-work-h2" id="all-work">

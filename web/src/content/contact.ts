@@ -3,6 +3,7 @@
  * "Schedule a meeting" card with the form, "Up for a quick connect?" band,
  * "A glimpse into our expertise" brochure section.
  */
+import type { PageSeo } from "./seo-types";
 export const CONTACT = {
   h1: "Dedicated to guiding you to the [[next level]].",
   lede: "We are ready to transform your brand or product from great to incredible. Share your project details to kick-start the business conversation.",
@@ -45,5 +46,5 @@ export const CONTACT = {
   seo: {
     title: "Contact Infoloop: book a call or send a project brief",
     description: "Tell Infoloop what you want to build, modernize or run. A reply within one business day, a 30-minute call, then a price in writing before anyone starts.",
-  },
+  } as PageSeo,
 };

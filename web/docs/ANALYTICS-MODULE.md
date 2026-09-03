@@ -2,7 +2,7 @@
 
 **Audience:** Infoloop team (marketing, ops, leadership)  
 **Where it lives:** CMS → **Settings → Analytics & tracking**  
-**Public site:** [https://infoloop-web.onrender.com](https://infoloop-web.onrender.com)  
+**Public site:** [https://infoloop.co](https://infoloop.co) (Render Web Service `Infoloop-WebMain` behind Cloudflare)  
 **CMS:** [https://infoloop-cms.onrender.com](https://infoloop-cms.onrender.com)
 
 This document explains what the Analytics module does, what each field means, how it affects the live website and privacy policy, and how to connect Google Analytics (or related tools) **without asking a developer to change code**.

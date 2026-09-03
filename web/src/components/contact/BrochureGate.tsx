@@ -8,8 +8,8 @@ import { trackEvent } from "@/lib/track";
  * work email); on submit the lead is posted to /api/contact as type
  * "brochure" and the PDF opens in a new tab.
  */
-export function BrochureGate() {
-  const B = CONTACT.brochure;
+export function BrochureGate({ brochure = CONTACT.brochure }: { brochure?: typeof CONTACT.brochure } = {}) {
+  const B = brochure;
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);

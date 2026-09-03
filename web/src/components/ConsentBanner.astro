@@ -63,8 +63,24 @@ const clarityId = cfg.clarityId;
           })(window, document, "clarity", "script", clarityId);
         }
         if (!granted && typeof window.clarity === "function") window.clarity("consent", false);
+        /* PostHog and LinkedIn are defined by Analytics.astro only when configured; they wait for this grant. */
+        if (granted && typeof window.__ilStartPosthog === "function") window.__ilStartPosthog();
+        if (granted && typeof window.__ilStartLinkedIn === "function") window.__ilStartLinkedIn();
+        if (!granted && window.posthog && typeof window.posthog.opt_out_capturing === "function") window.posthog.opt_out_capturing();
         el.hidden = true;
       }
+
+      /* "Change your cookie choice" on /privacy (and anywhere else that renders the button):
+         forget the stored answer and show the banner again. Declining after an earlier
+         Allow updates Consent Mode at once; cookies already set expire on their own. */
+      document.addEventListener("click", function (e) {
+        var t = e.target instanceof Element ? e.target.closest("[data-consent-manage]") : null;
+        if (!t) return;
+        e.preventDefault();
+        try { localStorage.removeItem(KEY); } catch (err) {}
+        el.hidden = false;
+        el.scrollIntoView({ block: "end" });
+      });
 
       document.getElementById("consent-yes").addEventListener("click", function () { apply("granted"); });
       document.getElementById("consent-no").addEventListener("click", function () { apply("denied"); });

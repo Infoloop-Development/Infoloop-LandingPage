@@ -80,11 +80,14 @@ GROQ_API_KEY=           # console.groq.com — required for /api/chat (at build 
 GROQ_MODEL=             # optional; default openai/gpt-oss-20b
 ```
 
-## Deploy (Netlify)
+## Deploy (Render)
 
-`netlify.toml` is in this folder. In Netlify set the base directory to `web`,
-add the three variables above, and create a **Build hook**; paste its URL into the
-CMS as `NETLIFY_BUILD_HOOK_URL` so publishing in Payload rebuilds the site.
+The site runs on a Render Web Service: root directory `web`, build `npm ci && npm run build`,
+start **`npm start`** (`server.mjs`, which adds the security headers and asset caching that
+`netlify.toml` used to provide). Create a **Deploy Hook** on the service and paste its URL into
+the CMS environment as `SITE_BUILD_HOOK_URL` so publishing in Payload rebuilds the site.
+Full runbook: `docs/DEPLOYMENT.md`, section 0. `netlify.toml` is kept only for a Netlify
+deployment; Render ignores it (redirects live in `redirects.mjs`).
 
 ## Work section
 

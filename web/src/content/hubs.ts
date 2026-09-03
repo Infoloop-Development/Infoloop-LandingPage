@@ -8,6 +8,7 @@
  * come from the detail pages themselves (services from the Solutions group
  * offer list, industries from their H1, roles from their sub line).
  */
+import type { PageSeo } from "./seo-types";
 
 export type Hub = {
   slug: "services" | "industries" | "hire";
@@ -19,7 +20,7 @@ export type Hub = {
   groupsH2: string;
   groupsLede: string;
   cta: { h2: string; lede: string; button: string };
-  seo: { title: string; description: string };
+  seo: PageSeo;
 };
 
 export const HUBS: Hub[] = [

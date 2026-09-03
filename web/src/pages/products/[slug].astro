@@ -39,7 +39,7 @@ const jsonLd = [
     publisher: org,
     featureList: [...p.block1.features, ...p.block2.features].map((f) => f.h3),
   },
-  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: p.faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
+  ...(p.faq.length ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: p.faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) }] : []),
   { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Products", item: `${S.url}/products` }, { "@type": "ListItem", position: 3, name: p.name, item: url }] },
 ];
 ---
@@ -61,7 +61,7 @@ const jsonLd = [
     </section>
   )}
   <div class="h-14 sm:h-20"></div>
-  <Faq data={faqData} />
+  {p.faq.length > 0 && (<Faq data={faqData} />)}
   <div class="h-14 sm:h-20"></div>
   <WorkBand data={band} />
 </Site>

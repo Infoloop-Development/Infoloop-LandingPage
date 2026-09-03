@@ -9,6 +9,7 @@ import { CaseHeader, CaseBody, RelatedWork } from "@/components/work/CasePage";
 import { WorkBand } from "@/components/work/WorkIndex";
 import { getSite, getWork, getWorkIndex, relatedCases } from "@/lib/cms";
 import type { CaseStudy } from "@/content/work";
+import { absoluteAssetUrl } from "@/lib/seo";
 
 export async function getStaticPaths() {
   const cases = await getWork();
@@ -36,7 +37,7 @@ const jsonLd = [
     headline: c.title,
     description: seoDesc,
     articleSection: "Case study",
-    image: [c.cover?.url ?? `${S.url}/og.png`],
+    image: [absoluteAssetUrl(c.seo?.image?.url ?? c.cover?.url, S.url)],
     datePublished: c.datePublished,
     dateModified: c.dateModified ?? c.datePublished,
     inLanguage: "en",

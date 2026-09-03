@@ -19,7 +19,7 @@ import {
 import { computeEstimate, estimateTranscriptText, stackForPlatform } from "@/lib/chat-estimate";
 import { buildProposalMessage } from "@/lib/chat-proposal";
 import { featuresByKeys, getChatFeatures } from "@/lib/chat-features";
-import { createSalesInquiryTicket, lookupTicketsForResume, resumeTicketSession, appendTicketTranscript, updateTicketEstimate, requestHandoff, pollHandoff, appendVisitorHandoffMessage, endHandoff } from "@/lib/chat-ticket";
+import { createSalesInquiryTicket, lookupTicketsForResume, resumeTicketSession, appendTicketTranscript, updateTicketEstimate, requestHandoff, pollHandoff, appendVisitorHandoffMessage, endHandoff, ticketToken, ticketAuthorized } from "@/lib/chat-ticket";
 
 export const prerender = false;
 
@@ -32,6 +32,31 @@ type TranscriptTurn = { role: "user" | "assistant" | "system" | "agent"; message
 
 const MAX_MESSAGE = 800;
 const MAX_HISTORY = 40;
+/** Largest request body we will parse. The biggest legitimate payload (40 turns of 800 chars plus a transcript) is well under this. */
+const MAX_BODY_BYTES = 64_000;
+/** Per-client budget: the live-chat poll is one call every 3.5s, so 40 a minute leaves room for typing. */
+const RATE_LIMIT = 40;
+const RATE_WINDOW_MS = 60_000;
+const rateBuckets = new Map<string, number[]>();
+
+/** Sliding-window rate limit per client address, in memory (one Render instance). */
+function rateLimited(request: Request, fallbackAddress: string): boolean {
+  const ip =
+    request.headers.get("cf-connecting-ip")?.trim() ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    fallbackAddress ||
+    "unknown";
+  const now = Date.now();
+  const recent = (rateBuckets.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
+  recent.push(now);
+  rateBuckets.set(ip, recent);
+  if (rateBuckets.size > 5000) {
+    for (const [k, v] of rateBuckets) if (!v.some((t) => now - t < RATE_WINDOW_MS)) rateBuckets.delete(k);
+  }
+  return recent.length > RATE_LIMIT;
+}
+
+const TICKET_DENIED = "That quote could not be verified from this browser. Resume it with your email first.";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const DEFAULT_MODEL = "openai/gpt-oss-20b";
 
@@ -269,7 +294,7 @@ async function summarizeTranscript(transcript: TranscriptTurn[]): Promise<string
  * Supports normal Q&A plus build-intent feature selection (tool call) and
  * post-lead server-side estimates + Payload sales tickets.
  */
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, clientAddress }) => {
   if (!groqKey()) {
     return json(
       {
@@ -287,11 +312,20 @@ export const POST: APIRoute = async ({ request }) => {
     proposal?: unknown;
     transcript?: unknown;
   };
+  if (rateLimited(request, (() => { try { return clientAddress; } catch { return ""; } })())) {
+    return json({ error: "Too many requests. Please wait a moment and try again." }, 429);
+  }
+  const declared = Number(request.headers.get("content-length") || 0);
+  if (declared > MAX_BODY_BYTES) return json({ error: "Request too large." }, 413);
   try {
-    body = (await request.json()) as typeof body;
+    const raw = await request.text();
+    if (raw.length > MAX_BODY_BYTES) return json({ error: "Request too large." }, 413);
+    body = JSON.parse(raw) as typeof body;
   } catch {
     return json({ error: "Invalid request." }, 400);
   }
+  if (!body || typeof body !== "object" || Array.isArray(body)) return json({ error: "Invalid request." }, 400);
+  const ticketTokenIn = (body as { ticketToken?: unknown }).ticketToken;
 
   const action = typeof body.action === "string" ? body.action : "chat";
   const catalog = await getChatFeatures();
@@ -314,7 +348,8 @@ export const POST: APIRoute = async ({ request }) => {
     if (!result.ok) return json({ error: result.error || "Could not look up quotes." }, 502);
     return json({
       phase: "resume_lookup",
-      tickets: result.tickets,
+      // The token is what lets this browser open the ticket; see ticketToken in lib/chat-ticket.ts.
+      tickets: result.tickets.map((t) => ({ ...t, token: ticketToken(t.id) })),
       count: result.tickets.length,
     });
   }
@@ -328,6 +363,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (docId === undefined || docId === null || docId === "") {
       return json({ error: "Missing project selection." }, 400);
     }
+    if (!ticketAuthorized(docId, ticketTokenIn)) return json({ error: TICKET_DENIED }, 403);
     const result = await resumeTicketSession(docId as string | number, projectName);
     if (!result.ok || !result.ticket) {
       return json({ error: result.error || "Could not restore that quote." }, 502);
@@ -337,6 +373,7 @@ export const POST: APIRoute = async ({ request }) => {
       phase: "resume_loaded",
       ticketId: t.ticketId,
       ticketDocId: t.id,
+      ticketToken: ticketToken(t.id),
       projectTitle: t.projectName,
       estimate: t.estimate,
       chatSummary: t.chatSummary,
@@ -372,6 +409,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (docId === undefined || docId === null || docId === "") {
       return json({ error: "Missing ticket." }, 400);
     }
+    if (!ticketAuthorized(docId, ticketTokenIn)) return json({ error: TICKET_DENIED }, 403);
     const turns: { role: "user" | "assistant" | "system"; message: string; timestamp: string }[] = [];
     for (const row of turnsIn.slice(-20)) {
       if (!row || typeof row !== "object") continue;
@@ -399,6 +437,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (docId === undefined || docId === null || docId === "") {
       return json({ error: "Create or resume a quote first, then we can connect you with sales." }, 400);
     }
+    if (!ticketAuthorized(docId, ticketTokenIn)) return json({ error: TICKET_DENIED }, 403);
     const result = await requestHandoff(docId as string | number);
     if (!result.ok) return json({ error: result.error || "Could not request a connection." }, 502);
     return json({
@@ -415,6 +454,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (docId === undefined || docId === null || docId === "") {
       return json({ error: "Missing ticket." }, 400);
     }
+    if (!ticketAuthorized(docId, ticketTokenIn)) return json({ error: TICKET_DENIED }, 403);
     const result = await pollHandoff(docId as string | number);
     if (!result.ok || !result.data) return json({ error: result.error || "Could not check status." }, 502);
     const all = result.data.transcript;
@@ -457,6 +497,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (!message || message.length > MAX_MESSAGE) {
       return json({ error: "Please enter a message." }, 400);
     }
+    if (!ticketAuthorized(docId, ticketTokenIn)) return json({ error: TICKET_DENIED }, 403);
     const result = await appendVisitorHandoffMessage(docId as string | number, message);
     if (!result.ok) return json({ error: result.error || "Could not send." }, 502);
     return json({ ok: true, phase: "handoff_visitor_message" });
@@ -469,6 +510,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
     const reason =
       (body as { reason?: unknown }).reason === "visitor_left" ? "visitor_left" : "visitor_closed";
+    if (!ticketAuthorized(docId, ticketTokenIn)) return json({ error: TICKET_DENIED }, 403);
     const result = await endHandoff(docId as string | number, reason);
     if (!result.ok) return json({ error: result.error || "Could not end live chat." }, 502);
     return json({ ok: true, phase: "handoff_ended" });
@@ -547,6 +589,7 @@ export const POST: APIRoute = async ({ request }) => {
     let ticketOk = false;
 
     if (existingDocId !== undefined && existingDocId !== null && existingDocId !== "") {
+      if (!ticketAuthorized(existingDocId, ticketTokenIn)) return json({ error: TICKET_DENIED }, 403);
       const updated = await updateTicketEstimate(existingDocId as string | number, {
         projectName,
         chatSummary,
@@ -581,6 +624,7 @@ export const POST: APIRoute = async ({ request }) => {
       projectTitle: projectName,
       ticketId,
       ticketDocId,
+      ticketToken: ticketDocId !== undefined ? ticketToken(ticketDocId) : undefined,
       ticketOk,
       reply: estimateTranscriptText(projectName, publicEst, ticketId),
     });

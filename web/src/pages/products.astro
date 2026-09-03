@@ -30,7 +30,7 @@ const jsonLd = [
   { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: `${S.url}/` }, { "@type": "ListItem", position: 2, name: "Products", item: `${S.url}/products` }] },
 ];
 ---
-<Site title={index.seo.title} description={index.seo.description} canonical="/products" jsonLd={jsonLd} image={index.seo.image?.url} imageAlt={index.seo.image?.alt}>
+<Site title={index.seo.title} description={index.seo.description} canonical="/products" jsonLd={jsonLd} noindex={!!index.seo.noindex} image={index.seo.image?.url} imageAlt={index.seo.image?.alt}>
   <section aria-labelledby="products-h1">
     <div class="container-x pt-12 sm:pt-16">
       <h1 id="products-h1" class="display-h2 text-ink hero-in">{index.h1}</h1>

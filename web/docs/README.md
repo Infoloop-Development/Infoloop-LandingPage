@@ -9,7 +9,10 @@ Read them in this order.
 | [TRACKING.md](TRACKING.md) | Turning on GA4 and Clarity, the consent banner, the privacy policy change that ships with them, and connecting Search Console, Google Business Profile and Attio. |
 | [AEO-GEO.md](AEO-GEO.md) | Being found and quoted by search engines and answer engines: what the site already does, and what is worth doing next. |
 | [IMAGE-ALT.md](IMAGE-ALT.md) | Required media alt text in the CMS and how the site uses it. |
-| [CHATBOT-MODULE.md](CHATBOT-MODULE.md) | Groq-backed Infoloop-only site assistant (`/api/chat`). |
+| [CHATBOT-MODULE.md](CHATBOT-MODULE.md) | Groq-backed Infoloop-only site assistant (`/api/chat`), ticket tokens and limits. |
+| [ANALYTICS-MODULE.md](ANALYTICS-MODULE.md) | The CMS screen that holds tracking IDs, and how it interacts with the privacy policy and consent. |
+| [SEO-MODULE.md](SEO-MODULE.md) | Per-page meta title, description, social image and answer-engine summary in the CMS. |
+| [USERS-MODULE.md](USERS-MODULE.md) | CMS users, limited access by category, first login. |
 
 The repository README at `../README.md` is the map of the codebase itself:
 which file builds which page.

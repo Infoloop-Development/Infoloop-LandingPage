@@ -9,34 +9,31 @@ import { PostCard } from "@/components/blog/PostCards";
 import { fmtDate } from "@/components/blog/PostCards";
 import { AuthorCard } from "@/components/blog/AuthorCard";
 import { PostFaq } from "@/components/blog/PostFaq";
-import { BLOG } from "@/content/blog";
 import { getPosts, toMeta } from "@/lib/posts";
-import { getSite } from "@/lib/cms";
-import { render } from "astro:content";
+import { getBlogIndex, getSite } from "@/lib/cms";
+const BLOG = await getBlogIndex();
 
 export async function getStaticPaths() {
   const posts = await getPosts();
-  return posts.map((e) => ({ params: { slug: e.data.slug }, props: { entry: e } }));
+  return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
 }
-const { entry } = Astro.props;
-const d = entry.data;
+const { post: d } = Astro.props;
 const site = await getSite();
 const S = site.site;
 const all = (await getPosts()).map(toMeta);
-const me = toMeta(entry);
+const me = toMeta(d);
 const cats = me.categories;
 // Related: same category first, then the rest, never itself.
 const related = [...all.filter((p) => p.slug !== me.slug && p.categories.some((c) => cats.includes(c))), ...all.filter((p) => p.slug !== me.slug && !p.categories.some((c) => cats.includes(c)))].slice(0, 3);
 const url = `${S.url}/blog/${me.slug}`;
 
-// Rendered HTML, with the CTA card inserted before the third H2 (7Span puts it mid-article).
-const { Content } = await render(entry);
-const html = entry.rendered?.html ?? "";
+// Rendered HTML (markdown or CMS, see lib/posts.ts), with the CTA card inserted before the third H2 (7Span puts it mid-article).
+const html = d.html;
 const parts = html.split(/(?=<h2)/);
 const cut = parts.length > 3 ? 3 : Math.max(1, Math.floor(parts.length / 2));
 const before = parts.slice(0, cut).join("");
 const after = parts.slice(cut).join("");
-const readMins = d.readingMinutes ?? Math.max(1, Math.round(entry.body!.split(/\s+/).length / 220));
+const readMins = d.readingMinutes;
 const isTeam = /team/i.test(d.author);
 const author = {
   name: d.author,
@@ -63,7 +60,7 @@ const jsonLd = [
     publisher: org,
     articleSection: cats,
     keywords: cats.join(", "),
-    wordCount: entry.body!.split(/\s+/).length,
+    wordCount: d.wordCount,
     image: [`${S.url}/og.png`],
     inLanguage: "en",
   },
@@ -71,7 +68,7 @@ const jsonLd = [
   ...(d.faq.length ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: d.faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) }] : []),
 ];
 ---
-<Site title={`${d.title} | Infoloop`} description={d.description} canonical={`/blog/${me.slug}`} jsonLd={jsonLd} ogType="article">
+<Site title={`${d.title} | Infoloop`} description={d.description} canonical={`/blog/${me.slug}`} jsonLd={jsonLd} ogType="article" image={d.cover}>
   {/* Header band (7Span: gray band with title, date, categories) */}
   <header class="bg-paper" aria-labelledby="post-h1">
     <div class="container-x py-12 sm:py-16">

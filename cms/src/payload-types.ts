@@ -117,6 +117,11 @@ export interface Config {
     'solutions-pages': SolutionsPage;
     'industry-pages': IndustryPage;
     'hire-pages': HirePage;
+    'hub-pages': HubPage;
+    'company-pages': CompanyPage;
+    'contact-page': ContactPage;
+    'technologies-page': TechnologiesPage;
+    'blog-page': BlogPage;
     analytics: Analytics;
   };
   globalsSelect: {
@@ -129,6 +134,11 @@ export interface Config {
     'solutions-pages': SolutionsPagesSelect<false> | SolutionsPagesSelect<true>;
     'industry-pages': IndustryPagesSelect<false> | IndustryPagesSelect<true>;
     'hire-pages': HirePagesSelect<false> | HirePagesSelect<true>;
+    'hub-pages': HubPagesSelect<false> | HubPagesSelect<true>;
+    'company-pages': CompanyPagesSelect<false> | CompanyPagesSelect<true>;
+    'contact-page': ContactPageSelect<false> | ContactPageSelect<true>;
+    'technologies-page': TechnologiesPageSelect<false> | TechnologiesPageSelect<true>;
+    'blog-page': BlogPageSelect<false> | BlogPageSelect<true>;
     analytics: AnalyticsSelect<false> | AnalyticsSelect<true>;
   };
   locale: null;
@@ -967,27 +977,75 @@ export interface Product {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Published posts appear on /blog after the site rebuilds. Title, excerpt and slug are required for the page to exist; everything else has a sensible default.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
   id: number;
+  /**
+   * The H1 and the link text in lists.
+   */
   title: string;
   /**
    * URL path segment, e.g. custom-software-development.
    */
   slug: string;
   /**
-   * One or two sentences. Used in lists and as the default meta description.
+   * Optional longer H1 for the article page. Leave empty to use the title.
    */
-  excerpt?: string | null;
+  heading?: string | null;
+  /**
+   * One or two sentences. Used in lists, the RSS feed, and as the meta description unless SEO below overrides it.
+   */
+  excerpt: string;
+  /**
+   * Optional standfirst shown under the H1 on the article page.
+   */
+  dek?: string | null;
   /**
    * After choosing or uploading, open the Media item and set Alt text (required). That text shows if the image fails to load and is used for accessibility.
    */
   cover?: (number | null) | Media;
-  author?: (number | null) | User;
-  publishedAt?: string | null;
+  /**
+   * One-word section label, e.g. Operations, AI, Web. Used as the category when Topics below is empty.
+   */
+  kicker?: string | null;
+  /**
+   * One per row. The first row is the primary category on cards and in the filter buttons on /blog.
+   */
   topics?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Shown on cards, the author card and in Article schema. Defaults to "Infoloop team" when empty.
+   */
+  authorName?: string | null;
+  /**
+   * e.g. "Head of Managed Delivery, Infoloop".
+   */
+  authorRole?: string | null;
+  /**
+   * Optional. If Author name above is empty, this user's name is used.
+   */
+  author?: (number | null) | User;
+  publishedAt: string;
+  /**
+   * Featured posts fill the three cards at the top of /blog first.
+   */
+  featured?: boolean | null;
+  /**
+   * Optional. Estimated from the text when empty.
+   */
+  readingMinutes?: number | null;
+  /**
+   * Two to four one-line points shown near the top of the article.
+   */
+  takeaways?:
     | {
         value: string;
         id?: string | null;
@@ -1008,6 +1066,10 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Rendered from Body on save. Read by the site; not edited by hand.
+   */
+  bodyHtml?: string | null;
   faq?:
     | {
         q: string;
@@ -1074,6 +1136,10 @@ export interface User {
         | 'hire'
         | 'about'
         | 'brand'
+        | 'hubs'
+        | 'company'
+        | 'contact'
+        | 'technologies'
         | 'analytics'
         | 'posts'
         | 'testimonials'
@@ -2016,17 +2082,31 @@ export interface WorkSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  heading?: T;
   excerpt?: T;
+  dek?: T;
   cover?: T;
-  author?: T;
-  publishedAt?: T;
+  kicker?: T;
   topics?:
     | T
     | {
         value?: T;
         id?: T;
       };
+  authorName?: T;
+  authorRole?: T;
+  author?: T;
+  publishedAt?: T;
+  featured?: T;
+  readingMinutes?: T;
+  takeaways?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
   body?: T;
+  bodyHtml?: T;
   faq?:
     | T
     | {
@@ -3903,6 +3983,925 @@ export interface HirePage {
   createdAt?: string | null;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hub-pages".
+ */
+export interface HubPage {
+  id: number;
+  /**
+   * One row per hub page: services, industries and hire. Anything you leave empty keeps the copy that ships with the site, so you can edit a single line without retyping the rest.
+   */
+  pages?:
+    | {
+        /**
+         * Which hub this row edits: services is /services, industries is /industries, hire is /hire. Changing it repoints the whole row to a different page.
+         */
+        slug: 'services' | 'industries' | 'hire';
+        /**
+         * Small line above the H1, two or three words, e.g. Services or Hire talent.
+         */
+        eyebrow?: string | null;
+        /**
+         * The page H1. Wrap one phrase in [[double brackets]] to give it the orange highlight. No full stop.
+         */
+        h1?: string | null;
+        /**
+         * Paragraph under the H1. Two or three sentences saying what is on the page and how much of it there is.
+         */
+        lede?: string | null;
+        /**
+         * Label only. The hero button always links to /contact.
+         */
+        button?: string | null;
+        /**
+         * The scrolling band under the hero. Exactly two short lines: the first shows in ink, the second in orange.
+         */
+        band?:
+          | {
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Heading above the card groups, e.g. The four groups or Where we work.
+         */
+        groupsH2?: string | null;
+        /**
+         * Paragraph under that heading, telling the reader how to pick. The cards below it are built from the detail pages, so their titles and lines are edited on those pages, not here.
+         */
+        groupsLede?: string | null;
+        cta?: {
+          /**
+           * Heading on the panel at the foot of the page, usually the "none of these fit" question.
+           */
+          h2?: string | null;
+          /**
+           * Paragraph under it: what to do when the reader cannot find themselves in the list.
+           */
+          lede?: string | null;
+          /**
+           * Button label. It always links to /contact.
+           */
+          button?: string | null;
+        };
+        /**
+         * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+         */
+        seo?: {
+          /**
+           * Browser tab and OG title. Max 60 characters.
+           */
+          title?: string | null;
+          /**
+           * Search snippet and OG description. Aim for 110 to 158 characters.
+           */
+          description?: string | null;
+          /**
+           * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
+           */
+          image?: (number | null) | Media;
+          /**
+           * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+           */
+          llmSummary?: string | null;
+          noindex?: boolean | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "company-pages".
+ */
+export interface CompanyPage {
+  id: number;
+  /**
+   * The careers page. Every button on this page opens a mail to the careers address in Site settings, so you write the label only, never a link.
+   */
+  careers?: {
+    /**
+     * Small caps line above the H1, e.g. "Careers".
+     */
+    eyebrow?: string | null;
+    /**
+     * The one H1 on the page. Wrap one phrase in [[double brackets]] to give it the orange highlight.
+     */
+    h1?: string | null;
+    /**
+     * The paragraph under the H1. Two or three sentences.
+     */
+    lede?: string | null;
+    /**
+     * Label only, e.g. "Send us your work". It opens the careers email from Site settings.
+     */
+    button?: string | null;
+    /**
+     * The scrolling band under the hero. Exactly two lines: the first shows in white, the second in orange.
+     */
+    band?:
+      | {
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    life?: {
+      h2?: string | null;
+      lede?: string | null;
+      /**
+       * Shown two per row on desktop, so an even number looks best. Four is the current design.
+       */
+      items?:
+        | {
+            /**
+             * Card heading, one short line.
+             */
+            title?: string | null;
+            /**
+             * Two or three sentences under the heading.
+             */
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    how?: {
+      /**
+       * Small caps line above the H2, e.g. "How hiring works".
+       */
+      eyebrow?: string | null;
+      /**
+       * Wrap one phrase in [[double brackets]] to give it the orange highlight.
+       */
+      h2?: string | null;
+      lede?: string | null;
+      /**
+       * The step strip is designed for four steps.
+       */
+      steps?:
+        | {
+            /**
+             * Typed as text so the leading zero is kept, e.g. 01.
+             */
+            n?: string | null;
+            /**
+             * Wrap one phrase in [[double brackets]] to give it the orange highlight.
+             */
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    /**
+     * Intentionally empty. While there are no rows here the page shows the "nothing open" panel below instead of inventing a job. Add one row and the page lists that real opening instead of the panel, and the row is also published as a Google for Jobs posting, so fill in every field before you save.
+     */
+    roles?:
+      | {
+          /**
+           * Job title as a candidate would search for it, e.g. "Full-stack engineer".
+           */
+          title?: string | null;
+          /**
+           * Shown in small caps beside the title, e.g. "Engineering".
+           */
+          team?: string | null;
+          /**
+           * Where the job sits, e.g. "Surat, India". Also the job location in the search listing.
+           */
+          place?: string | null;
+          /**
+           * Employment type, e.g. "Full-time" or "Contract". Also sent to Google for Jobs.
+           */
+          type?: string | null;
+          /**
+           * One line under the title, and the description in the job listing.
+           */
+          blurb?: string | null;
+          /**
+           * Optional. A path or full URL for this role. Leave empty and it uses the careers email from Site settings.
+           */
+          href?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    openings?: {
+      h2?: string | null;
+      lede?: string | null;
+      /**
+       * Only shown while Open roles above has no rows.
+       */
+      emptyTitle?: string | null;
+      /**
+       * Only shown while Open roles above has no rows.
+       */
+      emptyBody?: string | null;
+      /**
+       * Label only. It opens the careers email.
+       */
+      button?: string | null;
+    };
+    where?: {
+      h2?: string | null;
+      /**
+       * One card per office, two per row on desktop.
+       */
+      items?:
+        | {
+            /**
+             * City and country, e.g. "Surat, India".
+             */
+            title?: string | null;
+            /**
+             * One line on what happens there.
+             */
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    cta?: {
+      /**
+       * Wrap one phrase in [[double brackets]] to give it the orange highlight.
+       */
+      h2?: string | null;
+      lede?: string | null;
+      /**
+       * Label only. It opens the careers email.
+       */
+      button?: string | null;
+    };
+    /**
+     * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+     */
+    seo?: {
+      /**
+       * Browser tab and OG title. Max 60 characters.
+       */
+      title?: string | null;
+      /**
+       * Search snippet and OG description. Aim for 110 to 158 characters.
+       */
+      description?: string | null;
+      /**
+       * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
+       */
+      image?: (number | null) | Media;
+      /**
+       * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+       */
+      llmSummary?: string | null;
+      noindex?: boolean | null;
+    };
+  };
+  /**
+   * Headings only. The quotes and the case studies both come from the Work collection (each case study carries the client quote behind it), and the review scores come from Site settings, so this group is what wraps around them.
+   */
+  testimonials?: {
+    /**
+     * Small caps line above the H1, e.g. "Testimonials".
+     */
+    eyebrow?: string | null;
+    /**
+     * The one H1 on the page. Wrap one phrase in [[double brackets]] to give it the orange highlight.
+     */
+    h1?: string | null;
+    /**
+     * The paragraph under the H1.
+     */
+    lede?: string | null;
+    /**
+     * Label only, e.g. "See the work". It goes to /work.
+     */
+    button?: string | null;
+    /**
+     * The scrolling band under the hero. Exactly two lines.
+     */
+    band?:
+      | {
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Not shown on the page today: the ratings row carries a hidden heading for screen readers only. Kept so the wording is ready if that row gets a visible heading. The scores themselves are edited in Site settings.
+     */
+    ratingsH2?: string | null;
+    /**
+     * Not shown on the page today, for the same reason as the ratings heading above.
+     */
+    ratingsLede?: string | null;
+    /**
+     * Heading over the client quotes. The quotes themselves live on each case study in the Work collection.
+     */
+    quotesH2?: string | null;
+    quotesLede?: string | null;
+    /**
+     * Heading over the case studies behind the quotes. The cases are edited in the Work collection.
+     */
+    casesH2?: string | null;
+    casesLede?: string | null;
+    cta?: {
+      /**
+       * Wrap one phrase in [[double brackets]] to give it the orange highlight.
+       */
+      h2?: string | null;
+      lede?: string | null;
+      /**
+       * Label only. It goes to /contact.
+       */
+      button?: string | null;
+    };
+    /**
+     * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+     */
+    seo?: {
+      /**
+       * Browser tab and OG title. Max 60 characters.
+       */
+      title?: string | null;
+      /**
+       * Search snippet and OG description. Aim for 110 to 158 characters.
+       */
+      description?: string | null;
+      /**
+       * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
+       */
+      image?: (number | null) | Media;
+      /**
+       * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+       */
+      llmSummary?: string | null;
+      noindex?: boolean | null;
+    };
+  };
+  /**
+   * The page a careful buyer reads before signing. Only claim what is true today: if a certification or a number is not in hand, it does not go on this page.
+   */
+  trust?: {
+    /**
+     * Small caps line above the H1, e.g. "Trust center".
+     */
+    eyebrow?: string | null;
+    /**
+     * The one H1 on the page. Wrap one phrase in [[double brackets]] to give it the orange highlight.
+     */
+    h1?: string | null;
+    /**
+     * The paragraph under the H1.
+     */
+    lede?: string | null;
+    /**
+     * Label only, e.g. "Ask a security question". It goes to /contact.
+     */
+    button?: string | null;
+    /**
+     * The scrolling band under the hero. Exactly two lines.
+     */
+    band?:
+      | {
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    ownership?: {
+      h2?: string | null;
+      lede?: string | null;
+      /**
+       * What the client owns: code, accounts, data, and the right to leave. Two per row on desktop.
+       */
+      items?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    practice?: {
+      h2?: string | null;
+      lede?: string | null;
+      /**
+       * Practices we can demonstrate on a call. Do not add one we cannot show.
+       */
+      items?:
+        | {
+            title?: string | null;
+            body?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    /**
+     * The section that says no. Keep it short and keep it true: it is the reason the rest of the page is believed.
+     */
+    honest?: {
+      h2?: string | null;
+      lede?: string | null;
+      /**
+       * One statement per row, a sentence or two each. Written in full, not as bullet fragments.
+       */
+      items?:
+        | {
+            value: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    report?: {
+      h2?: string | null;
+      /**
+       * Includes the reply time we promise. Only change it to a time we will actually meet.
+       */
+      lede?: string | null;
+      /**
+       * Label only. It opens the general email address from Site settings.
+       */
+      button?: string | null;
+      include?: {
+        /**
+         * Small heading over the checklist, e.g. "Please include".
+         */
+        title?: string | null;
+        /**
+         * One short line per row: what the reporter should send us.
+         */
+        items?:
+          | {
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
+      };
+    };
+    cta?: {
+      /**
+       * Wrap one phrase in [[double brackets]] to give it the orange highlight.
+       */
+      h2?: string | null;
+      lede?: string | null;
+      /**
+       * Label only. It goes to /contact.
+       */
+      button?: string | null;
+    };
+    /**
+     * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+     */
+    seo?: {
+      /**
+       * Browser tab and OG title. Max 60 characters.
+       */
+      title?: string | null;
+      /**
+       * Search snippet and OG description. Aim for 110 to 158 characters.
+       */
+      description?: string | null;
+      /**
+       * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
+       */
+      image?: (number | null) | Media;
+      /**
+       * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+       */
+      llmSummary?: string | null;
+      noindex?: boolean | null;
+    };
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-page".
+ */
+export interface ContactPage {
+  id: number;
+  /**
+   * The one H1 on the page. Wrap a phrase in [[double brackets]] to give it the orange highlight, e.g. "Dedicated to guiding you to the [[next level]]."
+   */
+  h1?: string | null;
+  /**
+   * The paragraph under the H1, beside the photo. One or two sentences that tell a visitor what to send.
+   */
+  lede?: string | null;
+  /**
+   * Alt text for the hero photo frame. Screen readers announce it and search engines read it, so describe what is in the picture rather than repeating the headline.
+   */
+  photoAlt?: string | null;
+  /**
+   * The white card inside the black band. The ten input labels (Name, Email, Phone number, Company, Country, Looking for, About project, Project budget (in USD), Project timeline, How did you hear about us?) are set in the page code and cannot be changed here. What you control below is the heading, the button, the thank you message and the four dropdown lists.
+   */
+  form?: {
+    /**
+     * Heading on the card, currently "Schedule a meeting".
+     */
+    h2?: string | null;
+    /**
+     * One line under that heading. It carries the reply promise ("within one business day"), so only change it to something the team can keep.
+     */
+    sub?: string | null;
+    /**
+     * Label on the send button, currently "Submit now". While the form is posting the button switches to "Sending" on its own, so you do not need a second label for that.
+     */
+    submit?: string | null;
+    /**
+     * Replaces the whole form once a message goes through. The visitor reads this instead of the fields, so it is the last thing the page says to a brand new lead.
+     */
+    success?: {
+      /**
+       * Headline of the thank you state, shown where the form was.
+       */
+      h3?: string | null;
+      /**
+       * Sentence under the thank you headline. A good place to set expectations about who replies and how fast.
+       */
+      body?: string | null;
+    };
+    /**
+     * Choices in the Country dropdown, one per row, in the order a visitor sees them. The dropdown opens on "Select", so no row is preselected. Keep a catch all such as "Other" in the last row.
+     */
+    countries?:
+      | {
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Choices in the "Looking for" dropdown, one per row. The line a visitor picks is what lands in the sales inbox, so word each one the way you want leads reported, and keep the list matched to the services and products the site actually sells.
+     */
+    lookingFor?:
+      | {
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Choices in the "Project budget (in USD)" dropdown, one per row, lowest band first. Keep an option for people who have not set a number yet, otherwise they abandon the form here.
+     */
+    budgets?:
+      | {
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Choices in the "Project timeline" dropdown, one per row, soonest first. Keep a "Just exploring" style option so early stage leads still send the form.
+     */
+    timelines?:
+      | {
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * The orange hatched band between the form and the brochure. The email and phone boxes inside it are pulled from Site settings, so change those there, not here.
+   */
+  quick?: {
+    /**
+     * Heading on the band, currently "Up for a quick connect?".
+     */
+    h2?: string | null;
+    /**
+     * One line under that heading, sitting above the email and phone boxes.
+     */
+    sub?: string | null;
+  };
+  /**
+   * The black band at the foot of the page. The button does not download anything straight away: it opens a two-field gate, captures the lead, and then the PDF opens in a new tab.
+   */
+  brochure?: {
+    /**
+     * Heading on the black band, currently "A glimpse into our expertise".
+     */
+    h2?: string | null;
+    /**
+     * One line under that heading. Say what is inside the brochure, so handing over an email address feels like a fair trade.
+     */
+    sub?: string | null;
+    /**
+     * Label on the button that opens the gate, currently "Download brochure".
+     */
+    button?: string | null;
+    /**
+     * Path to the PDF that opens once the gate is submitted, e.g. /downloads/infoloop-brochure.pdf. The file has to be in the site downloads folder already; typing a path here does not upload anything. A wrong path means the gate still captures the lead and then opens nothing.
+     */
+    file?: string | null;
+    /**
+     * The small form that appears in place of the button. It asks for two things only, Name and Work email, and those two input labels are set in the page code. The copy below is yours.
+     */
+    gate?: {
+      /**
+       * Heading on the gate, currently "Where should we send it?".
+       */
+      h3?: string | null;
+      /**
+       * One line under the gate heading. Worth saying that the brochure opens right away, since waiting for an email is what makes people close the gate.
+       */
+      body?: string | null;
+      /**
+       * Label on the gate button, currently "Get the brochure". It switches to "Sending" on its own while the lead is being saved.
+       */
+      submit?: string | null;
+    };
+  };
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
+  seo?: {
+    /**
+     * Browser tab and OG title. Max 60 characters.
+     */
+    title?: string | null;
+    /**
+     * Search snippet and OG description. Aim for 110 to 158 characters.
+     */
+    description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
+     */
+    image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
+    noindex?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "technologies-page".
+ */
+export interface TechnologiesPage {
+  id: number;
+  /**
+   * Small line above the H1, e.g. "Technologies".
+   */
+  eyebrow?: string | null;
+  /**
+   * The one H1 on the page. Wrap one phrase in [[double brackets]] to give it the orange highlight.
+   */
+  h1?: string | null;
+  /**
+   * The large line under the H1. One short sentence.
+   */
+  sub?: string | null;
+  /**
+   * Opening paragraph under the sub heading. Two or three sentences.
+   */
+  lede?: string | null;
+  /**
+   * Label only. This button always goes to /contact.
+   */
+  button?: string | null;
+  /**
+   * The scrolling band under the hero. Two short lines, the second one is shown in orange.
+   */
+  band?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The heading above the group tabs. The tabs themselves come from Technology groups below.
+   */
+  panel?: {
+    /**
+     * Heading above the tabs, e.g. "What we build with".
+     */
+    h2?: string | null;
+    /**
+     * One line under the H2. If it names a number of groups, update it when you add or remove one below.
+     */
+    lede?: string | null;
+  };
+  /**
+   * One row per tab, in the order they appear on the rail. Each row holds the tools shown when that tab is selected. The tool count next to each tab label is counted for you.
+   */
+  groups?:
+    | {
+        /**
+         * Stable id for this group, lowercase and no spaces (frontend, backend, mobile). Never shown on the page, so leave it alone once set.
+         */
+        key?: string | null;
+        /**
+         * Short name on the tab rail. One or two words keeps the rail tidy.
+         */
+        label?: string | null;
+        /**
+         * Heading at the top of the pane for this tab. Usually the same as the tab label.
+         */
+        h2?: string | null;
+        /**
+         * One line under the pane heading: what this group of tools is for, in plain words a client would use.
+         */
+        lede?: string | null;
+        /**
+         * One tile per technology. The order here is the order on the page, so put the ones you most want to sell first.
+         */
+        items?:
+          | {
+              /**
+               * The tool written the way its makers write it, e.g. Next.js, React Native.
+               */
+              name?: string | null;
+              /**
+               * One line a business owner understands: what this is for, not what it is. Keep it to a single sentence, the tile is small.
+               */
+              what?: string | null;
+              /**
+               * The short mark in the black square, up to 3 characters (JS, Re, Fig). It stands in for a vendor logo until logo use is cleared.
+               */
+              badge?: string | null;
+              /**
+               * The hire page for this technology, e.g. /hire-react-developers. Leave it empty and the tile links to /contact instead.
+               */
+              hire?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The dark section between the tabs and the closing call to action.
+   */
+  choose?: {
+    /**
+     * Heading for the dark section, e.g. "How we choose a technology".
+     */
+    h2?: string | null;
+    /**
+     * One or two lines setting up the questions below.
+     */
+    lede?: string | null;
+    /**
+     * One card each, laid out on a two column grid, so an even number sits best.
+     */
+    items?:
+      | {
+          /**
+           * The question, e.g. "Could another team take this over?"
+           */
+          title?: string | null;
+          /**
+           * The honest answer, two or three sentences.
+           */
+          body?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * The last panel on the page, above the ratings row.
+   */
+  cta?: {
+    /**
+     * Closing heading. Wrap one phrase in [[double brackets]] to give it the orange highlight.
+     */
+    h2?: string | null;
+    /**
+     * One line under the closing heading.
+     */
+    lede?: string | null;
+    /**
+     * Label only. This button always goes to /contact.
+     */
+    button?: string | null;
+  };
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
+  seo?: {
+    /**
+     * Browser tab and OG title. Max 60 characters.
+     */
+    title?: string | null;
+    /**
+     * Search snippet and OG description. Aim for 110 to 158 characters.
+     */
+    description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
+     */
+    image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
+    noindex?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Wording on /blog, plus the two blocks that repeat on every article page (the mid-article card and the related articles heading). Leave a field empty to keep the wording the site ships with.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-page".
+ */
+export interface BlogPage {
+  id: number;
+  /**
+   * The single H1 at the top of /blog, e.g. "Our knowledge hub". Keep it short.
+   */
+  h1?: string | null;
+  /**
+   * One line under the H1 that says what the reader gets from the blog.
+   */
+  lede?: string | null;
+  /**
+   * Heading over the search box and the full article list, below the three featured cards, e.g. "Keep exploring".
+   */
+  exploreH2?: string | null;
+  /**
+   * One short line under that heading.
+   */
+  exploreSub?: string | null;
+  /**
+   * Faint text inside the empty search box, e.g. "Search blog". Two or three words.
+   */
+  searchPlaceholder?: string | null;
+  /**
+   * Label above the category filter buttons, e.g. "Top categories". The category names themselves come from the articles and are not edited here.
+   */
+  categoriesLabel?: string | null;
+  /**
+   * The first filter button, the one that clears the category filter, e.g. "All articles".
+   */
+  allLabel?: string | null;
+  /**
+   * Button under the list that reveals the next batch of articles, e.g. "Load more".
+   */
+  loadMore?: string | null;
+  /**
+   * Shown in place of the list when a search or a category returns no articles. Tell the reader what to try next.
+   */
+  empty?: string | null;
+  /**
+   * The card that sits part way down every article page, not on this index. Edit it once and it changes on every post.
+   */
+  articleCta: {
+    /**
+     * Card heading, usually a question the reader is already asking.
+     */
+    h3?: string | null;
+    /**
+     * One or two sentences under the heading. Say what happens when they get in touch.
+     */
+    body?: string | null;
+    /**
+     * The card button. Label is the words on the button, e.g. "Talk to our experts". Href is where it goes, e.g. /contact.
+     */
+    button: {
+      label: string;
+      /**
+       * Site path (/contact) or full URL.
+       */
+      href: string;
+      blurb?: string | null;
+    };
+  };
+  /**
+   * Heading over the related articles at the foot of every article page, e.g. "More". Not shown on this index.
+   */
+  moreH2?: string | null;
+  /**
+   * One short line under that heading.
+   */
+  moreSub?: string | null;
+  /**
+   * Meta title and description also drive Open Graph (link previews). Upload a 1200×630 image for a per-page social preview; leave empty to use the site default.
+   */
+  seo?: {
+    /**
+     * Browser tab and OG title. Max 60 characters.
+     */
+    title?: string | null;
+    /**
+     * Search snippet and OG description. Aim for 110 to 158 characters.
+     */
+    description?: string | null;
+    /**
+     * Optional. 1200×630 recommended. Set Alt text on the Media file (used for og:image:alt).
+     */
+    image?: (number | null) | Media;
+    /**
+     * Optional plain-text blurb for AI crawlers. Appended to the site /llms.txt for this page when set.
+     */
+    llmSummary?: string | null;
+    noindex?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * Connect Google Analytics and other tools without a code change. Paste the IDs from each vendor, tick the privacy checkbox, save, and wait for the site rebuild.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3928,6 +4927,14 @@ export interface Analytics {
     gscVerification?: string | null;
   };
   other?: {
+    /**
+     * HTML meta-tag content from Bing Webmaster Tools (msvalidate.01). Not a tracker. Bing feeds ChatGPT search, so verify it. Prefer DNS verification when you can.
+     */
+    bingVerification?: string | null;
+    /**
+     * Token from Ahrefs Site Audit > verify ownership (ahrefs-site-verification). Not a tracker; unlocks the full crawl and Webmaster Tools data.
+     */
+    ahrefsVerification?: string | null;
     /**
      * Cookieless analytics. Usually your site hostname, e.g. infoloop.co
      */
@@ -5288,6 +6295,464 @@ export interface HirePagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hub-pages_select".
+ */
+export interface HubPagesSelect<T extends boolean = true> {
+  pages?:
+    | T
+    | {
+        slug?: T;
+        eyebrow?: T;
+        h1?: T;
+        lede?: T;
+        button?: T;
+        band?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+            };
+        groupsH2?: T;
+        groupsLede?: T;
+        cta?:
+          | T
+          | {
+              h2?: T;
+              lede?: T;
+              button?: T;
+            };
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              llmSummary?: T;
+              noindex?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "company-pages_select".
+ */
+export interface CompanyPagesSelect<T extends boolean = true> {
+  careers?:
+    | T
+    | {
+        eyebrow?: T;
+        h1?: T;
+        lede?: T;
+        button?: T;
+        band?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+            };
+        life?:
+          | T
+          | {
+              h2?: T;
+              lede?: T;
+              items?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+            };
+        how?:
+          | T
+          | {
+              eyebrow?: T;
+              h2?: T;
+              lede?: T;
+              steps?:
+                | T
+                | {
+                    n?: T;
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+            };
+        roles?:
+          | T
+          | {
+              title?: T;
+              team?: T;
+              place?: T;
+              type?: T;
+              blurb?: T;
+              href?: T;
+              id?: T;
+            };
+        openings?:
+          | T
+          | {
+              h2?: T;
+              lede?: T;
+              emptyTitle?: T;
+              emptyBody?: T;
+              button?: T;
+            };
+        where?:
+          | T
+          | {
+              h2?: T;
+              items?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+            };
+        cta?:
+          | T
+          | {
+              h2?: T;
+              lede?: T;
+              button?: T;
+            };
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              llmSummary?: T;
+              noindex?: T;
+            };
+      };
+  testimonials?:
+    | T
+    | {
+        eyebrow?: T;
+        h1?: T;
+        lede?: T;
+        button?: T;
+        band?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+            };
+        ratingsH2?: T;
+        ratingsLede?: T;
+        quotesH2?: T;
+        quotesLede?: T;
+        casesH2?: T;
+        casesLede?: T;
+        cta?:
+          | T
+          | {
+              h2?: T;
+              lede?: T;
+              button?: T;
+            };
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              llmSummary?: T;
+              noindex?: T;
+            };
+      };
+  trust?:
+    | T
+    | {
+        eyebrow?: T;
+        h1?: T;
+        lede?: T;
+        button?: T;
+        band?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+            };
+        ownership?:
+          | T
+          | {
+              h2?: T;
+              lede?: T;
+              items?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+            };
+        practice?:
+          | T
+          | {
+              h2?: T;
+              lede?: T;
+              items?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                  };
+            };
+        honest?:
+          | T
+          | {
+              h2?: T;
+              lede?: T;
+              items?:
+                | T
+                | {
+                    value?: T;
+                    id?: T;
+                  };
+            };
+        report?:
+          | T
+          | {
+              h2?: T;
+              lede?: T;
+              button?: T;
+              include?:
+                | T
+                | {
+                    title?: T;
+                    items?:
+                      | T
+                      | {
+                          value?: T;
+                          id?: T;
+                        };
+                  };
+            };
+        cta?:
+          | T
+          | {
+              h2?: T;
+              lede?: T;
+              button?: T;
+            };
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              llmSummary?: T;
+              noindex?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-page_select".
+ */
+export interface ContactPageSelect<T extends boolean = true> {
+  h1?: T;
+  lede?: T;
+  photoAlt?: T;
+  form?:
+    | T
+    | {
+        h2?: T;
+        sub?: T;
+        submit?: T;
+        success?:
+          | T
+          | {
+              h3?: T;
+              body?: T;
+            };
+        countries?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+            };
+        lookingFor?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+            };
+        budgets?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+            };
+        timelines?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+            };
+      };
+  quick?:
+    | T
+    | {
+        h2?: T;
+        sub?: T;
+      };
+  brochure?:
+    | T
+    | {
+        h2?: T;
+        sub?: T;
+        button?: T;
+        file?: T;
+        gate?:
+          | T
+          | {
+              h3?: T;
+              body?: T;
+              submit?: T;
+            };
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        llmSummary?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "technologies-page_select".
+ */
+export interface TechnologiesPageSelect<T extends boolean = true> {
+  eyebrow?: T;
+  h1?: T;
+  sub?: T;
+  lede?: T;
+  button?: T;
+  band?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  panel?:
+    | T
+    | {
+        h2?: T;
+        lede?: T;
+      };
+  groups?:
+    | T
+    | {
+        key?: T;
+        label?: T;
+        h2?: T;
+        lede?: T;
+        items?:
+          | T
+          | {
+              name?: T;
+              what?: T;
+              badge?: T;
+              hire?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  choose?:
+    | T
+    | {
+        h2?: T;
+        lede?: T;
+        items?:
+          | T
+          | {
+              title?: T;
+              body?: T;
+              id?: T;
+            };
+      };
+  cta?:
+    | T
+    | {
+        h2?: T;
+        lede?: T;
+        button?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        llmSummary?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-page_select".
+ */
+export interface BlogPageSelect<T extends boolean = true> {
+  h1?: T;
+  lede?: T;
+  exploreH2?: T;
+  exploreSub?: T;
+  searchPlaceholder?: T;
+  categoriesLabel?: T;
+  allLabel?: T;
+  loadMore?: T;
+  empty?: T;
+  articleCta?:
+    | T
+    | {
+        h3?: T;
+        body?: T;
+        button?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              blurb?: T;
+            };
+      };
+  moreH2?: T;
+  moreSub?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        llmSummary?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "analytics_select".
  */
 export interface AnalyticsSelect<T extends boolean = true> {
@@ -5301,6 +6766,8 @@ export interface AnalyticsSelect<T extends boolean = true> {
   other?:
     | T
     | {
+        bingVerification?: T;
+        ahrefsVerification?: T;
         plausibleDomain?: T;
         clarityId?: T;
         linkedinPartnerId?: T;
